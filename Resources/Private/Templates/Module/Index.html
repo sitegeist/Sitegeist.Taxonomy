@@ -10,6 +10,8 @@
             <table class="neos-table">
                 <thead>
                 <tr>
+                    <th></th>
+                    <th>Path</th>
                     <th>Title</th>
                     <th>Description</th>
                     <th></th>
@@ -18,6 +20,12 @@
                 <tbody>
                 <f:for each="{vocabularies}" as="vocabulary">
                     <tr class="neos-folder">
+                        <td>
+                             <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
+                        </td>
+                        <td>
+                            {vocabulary.path}
+                        </td>
                         <td>
                             <f:link.action action="showVocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary">
                                 <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
