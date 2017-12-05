@@ -1,0 +1,19 @@
+Sitegeist.Taxonomy:Referencable:
+  abstract: true
+  ui:
+    inspector:
+      groups:
+        taxonomy:
+          label: Taxonomy
+          icon: icon-tag
+
+  properties:
+    taxonomyReferences:
+      type: references
+      ui:
+        label: 'Taxonomy References'
+        inspector:
+          group: taxonomy
+          editorOptions:
+            nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
+            startingPoint: '/taxonomy'

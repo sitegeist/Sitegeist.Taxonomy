@@ -24,6 +24,7 @@ use Neos\ContentRepository\Domain\Model\NodeTemplate;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\ContentRepository\Utility as CrUtitlity;
 
 /**
  * Class ModuleController
@@ -122,7 +123,7 @@ class ModuleController extends ActionController
 
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->vocabularyNodeType));
-        $nodeTemplate->setName($title);
+        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
 
         $vocabularyNode = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
         $vocabularyNode->setProperty('title', $title);
@@ -156,7 +157,7 @@ class ModuleController extends ActionController
     {
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyNodeType));
-        $nodeTemplate->setName($title);
+        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
 
         $taxonomyNode = $parent->createNodeFromTemplate($nodeTemplate);
         $taxonomyNode->setProperty('title', $title);
