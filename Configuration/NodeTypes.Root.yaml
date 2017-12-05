@@ -1,0 +1,8 @@
+Sitegeist.Taxonomy:Root:
+  label:
+  superTypes:
+    'unstructured': TRUE
+  constraints:
+    childNodes:
+      '*': FALSE
+      'Sitegeist.Taxonomy:Vocabulary': TRUE

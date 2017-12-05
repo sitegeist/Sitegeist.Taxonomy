@@ -3,7 +3,7 @@
     "type": "neos-package",
     "name": "sitegeist/taxonomy",
     "require": {
-        "neos/flow": "*"
+        "neos/neos": "*"
     },
     "autoload": {
         "psr-4": {

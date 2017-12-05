@@ -1,10 +1,60 @@
-<!doctype html>
-<html>
-	<head>
-	    <meta charset="UTF-8">
-        <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
-	</head>
-	<body style="padding:0; background-color:#222;">
-        I will become a taxonomy module
-	</body>
-</html>
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+
+    <legend>Vocabularies</legend>
+
+    <f:if condition="{vocabularies}">
+        <f:then>
+            <table class="neos-table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <f:for each="{vocabularies}" as="vocabulary">
+                    <tr class="neos-folder">
+                        <td>
+                            <f:link.action action="showVocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary">
+                                <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
+                                {vocabulary.properties.title}
+                            </f:link.action>
+                        </td>
+                        <td >
+                            {vocabulary.properties.description}
+                        </td>
+                        <td class="neos-action">
+                            <div class="neos-pull-right">
+                                <f:link.action action="showVocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary">
+                                    <i class="icon-eye icon-white"></i>
+                                </f:link.action>
+<!--
+                                <f:link.action action="editVocabulary" arguments="{title: vocabulary.properties.title}" title="edit vocabulary" >
+                                    <i class="icon-pencil icon-white"></i>
+                                </f:link.action>
+-->
+                            </div>
+                        </td>
+                    </tr>
+                </f:for>
+                </tbody>
+            </table>
+        </f:then>
+        <f:else>
+            No vocabularoies yet. Please create them.
+        </f:else>
+    </f:if>
+
+
+    <div class="neos-row-fluid">
+
+        <f:link.action action="newVocabulary"  class="neos-button neos-button-primary" title="" >
+            <i class="icon-pencil icon-white"></i> Create new vocabulary
+        </f:link.action>
+
+    </div>
+</f:section>

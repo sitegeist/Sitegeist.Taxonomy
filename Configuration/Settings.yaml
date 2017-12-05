@@ -1,11 +1,25 @@
+
+Sitegeist:
+  Taxonomy:
+    contentRepository:
+      rootNodeName: 'taxonomy'
+      rootNodeType: 'Sitegeist.Taxonomy:Root'
+      vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
+      taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
+
+
+
 Neos:
   Neos:
     modules:
-      mamagement:
+      management:
         submodules:
           taxonomies:
             label: "Taxonomies"
-            controller: \Sitegeist\Taxonomies\Controller\ModuleController
+            controller: \Sitegeist\Taxonomy\Controller\ModuleController
             description: 'Manage Taxonomies'
             icon: icon-tags
-            privilegeTarget: 'Sitegeist.Taxonomies:Module'
+            privilegeTarget: 'Sitegeist.Taxonomy:Module'
+  Fusion:
+    defaultContext:
+      Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper

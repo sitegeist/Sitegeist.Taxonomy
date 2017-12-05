@@ -1,0 +1,20 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+    <f:form action="createVocabulary">
+        <fieldset>
+            <legend>Create a new Vocabulary</legend>
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="title">Vocabulary Title</label>
+                <f:form.textfield name="title" id="title"/>
+            </div>
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="description">Vocabulary Description</label>
+                <f:form.textarea name="description" id="description"/>
+            </div>
+
+            <f:form.submit value="Create Vocabulary" class="neos-button neos-button-primary" />
+        </fieldset>
+    </f:form>
+</f:section>

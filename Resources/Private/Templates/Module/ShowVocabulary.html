@@ -1,0 +1,45 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+    <legend>Vocabulary "{vocabulary.path}"</legend>
+    <table class="neos-table">
+        <thead>
+        <tr>
+            <th>Path</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <f:render section="itemAndSub" arguments="{item: vocabulary, level: 0}" />
+        </tbody>
+    </table>
+</f:section>
+
+
+<f:section name="itemAndSub">
+    <tr>
+        <td>
+            {item.parentPath}
+        </td>
+        <td>
+            <i class="{item.nodeType.fullConfiguration.ui.icon}" ></i>
+            {item.properties.title}
+        </td>
+        <td>{item.properties.description}</td>
+        <td>
+            <div class="neos-pull-right">
+                <f:link.action action="newTaxonomy" arguments="{parent : item.contextPath}" title="Add taxonomy">
+                    <i class="icon-plus icon-white"></i>
+                </f:link.action>
+            </div>
+        </td>
+    </tr>
+
+    <f:for each="{item.childNodes}" as="child">
+        <f:render section="itemAndSub" arguments="{item: child, level: '{level + 1}' }" />
+    </f:for>
+
+</f:section>

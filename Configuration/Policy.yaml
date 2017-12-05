@@ -1,11 +1,11 @@
 privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
-    'Sitegeist.Taxonomies:Module':
-      matcher: 'method(Sitegeist\Monocle\Controller\StyleguideController->(index)Action())'
+    'Sitegeist.Taxonomy:Module':
+      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(index|newVocabulary|createVocabulary|showVocabulary|newTaxonomy|createTaxonomy)Action())'
 
 roles:
   'Neos.Neos:AbstractEditor':
     privileges:
       -
-        privilegeTarget: 'Sitegeist.Taxonomies:Module'
+        privilegeTarget: 'Sitegeist.Taxonomy:Module'
         permission: GRANT
