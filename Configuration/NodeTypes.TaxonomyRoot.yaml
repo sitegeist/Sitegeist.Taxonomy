@@ -1,0 +1,7 @@
+Sitegeist.Taxonomy:Taxonomy:
+  label:
+  superTypes:
+    'unstructured': TRUE
+  childNodes:
+    test:
+      type: 'Sitegeist.Taxonomy:Taxonomy'

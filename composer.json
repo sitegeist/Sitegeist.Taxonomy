@@ -1,0 +1,18 @@
+{
+    "description": "Mixins and Helpers for Taxonomies to be used in custom nodeTypes",
+    "type": "neos-package",
+    "name": "sitegeist/taxonomy",
+    "require": {
+        "neos/flow": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sitegeist\\Taxonomy\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Sitegeist.Taxonomy"
+        }
+    }
+}

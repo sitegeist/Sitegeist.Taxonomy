@@ -1,0 +1,11 @@
+Neos:
+  Neos:
+    modules:
+      mamagement:
+        submodules:
+          taxonomies:
+            label: "Taxonomies"
+            controller: \Sitegeist\Taxonomies\Controller\ModuleController
+            description: 'Manage Taxonomies'
+            icon: icon-tags
+            privilegeTarget: 'Sitegeist.Taxonomies:Module'
