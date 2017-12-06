@@ -1,7 +1,7 @@
 Sitegeist.Taxonomy:Root:
   label:
   superTypes:
-    'unstructured': TRUE
+    'Neos.Neos:Node': TRUE
   constraints:
     childNodes:
       '*': FALSE
