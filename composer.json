@@ -3,7 +3,8 @@
     "type": "neos-package",
     "name": "sitegeist/taxonomy",
     "require": {
-        "neos/neos": "*"
+        "neos/neos": "*",
+        "neos/content-repository": "*"
     },
     "autoload": {
         "psr-4": {
