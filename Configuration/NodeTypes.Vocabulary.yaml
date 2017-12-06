@@ -5,12 +5,8 @@ Sitegeist.Taxonomy:Vocabulary:
     icon: 'icon-tags'
   superTypes:
     'Neos.Neos:Node': TRUE
-  properties:
-    title:
-      type: string
-    description:
-      type: string
+    'Sitegeist.Taxonomy:Mixin.Properties': TRUE
   constraints:
-    childNodes:
+    nodeTypes:
       '*': FALSE
       'Sitegeist.Taxonomy:Taxonomy': TRUE

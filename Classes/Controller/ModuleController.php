@@ -99,7 +99,7 @@ class ModuleController extends ActionController
     public function indexAction()
     {
         $context = $this->contextFactory->create();
-        $taxonomyRoot = $this->taxonomyHelper->getRootNode($context);
+        $taxonomyRoot = $this->taxonomyHelper->root($context);
         $flowQuery = new FlowQuery([$taxonomyRoot]);
         $vocabularies = $flowQuery->children('[instanceof Sitegeist.Taxonomy:Vocabulary]')->get();
         $this->view->assign('vocabularies', $vocabularies);
@@ -119,7 +119,7 @@ class ModuleController extends ActionController
     public function createVocabularyAction($title, $description = '')
     {
         $context = $this->contextFactory->create();
-        $taxonomyRoot = $this->taxonomyHelper->getRootNode($context);
+        $taxonomyRoot = $this->taxonomyHelper->root($context);
 
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->vocabularyNodeType));

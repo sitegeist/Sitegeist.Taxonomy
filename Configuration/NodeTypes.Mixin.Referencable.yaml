@@ -1,4 +1,4 @@
-Sitegeist.Taxonomy:Referencable:
+Sitegeist.Taxonomy:Mixin.Referencable:
   abstract: true
   ui:
     inspector:

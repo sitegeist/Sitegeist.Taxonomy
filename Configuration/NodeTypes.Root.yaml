@@ -1,8 +1,8 @@
 Sitegeist.Taxonomy:Root:
-  label:
+  label: 'Taxonomy:Root'
   superTypes:
     'Neos.Neos:Node': TRUE
   constraints:
-    childNodes:
+    nodeTypes:
       '*': FALSE
       'Sitegeist.Taxonomy:Vocabulary': TRUE
