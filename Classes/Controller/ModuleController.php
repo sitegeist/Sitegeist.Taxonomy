@@ -124,7 +124,7 @@ class ModuleController extends ActionController
         $vocabulary->setProperty('description', $description);
 
         $this->flashMessageContainer->addMessage(new Message(sprintf('Created vocabulary %s' , $title)));
-        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+        $this->redirect('index');
     }
 
     /**
@@ -167,7 +167,7 @@ class ModuleController extends ActionController
         }
 
         $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s' , $title)));
-        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+        $this->redirect('index');
     }
 
     /**

@@ -61,7 +61,7 @@ class TaxonomyService
      * @param Context $context
      * @return NodeInterface
      */
-    public function getRootNode(Context $context = null)
+    public function getRoot(Context $context = null)
     {
         if ($context === null) {
             $context = $this->contextFactory->create();
@@ -94,5 +94,32 @@ class TaxonomyService
         $this->persistenceManager->persistAll();
 
         return $this->taxoniomyDataRootNodes[$contextHash];;
+    }
+
+    /**
+     * @param string $vocabularyName
+     * @param Context|null $context
+     * @param $vocabulary
+     */
+    public function getVocabulary($vocabularyName, Context $context = null) {
+        if ($context === null) {
+            $context = $this->contextFactory->create();
+        }
+
+        $root = $this->getRoot();
+        return $root->getNode($vocabularyName);
+    }
+
+    /**
+     * @param string $vocabularyName
+     * @param string $taxonomyPath
+     * @param Context|null $context
+     * @param $vocabulary
+     */
+    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null) {
+        $vocabulary = $this->getVocabulary($vocabularyName);
+        if ($vocabulary) {
+            return $vocabulary->getNode($taxonomyPath);
+        }
     }
 }
