@@ -1,0 +1,78 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+    <legend>Vocabulary "{vocabulary.path}"</legend>
+    <table class="neos-table">
+        <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>Path</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <f:for each="{vocabulary.childNodes}" as="taxon">
+                <f:render section="taxonAndSub" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
+            </f:for>
+        </tbody>
+    </table>
+
+    <div class="neos-row-fluid">
+        <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: vocabulary.contextPath}" >
+            <i class="icon-pencil icon-white"></i> Create new Taxonomy
+        </f:link.action>
+    </div>
+
+</f:section>
+
+
+<f:section name="taxonAndSub">
+    <tr>
+        <td>
+            <i class="{taxon.nodeType.fullConfiguration.ui.icon}" ></i>
+        </td>
+        <td>
+            {taxon.path}
+        </td>
+        <td>
+            {taxon.properties.title}
+        </td>
+        <td>
+            {taxon.properties.description}
+        </td>
+        <td>
+            <div class="neos-pull-right">
+                <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="Add taxonomy"  class="neos-button neos-button-primary">
+                    <i class="icon-plus icon-white"></i>
+                </f:link.action>
+
+                <f:form action="editTaxonomy" class="neos-inline">
+                    <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
+                    <f:form.button  title="Edit taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                        <i class="icon-pencil icon-white"></i>
+                    </f:form.button>
+                </f:form>
+
+                <f:if condition="{taxon.autoCreated = false}" >
+                    <f:form action="deleteTaxonomy" class="neos-inline">
+                        <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
+                        <f:form.button  title="Delete taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                            <i class="icon-trash icon-white"></i>
+                        </f:form.button>
+                    </f:form>
+                </f:if>
+
+            </div>
+        </td>
+    </tr>
+
+    <f:for each="{taxon.childNodes}" as="child">
+        <f:render section="taxonAndSub" arguments="{taxon: child, level: '{level + 1}' }" />
+    </f:for>
+
+</f:section>

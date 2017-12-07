@@ -19,7 +19,7 @@
                 </thead>
                 <tbody>
                 <f:for each="{vocabularies}" as="vocabulary">
-                    <tr class="neos-folder">
+                    <tr>
                         <td>
                              <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
                         </td>
@@ -28,7 +28,6 @@
                         </td>
                         <td>
                             <f:link.action action="showVocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary">
-                                <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
                                 {vocabulary.properties.title}
                             </f:link.action>
                         </td>
@@ -37,14 +36,17 @@
                         </td>
                         <td class="neos-action">
                             <div class="neos-pull-right">
-                                <f:link.action action="showVocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary">
-                                    <i class="icon-eye icon-white"></i>
-                                </f:link.action>
-<!--
-                                <f:link.action action="editVocabulary" arguments="{title: vocabulary.properties.title}" title="edit vocabulary" >
+                                <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                                     <i class="icon-pencil icon-white"></i>
                                 </f:link.action>
--->
+                                <f:if condition="{vocabulary.autoCreated = false}" >
+                                    <f:form action="deleteVocabulary" class="neos-inline">
+                                        <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
+                                        <f:form.button  title="Delete vocabulary" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                                            <i class="icon-trash icon-white"></i>
+                                        </f:form.button>
+                                    </f:form>
+                                </f:if>
                             </div>
                         </td>
                     </tr>

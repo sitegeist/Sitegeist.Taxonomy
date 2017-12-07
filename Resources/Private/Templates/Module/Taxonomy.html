@@ -2,7 +2,7 @@
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <legend>Vocabulary "{vocabulary.path}"</legend>
+    <legend>Taxonomy "{taxonomy.path}"</legend>
     <table class="neos-table">
         <thead>
         <tr>
@@ -16,7 +16,7 @@
         </tr>
         </thead>
         <tbody>
-            <f:render section="itemAndSub" arguments="{item: vocabulary, level: 0}" />
+            <f:render section="itemAndSub" arguments="{item: taxonomy, level: 0}" />
         </tbody>
     </table>
 
@@ -25,6 +25,7 @@
         <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: vocabulary.contextPath}" >
             <i class="icon-pencil icon-white"></i> Create new Taxonomy
         </f:link.action>
+
 
     </div>
 

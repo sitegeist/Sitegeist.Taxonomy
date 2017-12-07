@@ -136,8 +136,20 @@ class ModuleController extends ActionController
     /**
      * @param NodeInterface $vocabulary
      */
-    public function showVocabularyAction(NodeInterface $vocabulary) {
+    public function vocabularyAction(NodeInterface $vocabulary) {
         $this->view->assign('vocabulary', $vocabulary);
+    }
+
+    /**
+     * @param NodeInterface $vocabulary
+     */
+    public function deleteVocabularyAction(NodeInterface $vocabulary) {
+        if ($vocabulary->isAutoCreated()) {
+            throw new \Exception('cannot delete autocrated vocabularies');
+        } else {
+            $vocabulary->remove();
+        }
+        $this->redirect('index');
     }
 
     /**
@@ -168,7 +180,22 @@ class ModuleController extends ActionController
         $flowQuery = new FlowQuery([$taxonomyNode]);
         $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
 
-        $this->redirect('showVocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
     }
 
+    /**
+     * @param NodeInterface $taxonomy
+     */
+    public function deleteTaxonomyAction(NodeInterface $taxonomy)
+    {
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+
+        if ($taxonomy->isAutoCreated()) {
+            throw new \Exception('cannot delete autocrated vocabularies');
+        } else {
+            $taxonomy->remove();
+        }
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+    }
 }
