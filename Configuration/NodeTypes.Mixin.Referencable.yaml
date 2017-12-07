@@ -16,4 +16,4 @@ Sitegeist.Taxonomy:Mixin.Referencable:
           group: taxonomy
           editorOptions:
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
-            startingPoint: '/taxonomy'
+            startingPoint: '/%Sitegeist\Taxonomy\Package::ROOT_NODE_NAME%'

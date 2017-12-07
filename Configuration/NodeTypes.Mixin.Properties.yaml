@@ -1,7 +1,0 @@
-Sitegeist.Taxonomy:Mixin.Properties:
-  abstract: true
-  properties:
-    title:
-      type: string
-    description:
-      type: string

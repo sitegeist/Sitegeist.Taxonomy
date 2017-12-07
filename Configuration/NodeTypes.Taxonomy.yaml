@@ -5,9 +5,12 @@ Sitegeist.Taxonomy:Taxonomy:
     icon: 'icon-tag'
   superTypes:
     'Neos.Neos:Node': TRUE
-    'Sitegeist.Taxonomy:Mixin.Properties': TRUE
   constraints:
     nodeTypes:
       '*': FALSE
       'Sitegeist.Taxonomy:Taxonomy': TRUE
-
+  properties:
+    title:
+      type: string
+    description:
+      type: string

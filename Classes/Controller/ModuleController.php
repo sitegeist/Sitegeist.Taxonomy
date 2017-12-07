@@ -60,12 +60,6 @@ class ModuleController extends ActionController
 
     /**
      * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeName")
-     */
-    protected $rootNodeName;
-
-    /**
-     * @var string
      * @Flow\InjectConfiguration(path="contentRepository.rootNodeType")
      */
     protected $rootNodeType;
@@ -129,7 +123,7 @@ class ModuleController extends ActionController
         $vocabulary->setProperty('title', $title);
         $vocabulary->setProperty('description', $description);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('created vocabulary %s' , $title)));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Created vocabulary %s' , $title)));
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 
@@ -172,7 +166,7 @@ class ModuleController extends ActionController
             $vocabulary->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('updated vocabulary %s' , $title)));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s' , $title)));
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 
@@ -183,7 +177,9 @@ class ModuleController extends ActionController
         if ($vocabulary->isAutoCreated()) {
             throw new \Exception('cannot delete autocrated vocabularies');
         } else {
+            $path = $vocabulary->getPath();
             $vocabulary->remove();
+            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s' , $path)));
         }
         $this->redirect('index');
     }
@@ -211,7 +207,7 @@ class ModuleController extends ActionController
         $taxonomy->setProperty('title', $title);
         $taxonomy->setProperty('description', $description);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('created taxonomy %s' , $taxonomy->getPath() )));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Created taxonomy %s' , $taxonomy->getPath() )));
 
         $flowQuery = new FlowQuery([$taxonomy]);
         $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
@@ -256,7 +252,7 @@ class ModuleController extends ActionController
             $taxonomy->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('updated taxonomy %s' , $taxonomy->getPath() )));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated taxonomy %s' , $taxonomy->getPath() )));
 
         $flowQuery = new FlowQuery([$taxonomy]);
         $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
@@ -275,7 +271,9 @@ class ModuleController extends ActionController
         if ($taxonomy->isAutoCreated()) {
             throw new \Exception('cannot delete autocrated vocabularies');
         } else {
+            $path = $taxonomy->getPath();
             $taxonomy->remove();
+            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s' , $path)));
         }
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }

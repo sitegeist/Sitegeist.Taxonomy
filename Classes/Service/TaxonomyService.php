@@ -11,6 +11,7 @@ use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Sitegeist\Taxonomy\Package;
 
 class TaxonomyService
 {
@@ -47,12 +48,6 @@ class TaxonomyService
 
     /**
      * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeName")
-     */
-    protected $rootNodeName;
-
-    /**
-     * @var string
      * @Flow\InjectConfiguration(path="contentRepository.rootNodeType")
      */
     protected $rootNodeType;
@@ -80,7 +75,7 @@ class TaxonomyService
         }
 
         // return existing root-node
-        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath('/' . $this->rootNodeName, $context->getWorkspace());
+        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath('/' . Package::ROOT_NODE_NAME, $context->getWorkspace());
         if ($taxonomyDataRootNodeData !== null) {
             $this->taxoniomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData($taxonomyDataRootNodeData, $context);
             return $this->taxoniomyDataRootNodes[$contextHash];;
@@ -89,7 +84,7 @@ class TaxonomyService
         // create root-node
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->rootNodeType));
-        $nodeTemplate->setName($this->rootNodeName);
+        $nodeTemplate->setName(Package::ROOT_NODE_NAME);
 
         $rootNode = $context->getRootNode();
         $this->taxoniomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
