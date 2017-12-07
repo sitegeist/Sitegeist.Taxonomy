@@ -19,7 +19,7 @@ Neos:
             controller: \Sitegeist\Taxonomy\Controller\ModuleController
             description: 'Manage Taxonomies'
             icon: icon-tags
-            privilegeTarget: 'Sitegeist.Taxonomy:Module'
+            privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
   Fusion:
     defaultContext:
       Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper

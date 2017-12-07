@@ -1,0 +1,27 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+    <h2>{vocabulary.path}</h2>
+    <legend>Edit Vocabulary "{vocabulary.properties.title}"</legend>
+
+    <f:form action="updateVocabulary">
+        <fieldset>
+
+            <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
+
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="title">Vocabulary Title</label>
+                <f:form.textfield name="title" id="title" value="{vocabulary.properties.title}"/>
+            </div>
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="description">Vocabulary Description</label>
+                <f:form.textarea name="description" id="description" value="{vocabulary.properties.description}"/>
+            </div>
+
+            <f:link.action class="neos-button" action="vocabulary" arguments="{vocabulary: vocabulary}">Cancel</f:link.action>
+
+            <f:form.submit value="Save" class="neos-button neos-button-primary" />
+        </fieldset>
+    </f:form>
+</f:section>

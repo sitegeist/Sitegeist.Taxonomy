@@ -1,13 +1,19 @@
 {namespace neos=Neos\Neos\ViewHelpers}
+{namespace taxonomy=Sitegeist\Taxonomy\ViewHelpers}
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <legend>Vocabulary "{vocabulary.path}"</legend>
+    <h2>{vocabulary.path}</h2>
+    <legend>Vocabulary "{vocabulary.properties.title}"</legend>
+
+    <p>
+        {vocabulary.properties.description}
+    </p>
+
     <table class="neos-table">
         <thead>
         <tr>
             <th>
-
             </th>
             <th>Path</th>
             <th>Title</th>
@@ -23,8 +29,12 @@
     </table>
 
     <div class="neos-row-fluid">
+        <f:link.action action="editVocabulary" class="neos-button neos-button-primary" title="" arguments="{vocabulary: vocabulary.contextPath}" >
+            <i class="icon-pencil icon-white"></i> Edit Vocabulary
+        </f:link.action>
+
         <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: vocabulary.contextPath}" >
-            <i class="icon-pencil icon-white"></i> Create new Taxonomy
+            <i class="icon-plus icon-white"></i> Create new Taxonomy
         </f:link.action>
     </div>
 
@@ -37,8 +47,7 @@
             <i class="{taxon.nodeType.fullConfiguration.ui.icon}" ></i>
         </td>
         <td>
-            {taxon.path}
-        </td>
+            <taxonomy:replace search="{basePath}/" replace="" value="{taxon.path}" />
         <td>
             {taxon.properties.title}
         </td>
@@ -47,7 +56,7 @@
         </td>
         <td>
             <div class="neos-pull-right">
-                <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="Add taxonomy"  class="neos-button neos-button-primary">
+                <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="Add sub-taxonomy"  class="neos-button neos-button-primary">
                     <i class="icon-plus icon-white"></i>
                 </f:link.action>
 
@@ -72,7 +81,7 @@
     </tr>
 
     <f:for each="{taxon.childNodes}" as="child">
-        <f:render section="taxonAndSub" arguments="{taxon: child, level: '{level + 1}' }" />
+        <f:render section="taxonAndSub" arguments="{taxon: child, basePath: basePath, level: '{level + 1}' }" />
     </f:for>
 
 </f:section>

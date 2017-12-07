@@ -125,12 +125,12 @@ class ModuleController extends ActionController
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->vocabularyNodeType));
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
 
-        $vocabularyNode = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
-        $vocabularyNode->setProperty('title', $title);
-        $vocabularyNode->setProperty('description', $description);
+        $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
+        $vocabulary->setProperty('title', $title);
+        $vocabulary->setProperty('description', $description);
 
         $this->flashMessageContainer->addMessage(new Message(sprintf('created vocabulary %s' , $title)));
-        $this->redirect('index');
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 
     /**
@@ -138,6 +138,42 @@ class ModuleController extends ActionController
      */
     public function vocabularyAction(NodeInterface $vocabulary) {
         $this->view->assign('vocabulary', $vocabulary);
+    }
+
+    /**
+     * @param NodeInterface $vocabulary
+     */
+    public function editVocabularyAction(NodeInterface $vocabulary) {
+        $this->view->assign('vocabulary', $vocabulary);
+    }
+
+
+    /**
+     * @param NodeInterface $vocabulary
+     * @param string $title
+     * @param string $description
+     */
+    public function updateVocabularyAction(NodeInterface $vocabulary, $title, $description = '')
+    {
+        $previousTitle = $vocabulary->getProperty('title');
+        $previousDescription = $vocabulary->getProperty('description');
+
+        if ($previousTitle !== $title) {
+            $vocabulary->setProperty('title', $title);
+            if ($vocabulary->isAutoCreated() === false) {
+                $possibleName = CrUtitlity::renderValidNodeName($title);
+                if ($vocabulary->getName() !== $possibleName) {
+                    $vocabulary->setName($possibleName);
+                }
+            }
+        }
+
+        if ($previousDescription !== $description) {
+            $vocabulary->setProperty('description', $description);
+        }
+
+        $this->flashMessageContainer->addMessage(new Message(sprintf('updated vocabulary %s' , $title)));
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 
     /**
@@ -171,13 +207,58 @@ class ModuleController extends ActionController
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyNodeType));
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
 
-        $taxonomyNode = $parent->createNodeFromTemplate($nodeTemplate);
-        $taxonomyNode->setProperty('title', $title);
-        $taxonomyNode->setProperty('description', $description);
+        $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
+        $taxonomy->setProperty('title', $title);
+        $taxonomy->setProperty('description', $description);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('created vocabulary %s' , $title)));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('created taxonomy %s' , $taxonomy->getPath() )));
 
-        $flowQuery = new FlowQuery([$taxonomyNode]);
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
+    }
+
+    /**
+     * @param NodeInterface $taxonomy
+     */
+    public function editTaxonomyAction(NodeInterface $taxonomy)
+    {
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+
+        $this->view->assign('vocabulary', $vocabulary);
+        $this->view->assign('taxonomy', $taxonomy);
+
+    }
+
+    /**
+     * @param NodeInterface $taxonomy
+     * @param string $title
+     * @param string $description
+     */
+    public function updateTaxonomyAction(NodeInterface $taxonomy, $title, $description = '')
+    {
+        $previousTitle = $taxonomy->getProperty('title');
+        $previousDescription = $taxonomy->getProperty('description');
+
+        if ($previousTitle !== $title) {
+            $taxonomy->setProperty('title', $title);
+            if ($taxonomy->isAutoCreated() === false) {
+                $possibleName = CrUtitlity::renderValidNodeName($title);
+                if ($taxonomy->getName() !== $possibleName) {
+                    $taxonomy->setName($possibleName);
+                }
+            }
+        }
+
+        if ($previousDescription !== $description) {
+            $taxonomy->setProperty('description', $description);
+        }
+
+        $this->flashMessageContainer->addMessage(new Message(sprintf('updated taxonomy %s' , $taxonomy->getPath() )));
+
+        $flowQuery = new FlowQuery([$taxonomy]);
         $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);

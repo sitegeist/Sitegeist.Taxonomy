@@ -1,0 +1,27 @@
+{namespace neos=Neos\Neos\ViewHelpers}
+<f:layout name="BackendSubModule" />
+
+<f:section name="content">
+    <h2>{taxonomy.path}</h2>
+    <legend>Edit Taxonomy "{taxonomy.properties.title}"</legend>
+
+    <f:form action="updateTaxonomy">
+        <fieldset>
+
+            <f:form.hidden name="taxonomy" value="{taxonomy.contextPath}" />
+
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="title">Taxonomy Title</label>
+                <f:form.textfield name="title" id="title" value="{taxonomy.properties.title}"/>
+            </div>
+            <div class="neos-control-group">
+                <label class="neos-control-label" for="description">Taxonomy Description</label>
+                <f:form.textarea name="description" id="description" value="{taxonomy.properties.description}"/>
+            </div>
+
+            <f:link.action class="neos-button" action="vocabulary" arguments="{vocabulary: vocabulary}">Cancel</f:link.action>
+
+            <f:form.submit value="Save" class="neos-button neos-button-primary" />
+        </fieldset>
+    </f:form>
+</f:section>
