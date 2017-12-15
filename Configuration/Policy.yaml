@@ -1,18 +1,28 @@
 privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Sitegeist.Taxonomy:Module.Show':
-      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(index|vocabulary)Action())'
+      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(index|vocabulary|taxonomy|changeContext)Action())'
     'Sitegeist.Taxonomy:Module.ManageVocabularyActions':
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newVocabulary|createVocabulary|editVocabulary|updateVocabulary|deleteVocabulary)Action())'
     'Sitegeist.Taxonomy:Module.ManageTaxonomyActions':
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newTaxonomy|createTaxonomy|editTaxonomy|updateTaxonomy|deleteTaxonomy)Action())'
 
 roles:
+
   'Neos.Neos:AbstractEditor':
     privileges:
       -
         privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
         permission: GRANT
+      -
+        privilegeTarget: 'Sitegeist.Taxonomy:Module.ManageVocabularyActions'
+        permission: ABSTAIN
+      -
+        privilegeTarget: 'Sitegeist.Taxonomy:Module.ManageTaxonomyActions'
+        permission: ABSTAIN
+
+  'Neos.Neos:Administrator':
+    privileges:
       -
         privilegeTarget: 'Sitegeist.Taxonomy:Module.ManageVocabularyActions'
         permission: GRANT

@@ -1,9 +1,19 @@
 {namespace neos=Neos\Neos\ViewHelpers}
+{namespace taxonomy=Sitegeist\Taxonomy\ViewHelpers}
+
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
 
-    <legend>Vocabularies</legend>
+
+    <div class="neos-row-fluid">
+        <legend>
+            Vocabularies
+            <div class="neos-pull-right">
+                <f:render partial="LanguageSelection" arguments="{targetAction: 'index', targetProperty: 'root', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomyRoot}" />
+            </div>
+        </legend>
+    </div>
 
     <f:if condition="{vocabularies}">
         <f:then>

@@ -1,6 +1,7 @@
 <?php
 namespace Sitegeist\Taxonomy\Service;
 
+use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 
 use Neos\ContentRepository\Domain\Factory\NodeFactory;
@@ -11,10 +12,25 @@ use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Sitegeist\Taxonomy\Package;
+use Neos\Flow\Log\SystemLoggerInterface;
 
+use Sitegeist\Taxonomy\Package;
+use Sitegeist\Taxonomy\Service\DimensionService;
+
+/**
+ * Class TaxonomyService
+ * @package Sitegeist\Taxonomy\Service
+ * @Flow\Scope("singleton")
+ */
 class TaxonomyService
 {
+
+    /**
+     * @var SystemLoggerInterface
+     * @Flow\Inject
+     */
+    protected $systemLogger;
+
 
     /**
      * @Flow\Inject
@@ -53,9 +69,51 @@ class TaxonomyService
     protected $rootNodeType;
 
     /**
+     * @var string
+     * @Flow\InjectConfiguration(path="contentRepository.vocabularyNodeType")
+     */
+    protected $vocabularyNodeType;
+
+    /**
+     * @var string
+     * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
+     */
+    protected $taxonomyNodeType;
+
+    /**
      * @var NodeInterface[]
      */
     protected $taxoniomyDataRootNodes = [];
+
+    /**
+     * @var DimensionService
+     * @Flow\Inject
+     */
+    protected $dimensionService;
+
+    /**
+     * @return string
+     */
+    public function getRootNodeType()
+    {
+        return $this->rootNodeType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVocabularyNodeType()
+    {
+        return $this->vocabularyNodeType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTaxonomyNodeType()
+    {
+        return $this->taxonomyNodeType;
+    }
 
     /**
      * @param Context $context
@@ -122,4 +180,6 @@ class TaxonomyService
             return $vocabulary->getNode($taxonomyPath);
         }
     }
+
+
 }

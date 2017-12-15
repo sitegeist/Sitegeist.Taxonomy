@@ -3,8 +3,15 @@
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <h2>{vocabulary.path}</h2>
-    <legend>Vocabulary "{vocabulary.properties.title}"</legend>
+    <div class="neos-row-fluid">
+        <legend>
+            Vocabulary "{vocabulary.properties.title}"
+            <div class="neos-pull-right">
+                <f:render partial="LanguageSelection" arguments="{targetAction: 'vocabulary', targetProperty: 'vocabulary', contentDimensionOptions: contentDimensionOptions, contextNode: vocabulary}" />
+            </div>
+        </legend>
+    </div>
+
 
     <p>
         {vocabulary.properties.description}
@@ -23,61 +30,18 @@
         </thead>
         <tbody>
             <f:for each="{vocabulary.childNodes}" as="taxon">
-                <f:render section="taxonAndSub" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
+                <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
             </f:for>
         </tbody>
     </table>
 
     <div class="neos-row-fluid">
+        <f:link.action action="index" class="neos-button" title="" arguments="{root: taxonomyRoot}" >
+            <i class="icon-backward icon-white"></i> Back to Index
+        </f:link.action>
         <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: vocabulary.contextPath}" >
             <i class="icon-plus icon-white"></i> Create new Taxonomy
         </f:link.action>
     </div>
-
-</f:section>
-
-
-<f:section name="taxonAndSub">
-    <tr>
-        <td>
-            <i class="{taxon.nodeType.fullConfiguration.ui.icon}" ></i>
-        </td>
-        <td>
-            <taxonomy:replace search="{basePath}/" replace="" value="{taxon.path}" />
-        <td>
-            {taxon.properties.title}
-        </td>
-        <td>
-            {taxon.properties.description}
-        </td>
-        <td>
-            <div class="neos-pull-right">
-                <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="Add sub-taxonomy"  class="neos-button neos-button-primary">
-                    <i class="icon-plus icon-white"></i>
-                </f:link.action>
-
-                <f:form action="editTaxonomy" class="neos-inline">
-                    <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
-                    <f:form.button  title="Edit taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
-                        <i class="icon-pencil icon-white"></i>
-                    </f:form.button>
-                </f:form>
-
-                <f:if condition="{taxon.autoCreated = false}" >
-                    <f:form action="deleteTaxonomy" class="neos-inline">
-                        <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
-                        <f:form.button  title="Delete taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
-                            <i class="icon-trash icon-white"></i>
-                        </f:form.button>
-                    </f:form>
-                </f:if>
-
-            </div>
-        </td>
-    </tr>
-
-    <f:for each="{taxon.childNodes}" as="child">
-        <f:render section="taxonAndSub" arguments="{taxon: child, basePath: basePath, level: '{level + 1}' }" />
-    </f:for>
 
 </f:section>

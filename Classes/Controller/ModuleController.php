@@ -17,7 +17,8 @@ use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
-use Sitegeist\Taxonomy\Eel\TaxonomyHelper;
+use Sitegeist\Taxonomy\Service\DimensionService;
+use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\ContentRepository\Domain\Model\NodeTemplate;
@@ -25,6 +26,7 @@ use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Neos\ContentRepository\Utility as CrUtitlity;
+use Neos\Utility\Arrays;
 
 /**
  * Class ModuleController
@@ -32,12 +34,6 @@ use Neos\ContentRepository\Utility as CrUtitlity;
  */
 class ModuleController extends ActionController
 {
-
-    /**
-     * @Flow\Inject
-     * @var TaxonomyHelper
-     */
-    protected $taxonomyHelper;
 
     /**
      * @Flow\Inject
@@ -57,24 +53,23 @@ class ModuleController extends ActionController
      */
     protected $persistenceManager;
 
-
     /**
      * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeType")
+     * @Flow\InjectConfiguration(package="Neos.ContentRepository", path="contentDimensions")
      */
-    protected $rootNodeType;
+    protected $contentDimensions;
 
     /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.vocabularyNodeType")
+     * @var DimensionService
+     * @Flow\Inject
      */
-    protected $vocabularyNodeType;
+    protected $dimensionService;
 
     /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
+     * @var TaxonomyService
+     * @Flow\Inject
      */
-    protected $taxonomyNodeType;
+    protected $taxonomyService;
 
     /**
      * Initialize the view
@@ -84,25 +79,79 @@ class ModuleController extends ActionController
      */
     public function initializeView(ViewInterface $view)
     {
-
+        $this->view->assign('contentDimensionOptions', $this->getContentDimensionOptions());
     }
 
     /**
+     * @param NodeInterface $root
      * @return void
      */
-    public function indexAction()
+    public function indexAction ( NodeInterface $root = null)
     {
-        $context = $this->contextFactory->create();
-        $taxonomyRoot = $this->taxonomyHelper->root($context);
-        $flowQuery = new FlowQuery([$taxonomyRoot]);
+        if (!$root) {
+            $root = $this->taxonomyService->getRoot();
+        }
+
+        $flowQuery = new FlowQuery([$root]);
         $vocabularies = $flowQuery->children('[instanceof Sitegeist.Taxonomy:Vocabulary]')->get();
+
+        $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabularies', $vocabularies);
+    }
+
+    /**
+     * @param string $targetAction
+     * @param string $targetProperty
+     * @param NodeInterface $contextNode
+     * @param array $dimensions
+     */
+    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = []) {
+        $contextProperties = $contextNode->getContext()->getProperties();
+
+        $newContextProperties = [];
+        foreach($dimensions as $dimensionName => $presetName) {
+            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues($dimensionName, $presetName);
+            $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
+        }
+        $modifiedContext = $this->contextFactory->create( array_merge($contextProperties, $newContextProperties));
+        $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
+
+        $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
+    }
+
+    protected function getContentDimensionOptions ()
+    {
+        $result = [];
+
+        if (is_array($this->contentDimensions) === FALSE || count($this->contentDimensions) === 0 ) {
+            return $result;
+        }
+
+        foreach( $this->contentDimensions as $dimensionName => $dimensionConfiguration) {
+
+            $result[$dimensionName] = [
+                'label' => $dimensionConfiguration['label'],
+                'icon' => $dimensionConfiguration['icon'],
+                'presets' => array_map(
+                    function($preset) {
+                        return $preset['label'];
+                    },
+                    array_filter($dimensionConfiguration['presets'])
+                )
+            ];
+
+        }
+        return $result;
+    }
+
+    protected function getContentDimensionValues ($dimensionName, $presetName) {
+        return $this->contentDimensions[$dimensionName]['presets'][$presetName]['values'];
     }
 
     /**
      *
      */
-    public function newVocabularyAction()
+    public function newVocabularyAction($dimensions = [])
     {
     }
 
@@ -113,17 +162,17 @@ class ModuleController extends ActionController
     public function createVocabularyAction($title, $description = '')
     {
         $context = $this->contextFactory->create();
-        $taxonomyRoot = $this->taxonomyHelper->root($context);
+        $taxonomyRoot = $this->taxonomyService->getRoot($context);
 
         $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->vocabularyNodeType));
+        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType()));
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
+        $nodeTemplate->setProperty('title', $title);
+        $nodeTemplate->setProperty('description', $description);
 
         $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
-        $vocabulary->setProperty('title', $title);
-        $vocabulary->setProperty('description', $description);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Created vocabulary %s' , $title)));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Created vocabulary %s at path %s' , $title, $vocabulary->getPath())));
         $this->redirect('index');
     }
 
@@ -131,6 +180,10 @@ class ModuleController extends ActionController
      * @param NodeInterface $vocabulary
      */
     public function vocabularyAction(NodeInterface $vocabulary) {
+        $flowQuery = new FlowQuery([$vocabulary]);
+        $root = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getRootNodeType() . ']')->get(0);
+
+        $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabulary', $vocabulary);
     }
 
@@ -140,7 +193,6 @@ class ModuleController extends ActionController
     public function editVocabularyAction(NodeInterface $vocabulary) {
         $this->view->assign('vocabulary', $vocabulary);
     }
-
 
     /**
      * @param NodeInterface $vocabulary
@@ -185,6 +237,17 @@ class ModuleController extends ActionController
     }
 
     /**
+     * @param NodeInterface $taxonomy
+     */
+    public function taxonomyAction(NodeInterface $taxonomy) {
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+
+        $this->view->assign('taxonomy', $taxonomy);
+        $this->view->assign('vocabulary', $vocabulary);
+    }
+
+    /**
      * @param NodeInterface $parent
      */
     public function newTaxonomyAction(NodeInterface $parent)
@@ -200,17 +263,17 @@ class ModuleController extends ActionController
     public function createTaxonomyAction(NodeInterface $parent, $title, $description = '')
     {
         $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyNodeType));
+        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType()));
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
+        $nodeTemplate->setProperty('title', $title);
+        $nodeTemplate->setProperty('description', $description);
 
         $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
-        $taxonomy->setProperty('title', $title);
-        $taxonomy->setProperty('description', $description);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Created taxonomy %s' , $taxonomy->getPath() )));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Created taxonomy %s at path %s', $title, $taxonomy->getPath() )));
 
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
     }
@@ -221,7 +284,7 @@ class ModuleController extends ActionController
     public function editTaxonomyAction(NodeInterface $taxonomy)
     {
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
 
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('taxonomy', $taxonomy);
@@ -255,7 +318,7 @@ class ModuleController extends ActionController
         $this->flashMessageContainer->addMessage(new Message(sprintf('Updated taxonomy %s' , $taxonomy->getPath() )));
 
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
     }
@@ -266,7 +329,7 @@ class ModuleController extends ActionController
     public function deleteTaxonomyAction(NodeInterface $taxonomy)
     {
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->vocabularyNodeType . ']')->get(0);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
 
         if ($taxonomy->isAutoCreated()) {
             throw new \Exception('cannot delete autocrated vocabularies');

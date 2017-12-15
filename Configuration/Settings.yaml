@@ -16,6 +16,7 @@ Neos:
             description: 'Manage Taxonomies'
             icon: icon-tags
             privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
+
   Fusion:
     defaultContext:
       Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper

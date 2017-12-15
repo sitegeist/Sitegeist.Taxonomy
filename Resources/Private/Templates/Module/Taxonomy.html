@@ -1,13 +1,25 @@
 {namespace neos=Neos\Neos\ViewHelpers}
+{namespace taxonomy=Sitegeist\Taxonomy\ViewHelpers}
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <legend>Taxonomy "{taxonomy.path}"</legend>
+    <div class="neos-row-fluid">
+        <legend>
+            Taxonomy "{taxonomy.properties.title}"
+            <div class="neos-pull-right">
+                <f:render partial="LanguageSelection" arguments="{targetAction: 'taxonomy', targetProperty: 'taxonomy', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomy}" />
+            </div>
+        </legend>
+    </div>
+
+    <p>
+        {taxonomy.properties.description}
+    </p>
+
     <table class="neos-table">
         <thead>
         <tr>
             <th>
-
             </th>
             <th>Path</th>
             <th>Title</th>
@@ -16,45 +28,22 @@
         </tr>
         </thead>
         <tbody>
-            <f:render section="itemAndSub" arguments="{item: taxonomy, level: 0}" />
+            <f:for each="{taxonomy.childNodes}" as="taxon">
+                <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
+            </f:for>
         </tbody>
     </table>
 
     <div class="neos-row-fluid">
-
-        <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: vocabulary.contextPath}" >
-            <i class="icon-pencil icon-white"></i> Create new Taxonomy
+        <f:link.action action="vocabulary" class="neos-button" title="" arguments="{vocabulary: vocabulary}" >
+            <i class="icon-backward icon-white"></i> Back to Vocabulary
         </f:link.action>
-
+        <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: taxonomy.contextPath}" >
+            <i class="icon-plus icon-white"></i> Create new Taxonomy
+        </f:link.action>
 
     </div>
 
 </f:section>
 
 
-<f:section name="itemAndSub">
-    <tr>
-        <td>
-            <i class="{item.nodeType.fullConfiguration.ui.icon}" ></i>
-        </td>
-        <td>
-            {item.path}
-        </td>
-        <td>
-            {item.properties.title}
-        </td>
-        <td>{item.properties.description}</td>
-        <td>
-            <div class="neos-pull-right">
-                <f:link.action action="newTaxonomy" arguments="{parent : item.contextPath}" title="Add taxonomy">
-                    <i class="icon-plus icon-white"></i>
-                </f:link.action>
-            </div>
-        </td>
-    </tr>
-
-    <f:for each="{item.childNodes}" as="child">
-        <f:render section="itemAndSub" arguments="{item: child, level: '{level + 1}' }" />
-    </f:for>
-
-</f:section>
