@@ -374,7 +374,7 @@ class ModuleController extends ActionController
             ->get(0);
 
         if ($taxonomy->isAutoCreated()) {
-            throw new \Exception('cannot delete autocrated vocabularies');
+            throw new \Exception('cannot delete autocrated taxonomies');
         } else {
             $path = $taxonomy->getPath();
             $taxonomy->remove();

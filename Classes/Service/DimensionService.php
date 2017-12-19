@@ -47,14 +47,19 @@ class DimensionService
     public function getBaseDimensionSubgraphs()
     {
         $interDimensionalFallbackGraph = $this->fallbackGraphService->getInterDimensionalFallbackGraph();
-        $subgraphs = $interDimensionalFallbackGraph->getSubgraphs();
-        if (count($subgraphs) == 1) {
-            return [];
-        }
         // find all dimensionGraphs that have no fallbacks
-        $baseDimensionGraphs = array_filter($subgraphs, function ($subgraph) {
-            return (array_sum($subgraph->getWeight()) === 0);
-        });
+        $baseDimensionGraphs = array_filter(
+            $interDimensionalFallbackGraph->getSubgraphs(),
+            function ($subgraph) {
+                try {
+                    $weight = $subgraph->getWeight();
+                    return (array_sum($weight) === 0);
+                } catch (\TypeError $e) {
+                    return true;
+                }
+            }
+        );
+
         return $baseDimensionGraphs;
     }
 
@@ -98,7 +103,6 @@ class DimensionService
 
                 if ($modifiedContext->getNode($node->getPath()) == null) {
                     $results[] = $modifiedContext->adoptNode($node);
-                    ;
                 }
             }
         }
