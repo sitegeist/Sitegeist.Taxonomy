@@ -47,8 +47,12 @@ class DimensionService
     public function getBaseDimensionSubgraphs()
     {
         $interDimensionalFallbackGraph = $this->fallbackGraphService->getInterDimensionalFallbackGraph();
+        $subgraphs = $interDimensionalFallbackGraph->getSubgraphs();
+        if (count($subgraphs) == 1) {
+            return [];
+        }
         // find all dimensionGraphs that have no fallbacks
-        $baseDimensionGraphs = array_filter($interDimensionalFallbackGraph->getSubgraphs(), function ($subgraph) {
+        $baseDimensionGraphs = array_filter($subgraphs, function ($subgraph) {
             return (array_sum($subgraph->getWeight()) === 0);
         });
         return $baseDimensionGraphs;
@@ -73,8 +77,7 @@ class DimensionService
         $baseDimensionSubgraphs = $this->getBaseDimensionSubgraphs();
         if (count($baseDimensionSubgraphs) > 0) {
             $nodeContext = $node->getContext();
-            foreach($baseDimensionSubgraphs as $baseDimensionSubgraph) {
-
+            foreach ($baseDimensionSubgraphs as $baseDimensionSubgraph) {
                 $baseDimensionValues = [
                     'dimensions' => array_map(
                         function (ContentDimensionValue $contentDimensionValue) {
@@ -93,13 +96,13 @@ class DimensionService
                 $baseDimensionContext = array_merge($nodeContext->getProperties(), $baseDimensionValues);
                 $modifiedContext = $this->contextFactory->create($baseDimensionContext);
 
-                if ($modifiedContext->getNode($node->getPath()) == NULL) {
-                    $results[] = $modifiedContext->adoptNode($node);;
+                if ($modifiedContext->getNode($node->getPath()) == null) {
+                    $results[] = $modifiedContext->adoptNode($node);
+                    ;
                 }
             }
         }
         $this->persistenceManager->persistAll();
         return $results;
     }
-
 }

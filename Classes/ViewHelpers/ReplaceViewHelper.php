@@ -15,7 +15,15 @@ class ReplaceViewHelper extends AbstractViewHelper
      */
     public function render($search, $replace, $value = null)
     {
-        return self::renderStatic(['value' => $value, 'search' => $search, 'replace' => $replace], $this->buildRenderChildrenClosure(), $this->renderingContext);
+        return self::renderStatic(
+            [
+                'value' => $value,
+                'search' => $search,
+                'replace' => $replace
+            ],
+            $this->buildRenderChildrenClosure(),
+            $this->renderingContext
+        );
     }
 
     /**
@@ -25,8 +33,11 @@ class ReplaceViewHelper extends AbstractViewHelper
      * @return string
      * @throws InvalidVariableException
      */
-    public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
-    {
+    public static function renderStatic(
+        array $arguments,
+        \Closure $renderChildrenClosure,
+        RenderingContextInterface $renderingContext
+    ) {
         $search = $arguments['search'];
         $replace = $arguments['replace'];
         $value = $arguments['value'];

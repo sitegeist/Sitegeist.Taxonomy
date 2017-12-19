@@ -24,12 +24,15 @@ class PathInformationViewHelper extends AbstractViewHelper
      * @return string
      * @throws InvalidVariableException
      */
-    public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
-    {
+    public static function renderStatic(
+        array $arguments,
+        \Closure $renderChildrenClosure,
+        RenderingContextInterface $renderingContext
+    ) {
         /**
          * @var NodeInterface $node
          */
         $node = $arguments['node'];
-        return implode(' -> ', array_slice(explode( '/', $node->getPath() ), 3));
+        return implode(' -> ', array_slice(explode('/', $node->getPath()), 3));
     }
 }

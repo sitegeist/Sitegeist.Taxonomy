@@ -15,7 +15,14 @@ class DimensionInformationViewHelper extends AbstractViewHelper
      */
     public function render(NodeInterface $node, $dimension = null)
     {
-        return self::renderStatic(['node' => $node, 'dimension' =>  $dimension], $this->buildRenderChildrenClosure(), $this->renderingContext);
+        return self::renderStatic(
+            [
+                'node' => $node,
+                'dimension' =>  $dimension
+            ],
+            $this->buildRenderChildrenClosure(),
+            $this->renderingContext
+        );
     }
 
     /**
@@ -25,8 +32,11 @@ class DimensionInformationViewHelper extends AbstractViewHelper
      * @return string
      * @throws InvalidVariableException
      */
-    public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
-    {
+    public static function renderStatic(
+        array $arguments,
+        \Closure $renderChildrenClosure,
+        RenderingContextInterface $renderingContext
+    ) {
         /**
          * @var NodeInterface $node
          */

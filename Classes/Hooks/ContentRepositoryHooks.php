@@ -48,11 +48,11 @@ class ContentRepositoryHooks
     {
         $this->systemLogger->log(new Message(sprintf("CREATED NODE %S", $node->getContextPath())));
 
-        if ($node->getNodeType()->isOfType('Sitegeist.Taxonomy:Root')
-          || $node->getNodeType()->isOfType('Sitegeist.Taxonomy:Vocabulary')
-          || $node->getNodeType()->isOfType('Sitegeist.Taxonomy:Taxonomy')
+        if ($node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType())
+          || $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType())
+          || $node->getNodeType()->isOfType($this->taxonomyService->getTaxonomyNodeType())
         ) {
-            if ($node->isAutoCreated() == false && $this->preventCascade == false ) {
+            if ($node->isAutoCreated() == false && $this->preventCascade == false) {
                 $this->preventCascade = true;
                 $this->dimensionService->ensureBaseVariantsExist($node);
                 $this->preventCascade = false;

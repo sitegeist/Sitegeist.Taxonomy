@@ -86,7 +86,7 @@ class ModuleController extends ActionController
      * @param NodeInterface $root
      * @return void
      */
-    public function indexAction ( NodeInterface $root = null)
+    public function indexAction(NodeInterface $root = null)
     {
         if (!$root) {
             $root = $this->taxonomyService->getRoot();
@@ -105,46 +105,56 @@ class ModuleController extends ActionController
      * @param NodeInterface $contextNode
      * @param array $dimensions
      */
-    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = []) {
+    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
+    {
         $contextProperties = $contextNode->getContext()->getProperties();
 
         $newContextProperties = [];
-        foreach($dimensions as $dimensionName => $presetName) {
-            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues($dimensionName, $presetName);
+        foreach ($dimensions as $dimensionName => $presetName) {
+            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues(
+                $dimensionName,
+                $presetName
+            );
             $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
         }
-        $modifiedContext = $this->contextFactory->create( array_merge($contextProperties, $newContextProperties));
+        $modifiedContext = $this->contextFactory->create(array_merge($contextProperties, $newContextProperties));
         $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
 
         $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
     }
 
-    protected function getContentDimensionOptions ()
+    /**
+´     * @return array the list of available content dimensions and their presets
+     */
+    protected function getContentDimensionOptions()
     {
         $result = [];
 
-        if (is_array($this->contentDimensions) === FALSE || count($this->contentDimensions) === 0 ) {
+        if (is_array($this->contentDimensions) === false || count($this->contentDimensions) === 0) {
             return $result;
         }
 
-        foreach( $this->contentDimensions as $dimensionName => $dimensionConfiguration) {
+        foreach ($this->contentDimensions as $dimensionName => $dimensionConfiguration) {
+            $presetOptions = [];
+            foreach($dimensionConfiguration['presets'] as $presetKey => $preset) {
+                $presetOptions[$presetKey] = $preset['label'] ?: $presetKey;
+            }
 
             $result[$dimensionName] = [
-                'label' => $dimensionConfiguration['label'],
-                'icon' => $dimensionConfiguration['icon'],
-                'presets' => array_map(
-                    function($preset) {
-                        return $preset['label'];
-                    },
-                    array_filter($dimensionConfiguration['presets'])
-                )
+                'label' => $dimensionConfiguration['label'] ?: $dimensionName,
+                'presets' => $presetOptions
             ];
-
         }
         return $result;
     }
 
-    protected function getContentDimensionValues ($dimensionName, $presetName) {
+    /**
+     * @param $dimensionName
+     * @param $presetName
+     * @return array the values assiged to the preset identified by $dimensionName and $presetName
+     */
+    protected function getContentDimensionValues($dimensionName, $presetName)
+    {
         return $this->contentDimensions[$dimensionName]['presets'][$presetName]['values'];
     }
 
@@ -163,23 +173,27 @@ class ModuleController extends ActionController
     {
         $context = $this->contextFactory->create();
         $taxonomyRoot = $this->taxonomyService->getRoot($context);
+        $vocabularyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType());
 
         $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType()));
+        $nodeTemplate->setNodeType($vocabularyNodeType);
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
         $nodeTemplate->setProperty('title', $title);
         $nodeTemplate->setProperty('description', $description);
 
         $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Created vocabulary %s at path %s' , $title, $vocabulary->getPath())));
+        $this->flashMessageContainer->addMessage(
+            new Message(sprintf('Created vocabulary %s at path %s', $title, $vocabulary->getPath()))
+        );
         $this->redirect('index');
     }
 
     /**
      * @param NodeInterface $vocabulary
      */
-    public function vocabularyAction(NodeInterface $vocabulary) {
+    public function vocabularyAction(NodeInterface $vocabulary)
+    {
         $flowQuery = new FlowQuery([$vocabulary]);
         $root = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getRootNodeType() . ']')->get(0);
 
@@ -190,7 +204,8 @@ class ModuleController extends ActionController
     /**
      * @param NodeInterface $vocabulary
      */
-    public function editVocabularyAction(NodeInterface $vocabulary) {
+    public function editVocabularyAction(NodeInterface $vocabulary)
+    {
         $this->view->assign('vocabulary', $vocabulary);
     }
 
@@ -218,20 +233,21 @@ class ModuleController extends ActionController
             $vocabulary->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s' , $title)));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s', $title)));
         $this->redirect('index');
     }
 
     /**
      * @param NodeInterface $vocabulary
      */
-    public function deleteVocabularyAction(NodeInterface $vocabulary) {
+    public function deleteVocabularyAction(NodeInterface $vocabulary)
+    {
         if ($vocabulary->isAutoCreated()) {
             throw new \Exception('cannot delete autocrated vocabularies');
         } else {
             $path = $vocabulary->getPath();
             $vocabulary->remove();
-            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s' , $path)));
+            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s', $path)));
         }
         $this->redirect('index');
     }
@@ -239,9 +255,12 @@ class ModuleController extends ActionController
     /**
      * @param NodeInterface $taxonomy
      */
-    public function taxonomyAction(NodeInterface $taxonomy) {
+    public function taxonomyAction(NodeInterface $taxonomy)
+    {
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
 
         $this->view->assign('taxonomy', $taxonomy);
         $this->view->assign('vocabulary', $vocabulary);
@@ -270,12 +289,21 @@ class ModuleController extends ActionController
 
         $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Created taxonomy %s at path %s', $title, $taxonomy->getPath() )));
+        $this->flashMessageContainer->addMessage(
+            new Message(sprintf('Created taxonomy %s at path %s', $title, $taxonomy->getPath()))
+        );
 
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
 
-        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
+        $this->redirect(
+            'vocabulary',
+            null,
+            null,
+            ['vocabulary' => $vocabulary->getContextPath()]
+        );
     }
 
     /**
@@ -284,11 +312,12 @@ class ModuleController extends ActionController
     public function editTaxonomyAction(NodeInterface $taxonomy)
     {
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
 
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('taxonomy', $taxonomy);
-
     }
 
     /**
@@ -315,10 +344,12 @@ class ModuleController extends ActionController
             $taxonomy->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated taxonomy %s' , $taxonomy->getPath() )));
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated taxonomy %s', $taxonomy->getPath())));
 
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
     }
@@ -329,14 +360,16 @@ class ModuleController extends ActionController
     public function deleteTaxonomyAction(NodeInterface $taxonomy)
     {
         $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
 
         if ($taxonomy->isAutoCreated()) {
             throw new \Exception('cannot delete autocrated vocabularies');
         } else {
             $path = $taxonomy->getPath();
             $taxonomy->remove();
-            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s' , $path)));
+            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s', $path)));
         }
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }

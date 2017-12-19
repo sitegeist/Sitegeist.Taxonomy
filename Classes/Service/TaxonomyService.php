@@ -14,9 +14,6 @@ use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Log\SystemLoggerInterface;
 
-use Sitegeist\Taxonomy\Package;
-use Sitegeist\Taxonomy\Service\DimensionService;
-
 /**
  * Class TaxonomyService
  * @package Sitegeist\Taxonomy\Service
@@ -64,6 +61,12 @@ class TaxonomyService
 
     /**
      * @var string
+     * @Flow\InjectConfiguration(path="contentRepository.rootNodeName")
+     */
+    protected $rootNodeName;
+
+    /**
+     * @var string
      * @Flow\InjectConfiguration(path="contentRepository.rootNodeType")
      */
     protected $rootNodeType;
@@ -86,10 +89,12 @@ class TaxonomyService
     protected $taxoniomyDataRootNodes = [];
 
     /**
-     * @var DimensionService
-     * @Flow\Inject
+     * @return string
      */
-    protected $dimensionService;
+    public function getRootNodeName()
+    {
+        return $this->rootNodeName;
+    }
 
     /**
      * @return string
@@ -128,21 +133,30 @@ class TaxonomyService
         $contextHash = md5(json_encode($context->getProperties()));
 
         // return memoized root-node
-        if (array_key_exists($contextHash, $this->taxoniomyDataRootNodes) && $this->taxoniomyDataRootNodes[$contextHash] instanceof NodeInterface) {
+        if (array_key_exists($contextHash, $this->taxoniomyDataRootNodes)
+            && $this->taxoniomyDataRootNodes[$contextHash] instanceof NodeInterface
+        ) {
             return $this->taxoniomyDataRootNodes[$contextHash];
         }
 
         // return existing root-node
-        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath('/' . Package::ROOT_NODE_NAME, $context->getWorkspace());
+        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath(
+            '/' . $this->getRootNodeName(),
+            $context->getWorkspace()
+        );
         if ($taxonomyDataRootNodeData !== null) {
-            $this->taxoniomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData($taxonomyDataRootNodeData, $context);
-            return $this->taxoniomyDataRootNodes[$contextHash];;
+            $this->taxoniomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
+                $taxonomyDataRootNodeData,
+                $context
+            );
+            return $this->taxoniomyDataRootNodes[$contextHash];
+            ;
         }
 
         // create root-node
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->rootNodeType));
-        $nodeTemplate->setName(Package::ROOT_NODE_NAME);
+        $nodeTemplate->setName($this->getRootNodeName());
 
         $rootNode = $context->getRootNode();
         $this->taxoniomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
@@ -151,7 +165,8 @@ class TaxonomyService
         $this->taxoniomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
         $this->persistenceManager->persistAll();
 
-        return $this->taxoniomyDataRootNodes[$contextHash];;
+        return $this->taxoniomyDataRootNodes[$contextHash];
+        ;
     }
 
     /**
@@ -159,7 +174,8 @@ class TaxonomyService
      * @param Context|null $context
      * @param $vocabulary
      */
-    public function getVocabulary($vocabularyName, Context $context = null) {
+    public function getVocabulary($vocabularyName, Context $context = null)
+    {
         if ($context === null) {
             $context = $this->contextFactory->create();
         }
@@ -174,12 +190,11 @@ class TaxonomyService
      * @param Context|null $context
      * @param $vocabulary
      */
-    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null) {
-        $vocabulary = $this->getVocabulary($vocabularyName);
+    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
+    {
+        $vocabulary = $this->getVocabulary($vocabularyName, $context);
         if ($vocabulary) {
             return $vocabulary->getNode($taxonomyPath);
         }
     }
-
-
 }

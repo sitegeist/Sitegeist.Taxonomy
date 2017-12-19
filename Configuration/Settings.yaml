@@ -1,9 +1,10 @@
 Sitegeist:
   Taxonomy:
     contentRepository:
-      rootNodeType: '%Sitegeist\Taxonomy\Package::ROOT_NODE_TYPE%'
-      vocabularyNodeType: '%Sitegeist\Taxonomy\Package::VOCABULARY_NODE_TYPE%'
-      taxonomyNodeType: '%Sitegeist\Taxonomy\Package::TAXONOMY_NODE_TYPE%'
+      rootNodeName: 'taxonomy'
+      rootNodeType: 'Sitegeist.Taxonomy:Root'
+      vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
+      taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 
 Neos:
   Neos:
