@@ -25,6 +25,7 @@ use Neos\ContentRepository\Domain\Model\NodeTemplate;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\ContentRepository\Domain\Model\NodeInterface;
+use Neos\ContentRepository\Domain\Service\NodeServiceInterface;
 use Neos\ContentRepository\Utility as CrUtitlity;
 use Neos\Utility\Arrays;
 
@@ -46,6 +47,12 @@ class ModuleController extends ActionController
      * @var NodeTypeManager
      */
     protected $nodeTypeManager;
+
+    /**
+     * @Flow\Inject
+     * @var NodeServiceInterface
+     */
+    protected $nodeService;
 
     /**
      * @Flow\Inject
@@ -100,10 +107,10 @@ class ModuleController extends ActionController
     }
 
     /**
-     * @param string $targetAction
-     * @param string $targetProperty
-     * @param NodeInterface $contextNode
-     * @param array $dimensions
+     * @param string $targetAction the target action to redirect to
+     * @param string $targetProperty the property in the target action that will accept the node
+     * @param NodeInterface $contextNode the node to adjust the context for
+     * @param array $dimensions array with dimensionName, presetName combinations
      */
     public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
     {
@@ -161,7 +168,7 @@ class ModuleController extends ActionController
     /**
      *
      */
-    public function newVocabularyAction($dimensions = [])
+    public function newVocabularyAction()
     {
     }
 
@@ -224,7 +231,8 @@ class ModuleController extends ActionController
             if ($vocabulary->isAutoCreated() === false) {
                 $possibleName = CrUtitlity::renderValidNodeName($title);
                 if ($vocabulary->getName() !== $possibleName) {
-                    $vocabulary->setName($possibleName);
+                    $newName = $this->nodeService->generateUniqueNodeName($vocabulary->getParentPath(), $possibleName);
+                    $vocabulary->setName($newName);
                 }
             }
         }
@@ -335,7 +343,8 @@ class ModuleController extends ActionController
             if ($taxonomy->isAutoCreated() === false) {
                 $possibleName = CrUtitlity::renderValidNodeName($title);
                 if ($taxonomy->getName() !== $possibleName) {
-                    $taxonomy->setName($possibleName);
+                    $newName = $this->nodeService->generateUniqueNodeName($taxonomy->getParentPath(), $possibleName);
+                    $taxonomy->setName($newName);
                 }
             }
         }
