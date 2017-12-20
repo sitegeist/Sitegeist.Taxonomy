@@ -416,18 +416,18 @@ class ModuleController extends ActionController
      */
     public function deleteTaxonomyAction(NodeInterface $taxonomy)
     {
+        if ($taxonomy->isAutoCreated()) {
+            throw new \Exception('cannot delete autocrated taxonomies');
+        }
+
         $flowQuery = new FlowQuery([$taxonomy]);
         $vocabulary = $flowQuery
             ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
             ->get(0);
 
-        if ($taxonomy->isAutoCreated()) {
-            throw new \Exception('cannot delete autocrated taxonomies');
-        } else {
-            $path = $taxonomy->getPath();
-            $taxonomy->remove();
-            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s', $path)));
-        }
+        $taxonomy->remove();
+
+        $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s', $taxonomy->getPath())));
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 }
