@@ -55,6 +55,12 @@ class DimensionService
                     $weight = $subgraph->getWeight();
                     return (array_sum($weight) === 0);
                 } catch (\TypeError $e) {
+                    // TODO:
+                    // Yep, we're catching a TypeError here. That's because
+                    // $subgraph->getWeight() is supposed to return an array, but it doesn't if
+                    // there's no dimension configuration at all. This sure will be fixed in
+                    // future releases of the content repository and should be adjusted at this
+                    // point as well.
                     return true;
                 }
             }
