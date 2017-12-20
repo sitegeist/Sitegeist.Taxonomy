@@ -139,6 +139,8 @@ class TaxonomyService
         }
 
         // return existing root-node
+        //
+        // TODO: Find a better way to determine the root node
         $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath(
             '/' . $this->getRootNodeName(),
             $context->getWorkspace()
