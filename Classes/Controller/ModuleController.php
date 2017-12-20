@@ -90,6 +90,8 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Show an overview of available vocabularies
+     *
      * @param NodeInterface $root
      * @return void
      */
@@ -107,10 +109,13 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Switch to a modified content context and redirect to the given action
+     *
      * @param string $targetAction the target action to redirect to
      * @param string $targetProperty the property in the target action that will accept the node
      * @param NodeInterface $contextNode the node to adjust the context for
      * @param array $dimensions array with dimensionName, presetName combinations
+     * @return void
      */
     public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
     {
@@ -131,6 +136,8 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Retreive all available content dimensions
+     *
      * @return array the list of available content dimensions and their presets
      */
     protected function getContentDimensionOptions()
@@ -156,6 +163,8 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Get the content dimension values for a given content dimension and preset
+     *
      * @param $dimensionName
      * @param $presetName
      * @return array the values assiged to the preset identified by $dimensionName and $presetName
@@ -166,15 +175,35 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Show the given vocabulary
      *
+     * @param NodeInterface $vocabulary
+     * @return void
+     */
+    public function vocabularyAction(NodeInterface $vocabulary)
+    {
+        $flowQuery = new FlowQuery([$vocabulary]);
+        $root = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getRootNodeType() . ']')->get(0);
+
+        $this->view->assign('taxonomyRoot', $root);
+        $this->view->assign('vocabulary', $vocabulary);
+    }
+
+    /**
+     * Display a form that allows to create a new vocabulary
+     *
+     * @return void
      */
     public function newVocabularyAction()
     {
     }
 
     /**
+     * Create a new vocabulary
+     *
      * @param string $title
      * @param string $description
+     * @return void
      */
     public function createVocabularyAction($title, $description = '')
     {
@@ -197,19 +226,10 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Show a form that allows to modify the given vocabulary
+     *
      * @param NodeInterface $vocabulary
-     */
-    public function vocabularyAction(NodeInterface $vocabulary)
-    {
-        $flowQuery = new FlowQuery([$vocabulary]);
-        $root = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getRootNodeType() . ']')->get(0);
-
-        $this->view->assign('taxonomyRoot', $root);
-        $this->view->assign('vocabulary', $vocabulary);
-    }
-
-    /**
-     * @param NodeInterface $vocabulary
+     * @return void
      */
     public function editVocabularyAction(NodeInterface $vocabulary)
     {
@@ -217,9 +237,12 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Apply changes to the given vocabulary
+     *
      * @param NodeInterface $vocabulary
      * @param string $title
      * @param string $description
+     * @return void
      */
     public function updateVocabularyAction(NodeInterface $vocabulary, $title, $description = '')
     {
@@ -246,7 +269,11 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Delete the given vocabulary
+     *
      * @param NodeInterface $vocabulary
+     * @return void
+     * @throws \Exception
      */
     public function deleteVocabularyAction(NodeInterface $vocabulary)
     {
@@ -261,7 +288,10 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Show the given taxonomy
+     *
      * @param NodeInterface $taxonomy
+     * @return void
      */
     public function taxonomyAction(NodeInterface $taxonomy)
     {
@@ -275,7 +305,10 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Show a form to create a new taxonomy
+     *
      * @param NodeInterface $parent
+     * @return void
      */
     public function newTaxonomyAction(NodeInterface $parent)
     {
@@ -283,9 +316,12 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Create a new taxonomy
+     *
      * @param NodeInterface $parent
      * @param string $title
      * @param string $description
+     * @return void
      */
     public function createTaxonomyAction(NodeInterface $parent, $title, $description = '')
     {
@@ -315,7 +351,10 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Display a form that allows to modify the given taxonomy
+     *
      * @param NodeInterface $taxonomy
+     * @return void
      */
     public function editTaxonomyAction(NodeInterface $taxonomy)
     {
@@ -329,9 +368,12 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Apply changes to the given taxonomy
+     *
      * @param NodeInterface $taxonomy
      * @param string $title
      * @param string $description
+     * @return void
      */
     public function updateTaxonomyAction(NodeInterface $taxonomy, $title, $description = '')
     {
@@ -364,7 +406,10 @@ class ModuleController extends ActionController
     }
 
     /**
+     * Delete the given taxonomy
+     *
      * @param NodeInterface $taxonomy
+     * @return void
      */
     public function deleteTaxonomyAction(NodeInterface $taxonomy)
     {
