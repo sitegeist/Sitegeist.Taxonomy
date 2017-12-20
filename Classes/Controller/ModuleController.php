@@ -4,7 +4,7 @@ namespace Sitegeist\Taxonomy\Controller;
 /**
  * This file is part of the Sitegeist.Taxonomies package
  *
- * (c) 2016
+ * (c) 2017
  * Martin Ficzel <ficzel@sitegeist.de>
  *
  * This package is Open Source Software. For the full copyright and license
@@ -136,7 +136,7 @@ class ModuleController extends ActionController
     }
 
     /**
-     * Retreive all available content dimensions
+     * Prepare all available content dimensions for use in a select box
      *
      * @return array the list of available content dimensions and their presets
      */
@@ -149,16 +149,19 @@ class ModuleController extends ActionController
         }
 
         foreach ($this->contentDimensions as $dimensionName => $dimensionConfiguration) {
-            $presetOptions = [];
-            foreach($dimensionConfiguration['presets'] as $presetKey => $preset) {
-                $presetOptions[$presetKey] = $preset['label'] ?: $presetKey;
+            $dimensionOption = [];
+            $dimensionOption['label'] = array_key_exists('label', $dimensionConfiguration) ?
+                $dimensionConfiguration['label'] : $dimensionName;
+            $dimensionOption['presets'] = [];
+
+            foreach($dimensionConfiguration['presets'] as $presetKey => $presetConfiguration) {
+                $dimensionOption['presets'][$presetKey] = array_key_exists('label', $presetConfiguration) ?
+                    $presetConfiguration['label'] : $presetKey;
             }
 
-            $result[$dimensionName] = [
-                'label' => $dimensionConfiguration['label'] ?: $dimensionName,
-                'presets' => $presetOptions
-            ];
+            $result[$dimensionName] = $dimensionOption;
         }
+
         return $result;
     }
 
