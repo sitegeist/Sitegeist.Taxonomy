@@ -163,7 +163,8 @@ class TaxonomyService
         $rootNode = $context->getRootNode();
         $this->taxoniomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
 
-        // persist root node
+        // We fetch the workspace to be sure it's known to the persistence manager and persist all
+        // so the workspace and site node are persisted before we import any nodes to it.
         $this->taxoniomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
         $this->persistenceManager->persistAll();
 
