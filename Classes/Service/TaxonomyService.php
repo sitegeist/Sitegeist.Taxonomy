@@ -28,7 +28,6 @@ class TaxonomyService
      */
     protected $systemLogger;
 
-
     /**
      * @Flow\Inject
      * @var NodeDataRepository
@@ -144,13 +143,14 @@ class TaxonomyService
             '/' . $this->getRootNodeName(),
             $context->getWorkspace()
         );
+
         if ($taxonomyDataRootNodeData !== null) {
             $this->taxoniomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
                 $taxonomyDataRootNodeData,
                 $context
             );
+
             return $this->taxoniomyDataRootNodes[$contextHash];
-            ;
         }
 
         // create root-node
@@ -166,7 +166,6 @@ class TaxonomyService
         $this->persistenceManager->persistAll();
 
         return $this->taxoniomyDataRootNodes[$contextHash];
-        ;
     }
 
     /**
