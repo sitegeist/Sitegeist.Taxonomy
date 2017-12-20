@@ -131,7 +131,7 @@ class ModuleController extends ActionController
     }
 
     /**
-´     * @return array the list of available content dimensions and their presets
+     * @return array the list of available content dimensions and their presets
      */
     protected function getContentDimensionOptions()
     {
