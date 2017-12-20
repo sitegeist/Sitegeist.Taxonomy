@@ -48,9 +48,10 @@ class ContentRepositoryHooks
     {
         $this->systemLogger->log(new Message(sprintf("CREATED NODE %S", $node->getContextPath())));
 
-        if ($node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType())
-          || $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType())
-          || $node->getNodeType()->isOfType($this->taxonomyService->getTaxonomyNodeType())
+        if (
+            $node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType()) ||
+            $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType()) ||
+            $node->getNodeType()->isOfType($this->taxonomyService->getTaxonomyNodeType())
         ) {
             if ($node->isAutoCreated() == false && $this->preventCascade == false) {
                 $this->preventCascade = true;
