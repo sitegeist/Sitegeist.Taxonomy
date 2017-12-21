@@ -154,7 +154,7 @@ class ModuleController extends ActionController
                 $dimensionConfiguration['label'] : $dimensionName;
             $dimensionOption['presets'] = [];
 
-            foreach($dimensionConfiguration['presets'] as $presetKey => $presetConfiguration) {
+            foreach ($dimensionConfiguration['presets'] as $presetKey => $presetConfiguration) {
                 $dimensionOption['presets'][$presetKey] = array_key_exists('label', $presetConfiguration) ?
                     $presetConfiguration['label'] : $presetKey;
             }
