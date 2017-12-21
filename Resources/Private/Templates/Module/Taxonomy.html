@@ -16,30 +16,39 @@
         {taxonomy.properties.description}
     </p>
 
-    <table class="neos-table">
-        <thead>
-        <tr>
-            <th>
-            </th>
-            <th>Path</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-            <f:for each="{taxonomy.childNodes}" as="taxon">
-                <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
-            </f:for>
-        </tbody>
-    </table>
+    <f:if condition="{taxonomy.childNodes}">
+        <f:then>
+            <table class="neos-table">
+                <thead>
+                <tr>
+                    <th>
+                    </th>
+                    <th>Path</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <f:for each="{taxonomy.childNodes}" as="taxon">
+                        <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
+                    </f:for>
+                </tbody>
+            </table>
+        </f:then>
+        <f:else>
+            <p>
+                No sub-taxons yet. Please create them.
+            </p>
+        </f:else>
+    </f:if>
 
     <div class="neos-row-fluid">
         <f:link.action action="vocabulary" class="neos-button" title="" arguments="{vocabulary: vocabulary}" >
             <i class="icon-backward icon-white"></i> Back to Vocabulary
         </f:link.action>
         <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: taxonomy.contextPath}" >
-            <i class="icon-plus icon-white"></i> Create new Taxonomy
+            <i class="icon-plus icon-white"></i> Create new Taxon
         </f:link.action>
 
     </div>
