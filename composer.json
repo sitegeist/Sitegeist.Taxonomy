@@ -1,7 +1,8 @@
 {
-    "description": "Mixins and Helpers for Taxonomies to be used in custom nodeTypes",
+    "description": "Manage vocabularies and taxonomies as separate node-hierarchy.",
     "type": "neos-package",
     "name": "sitegeist/taxonomy",
+    "license": "GPL-3.0+",
     "require": {
         "neos/neos": "*",
         "neos/content-repository": "*"
