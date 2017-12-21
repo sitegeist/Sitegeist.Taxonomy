@@ -85,7 +85,7 @@ class TaxonomyService
     /**
      * @var NodeInterface[]
      */
-    protected $taxoniomyDataRootNodes = [];
+    protected $taxonomyDataRootNodes = [];
 
     /**
      * @return string
@@ -132,10 +132,10 @@ class TaxonomyService
         $contextHash = md5(json_encode($context->getProperties()));
 
         // return memoized root-node
-        if (array_key_exists($contextHash, $this->taxoniomyDataRootNodes)
-            && $this->taxoniomyDataRootNodes[$contextHash] instanceof NodeInterface
+        if (array_key_exists($contextHash, $this->taxonomyDataRootNodes)
+            && $this->taxonomyDataRootNodes[$contextHash] instanceof NodeInterface
         ) {
-            return $this->taxoniomyDataRootNodes[$contextHash];
+            return $this->taxonomyDataRootNodes[$contextHash];
         }
 
         // return existing root-node
@@ -147,12 +147,12 @@ class TaxonomyService
         );
 
         if ($taxonomyDataRootNodeData !== null) {
-            $this->taxoniomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
+            $this->taxonomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
                 $taxonomyDataRootNodeData,
                 $context
             );
 
-            return $this->taxoniomyDataRootNodes[$contextHash];
+            return $this->taxonomyDataRootNodes[$contextHash];
         }
 
         // create root-node
@@ -161,14 +161,14 @@ class TaxonomyService
         $nodeTemplate->setName($this->getRootNodeName());
 
         $rootNode = $context->getRootNode();
-        $this->taxoniomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
+        $this->taxonomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
 
         // We fetch the workspace to be sure it's known to the persistence manager and persist all
         // so the workspace and site node are persisted before we import any nodes to it.
-        $this->taxoniomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
+        $this->taxonomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
         $this->persistenceManager->persistAll();
 
-        return $this->taxoniomyDataRootNodes[$contextHash];
+        return $this->taxonomyDataRootNodes[$contextHash];
     }
 
     /**
