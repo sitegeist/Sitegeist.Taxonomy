@@ -41,7 +41,7 @@ If you have to enforce the existence of a specific vocabulary or taxonomy you ca
       childNodes:
         animals:
           type: 'Sitegeist.Taxonomy:Vocabulary'
-```          
+```
 
 And configure the taxonomy-package to use this rootNodeType instead of the default:
 
@@ -69,9 +69,9 @@ Since taxonomies are nodes they are referenced via reference or references node-
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
             startingPoint: '/taxonomy'
             placeholder: 'assign Taxonomies'
-``             
+```
 
-If you want to limit the selectable taxons to a vocalbulary or even a taxonomy use a more specific startingPoint.
+If you want to limit the selectable t`axons to a vocalbulary or even a taxonomy use a more specific startingPoint.
 
 ```YAML
     taxonomyReferences:
@@ -80,7 +80,7 @@ If you want to limit the selectable taxons to a vocalbulary or even a taxonomy u
           editorOptions:
             startingPoint: '/taxonomy/animals/mammals'
 ```
-            
+
 ## Content-Dimensions 
 
 Vocabularies and Taxonomies will be always be created in all base-dimensions. That way it is ensured that they can 
