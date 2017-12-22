@@ -16,5 +16,5 @@ Sitegeist.Taxonomy:Mixin.Referencable:
           group: taxonomy
           editorOptions:
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
-            startingPoint: '/taxonomy'
+            startingPoint: '/taxonomies'
             placeholder: 'assign Taxonomies'

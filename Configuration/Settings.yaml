@@ -1,7 +1,7 @@
 Sitegeist:
   Taxonomy:
     contentRepository:
-      rootNodeName: 'taxonomy'
+      rootNodeName: 'taxonomies'
       rootNodeType: 'Sitegeist.Taxonomy:Root'
       vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
       taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
