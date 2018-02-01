@@ -7,6 +7,9 @@
         "neos/neos": "*",
         "neos/content-repository": "*"
     },
+    "suggest": {
+        "sitegeist/silhouettes": "^1.0.0"
+    },
     "autoload": {
         "psr-4": {
             "Sitegeist\\Taxonomy\\": "Classes/"
