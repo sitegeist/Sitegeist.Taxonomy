@@ -44,6 +44,6 @@
 </tr>
 
 <f:for each="{taxon.childNodes}" as="child">
-    <f:render partial="TaxonRecursive" arguments="{taxon: child, basePath: basePath, level: '{level + 1}' }" />
+    <f:render partial="TaxonRecursive" arguments="{taxon: child, basePath: basePath, level: '{taxonomy:increment(value:level)}' }" />
 </f:for>
 
