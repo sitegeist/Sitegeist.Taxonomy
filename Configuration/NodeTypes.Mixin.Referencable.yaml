@@ -5,7 +5,9 @@ Sitegeist.Taxonomy:Mixin.Referencable:
       groups:
         taxonomy:
           label: Taxonomy
-          icon: icon-tag
+          icon: icon-tags
+          tab: meta
+          position: '80'
 
   properties:
     taxonomyReferences:
