@@ -4,17 +4,17 @@
 <f:section name="content">
     <f:form action="createVocabulary">
         <fieldset>
-            <legend>Create a new Vocabulary</legend>
+            <legend>{f:translate(id: 'module.createNewVocabulary')}</legend>
             <div class="neos-control-group">
-                <label class="neos-control-label" for="title">Vocabulary Title</label>
+                <label class="neos-control-label" for="title">{f:translate(id: 'module.title')}</label>
                 <f:form.textfield name="title" id="title"/>
             </div>
             <div class="neos-control-group">
-                <label class="neos-control-label" for="description">Vocabulary Description</label>
+                <label class="neos-control-label" for="description">{f:translate(id: 'module.description')}</label>
                 <f:form.textarea name="description" id="description"/>
             </div>
 
-            <f:form.submit value="Create Vocabulary" class="neos-button neos-button-primary" />
+            <f:form.submit value="{f:translate(id: 'module.createVocabulary')}" class="neos-button neos-button-primary" />
         </fieldset>
     </f:form>
 </f:section>

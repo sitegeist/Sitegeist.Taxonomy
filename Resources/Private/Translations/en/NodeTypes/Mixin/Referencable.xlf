@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file original="" product-name="Sitegeist.Taxonomy" source-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="groups.taxonomy" xml:space="preserve" approved="yes">
+                <source>Taxonomy</source>
+            </trans-unit>
+            <trans-unit id="properties.taxonomyReferences" xml:space="preserve" approved="yes">
+                <source>Taxonomy References</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

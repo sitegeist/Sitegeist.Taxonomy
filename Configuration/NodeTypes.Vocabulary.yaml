@@ -1,7 +1,7 @@
 Sitegeist.Taxonomy:Vocabulary:
   label: "${String.stripTags(q(node).property('title') + ': ' + q(node).property('_path'))}"
   ui:
-    label: 'Vocabulary'
+    label: i18n
     icon: 'icon-tags'
   superTypes:
     'Neos.Neos:Node': TRUE
