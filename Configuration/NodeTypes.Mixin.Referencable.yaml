@@ -4,7 +4,7 @@ Sitegeist.Taxonomy:Mixin.Referencable:
     inspector:
       groups:
         taxonomy:
-          label: Taxonomy
+          label: i18n
           icon: icon-tags
           tab: meta
           position: '80'
@@ -13,7 +13,7 @@ Sitegeist.Taxonomy:Mixin.Referencable:
     taxonomyReferences:
       type: references
       ui:
-        label: 'Taxonomy References'
+        label: i18n
         inspector:
           group: taxonomy
           editorOptions:

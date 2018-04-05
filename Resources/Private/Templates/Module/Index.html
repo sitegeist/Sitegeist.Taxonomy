@@ -8,7 +8,7 @@
 
     <div class="neos-row-fluid">
         <legend>
-            Vocabularies
+            {f:translate(id: 'module.index.vocabularies')}
             <div class="neos-pull-right">
                 <f:render partial="LanguageSelection" arguments="{targetAction: 'index', targetProperty: 'root', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomyRoot}" />
             </div>
@@ -21,9 +21,9 @@
                 <thead>
                 <tr>
                     <th></th>
-                    <th>Name</th>
-                    <th>Title</th>
-                    <th>Description</th>
+                    <th>{f:translate(id: 'module.name')}</th>
+                    <th>{f:translate(id: 'module.title')}</th>
+                    <th>{f:translate(id: 'module.description')}</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -44,16 +44,16 @@
                         </td>
                         <td class="neos-action">
                             <div class="neos-pull-right">
-                                <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="Show vocabulary" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                                <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="{f:translate(id: 'module.index.showVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                                     <i class="icon-eye icon-white"></i>
                                 </f:link.action>
-                                <f:link.action action="editVocabulary" class="neos-button neos-button-primary" title="" arguments="{vocabulary: vocabulary.contextPath}" >
+                                <f:link.action action="editVocabulary" class="neos-button neos-button-primary" title="{f:translate(id: 'module.index.editVocabulary')}" arguments="{vocabulary: vocabulary.contextPath}" >
                                     <i class="icon-pencil icon-white"></i>
                                 </f:link.action>
                                 <f:if condition="{vocabulary.autoCreated = false}" >
                                     <f:form action="deleteVocabulary" class="neos-inline">
                                         <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
-                                        <f:form.button  title="Delete vocabulary" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                                        <f:form.button  title="{f:translate(id: 'module.index.deleteVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                                             <i class="icon-trash icon-white"></i>
                                         </f:form.button>
                                     </f:form>
@@ -67,7 +67,7 @@
         </f:then>
         <f:else>
             <p>
-                No vocabularies yet. Please create them.
+                {f:translate(id: 'module.index.noVocabularies')}
             </p>
         </f:else>
     </f:if>
@@ -76,9 +76,8 @@
     <div class="neos-row-fluid">
 
         <f:link.action action="newVocabulary"  class="neos-button neos-button-primary" title="" >
-            <i class="icon-plus icon-white"></i> Create new vocabulary
+            <i class="icon-plus icon-white"></i> {f:translate(id: 'module.index.createNewVocabulary')}
         </f:link.action>
-
 
     </div>
 </f:section>

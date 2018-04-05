@@ -15,17 +15,17 @@
     </td>
     <td>
         <div class="neos-pull-right">
-            <f:link.action action="taxonomy" arguments="{taxonomy: taxon}" title="Show taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+            <f:link.action action="taxonomy" arguments="{taxonomy: taxon}" title="{f:translate(id: 'module.taxonRecursive.showTaxon')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                 <i class="icon-eye icon-white"></i>
             </f:link.action>
 
-            <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="Add sub-taxon"  class="neos-button neos-button-primary">
+            <f:link.action action="newTaxonomy" arguments="{parent : taxon.contextPath}" title="{f:translate(id: 'module.taxonRecursive.addSubTaxon')}"  class="neos-button neos-button-primary">
                 <i class="icon-plus icon-white"></i>
             </f:link.action>
 
             <f:form action="editTaxonomy" class="neos-inline">
                 <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
-                <f:form.button  title="Edit taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                <f:form.button  title="{f:translate(id: 'module.taxonRecursive.editTaxon')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                     <i class="icon-pencil icon-white"></i>
                 </f:form.button>
             </f:form>
@@ -33,7 +33,7 @@
             <f:if condition="{taxon.autoCreated = false}" >
                 <f:form action="deleteTaxonomy" class="neos-inline">
                     <f:form.hidden name="taxonomy" value="{taxon.contextPath}" />
-                    <f:form.button  title="Delete taxonomy" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                    <f:form.button  title="{f:translate(id: 'module.taxonRecursive.deleteTaxon')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
                         <i class="icon-trash icon-white"></i>
                     </f:form.button>
                 </f:form>

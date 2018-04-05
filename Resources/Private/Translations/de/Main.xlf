@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file original="" product-name="Sitegeist.Taxonomy" source-language="en" datatype="plaintext" target-language="de">
+        <body>
+            <trans-unit id="module.label" xml:space="preserve" approved="yes">
+                <source>Taxonomy</source>
+                <target xml:lang="de">Taxonomie</target>
+            </trans-unit>
+            <trans-unit id="module.description" xml:space="preserve" approved="yes">
+                <source>Manage Taxonomy</source>
+                <target xml:lang="de">Taxonomie Verwaltung</target>
+            </trans-unit>
+
+            <trans-unit id="module.name" xml:space="preserve" approved="yes">
+                <source>Name</source>
+                <target xml:lang="de">Name</target>
+            </trans-unit>
+            <trans-unit id="module.path" xml:space="preserve" approved="yes">
+                <source>Path</source>
+                <target xml:lang="de">Pfad</target>
+            </trans-unit>
+            <trans-unit id="module.title" xml:space="preserve" approved="yes">
+                <source>Title</source>
+                <target xml:lang="de">Titel</target>
+            </trans-unit>
+            <trans-unit id="module.description" xml:space="preserve" approved="yes">
+                <source>Description</source>
+                <target xml:lang="de">Beschreibung</target>
+            </trans-unit>
+            <trans-unit id="module.save" xml:space="preserve" approved="yes">
+                <source>Save</source>
+                <target xml:lang="de">Speichern</target>
+            </trans-unit>
+            <trans-unit id="module.cancel" xml:space="preserve" approved="yes">
+                <source>Cancel</source>
+                <target xml:lang="de">Abbrechen</target>
+            </trans-unit>
+
+            <trans-unit id="module.index.vocabularies" xml:space="preserve" approved="yes">
+                <source>Vocabularies</source>
+                <target xml:lang="de">Vokabulare</target>
+            </trans-unit>
+            <trans-unit id="module.index.noVocabularies" xml:space="preserve" approved="yes">
+                <source>No vocabularies yet. Please create them.</source>
+                <target xml:lang="de">Noch keine Vokabeln. Bitte erstellen Sie diese.</target>
+            </trans-unit>
+            <trans-unit id="module.index.showVocabulary" xml:space="preserve" approved="yes">
+                <source>Show vocabulary</source>
+                <target xml:lang="de">Zeige Vokabular</target>
+            </trans-unit>
+            <trans-unit id="module.index.editVocabulary" xml:space="preserve" approved="yes">
+                <source>Edit vocabulary</source>
+                <target xml:lang="de">Bearbeite Vokabular</target>
+            </trans-unit>
+            <trans-unit id="module.index.deleteVocabulary" xml:space="preserve" approved="yes">
+                <source>Delete vocabulary</source>
+                <target xml:lang="de">Lösche Vokabular</target>
+            </trans-unit>
+            <trans-unit id="module.index.createNewVocabulary" xml:space="preserve" approved="yes">
+                <source>Create new vocabulary</source>
+                <target xml:lang="de">Neues Vokabular erstellen</target>
+            </trans-unit>
+
+            <trans-unit id="module.vocabulary" xml:space="preserve" approved="yes">
+                <source>Vocabulary</source>
+                <target xml:lang="de">Vokabular</target>
+            </trans-unit>
+            <trans-unit id="module.vocabulary.noTaxons" xml:space="preserve" approved="yes">
+                <source>No taxons yet. Please create them.</source>
+                <target xml:lang="de">Noch keine Taxons. Bitte erstellen Sie diese.</target>
+            </trans-unit>
+            <trans-unit id="module.vocabulary.backToIndex" xml:space="preserve" approved="yes">
+                <source>Back to Index</source>
+                <target xml:lang="de">Zurück zur Übersicht</target>
+            </trans-unit>
+            <trans-unit id="module.vocabulary.createNewTaxon" xml:space="preserve" approved="yes">
+                <source>Create new taxon</source>
+                <target xml:lang="de">Neues Taxon erstellen</target>
+            </trans-unit>
+
+            <trans-unit id="module.editVocabulary" xml:space="preserve" approved="yes">
+                <source>Edit Vocabulary</source>
+                <target xml:lang="de">Vokabular bearbeiten</target>
+            </trans-unit>
+            <trans-unit id="module.createNewVocabulary" xml:space="preserve" approved="yes">
+                <source>Create a new Vocabulary</source>
+                <target xml:lang="de">Ein neues Vokabular anlegen</target>
+            </trans-unit>
+            <trans-unit id="module.createVocabulary" xml:space="preserve" approved="yes">
+                <source>Create Vocabulary</source>
+                <target xml:lang="de">Vokabular anlegen</target>
+            </trans-unit>
+
+            <trans-unit id="module.taxonomy" xml:space="preserve" approved="yes">
+                <source>Taxonomy</source>
+                <target xml:lang="de">Taxonomie</target>
+            </trans-unit>
+            <trans-unit id="module.taxonomy.noSubTaxons" xml:space="preserve" approved="yes">
+                <source>No sub-taxons yet. Please create them.</source>
+                <target xml:lang="de">Noch keine Subtaxons. Bitte erstellen Sie diese.</target>
+            </trans-unit>
+            <trans-unit id="module.taxonomy.backToVocabulary" xml:space="preserve" approved="yes">
+                <source>Back to Vocabulary</source>
+                <target xml:lang="de">Zurück zum Vokabular</target>
+            </trans-unit>
+            <trans-unit id="module.taxonomy.createNewTaxon" xml:space="preserve" approved="yes">
+                <source>Create new taxon</source>
+                <target xml:lang="de">Neues Taxon erstellen</target>
+            </trans-unit>
+
+            <trans-unit id="module.editTaxonomy" xml:space="preserve" approved="yes">
+                <source>Edit Taxonomy</source>
+                <target xml:lang="de">Toxonomie bearbeiten</target>
+            </trans-unit>
+            <trans-unit id="module.createNewTaxonomyBelow" xml:space="preserve" approved="yes">
+                <source>Create a new Taxonomy below</source>
+                <target xml:lang="de">Ein neues Vokabular anlegen unter</target>
+            </trans-unit>
+            <trans-unit id="module.createTaxon" xml:space="preserve" approved="yes">
+                <source>Create Taxon</source>
+                <target xml:lang="de">Taxon anlegen</target>
+            </trans-unit>
+
+            <trans-unit id="module.taxonRecursive.showTaxon" xml:space="preserve" approved="yes">
+                <source>Show taxon</source>
+                <target xml:lang="de">Zeige Taxon</target>
+            </trans-unit>
+            <trans-unit id="module.taxonRecursive.showTaxon" xml:space="preserve" approved="yes">
+                <source>Show taxon</source>
+                <target xml:lang="de">Zeige Taxon</target>
+            </trans-unit>
+            <trans-unit id="module.taxonRecursive.editTaxon" xml:space="preserve" approved="yes">
+                <source>Edit taxon</source>
+                <target xml:lang="de">Bearbeite Taxon</target>
+            </trans-unit>
+            <trans-unit id="module.taxonRecursive.deleteTaxon" xml:space="preserve" approved="yes">
+                <source>Delete taxon</source>
+                <target xml:lang="de">Lösche Taxon</target>
+            </trans-unit>
+            <trans-unit id="module.taxonRecursive.addSubTaxon" xml:space="preserve" approved="yes">
+                <source>Add sub-taxon</source>
+                <target xml:lang="de">Subtaxon hinzufügen</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

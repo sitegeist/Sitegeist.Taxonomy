@@ -5,7 +5,7 @@
 <f:section name="content">
     <div class="neos-row-fluid">
         <legend>
-            Taxonomy "{taxonomy.properties.title}"
+            {f:translate(id: 'module.taxonomy')} "{taxonomy.properties.title}"
             <div class="neos-pull-right">
                 <f:render partial="LanguageSelection" arguments="{targetAction: 'taxonomy', targetProperty: 'taxonomy', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomy}" />
             </div>
@@ -23,9 +23,9 @@
                 <tr>
                     <th>
                     </th>
-                    <th>Path</th>
-                    <th>Title</th>
-                    <th>Description</th>
+                    <th>{f:translate(id: 'module.path')}</th>
+                    <th>{f:translate(id: 'module.title')}</th>
+                    <th>{f:translate(id: 'module.description')}</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -38,17 +38,17 @@
         </f:then>
         <f:else>
             <p>
-                No sub-taxons yet. Please create them.
+                {f:translate(id: 'module.taxonomy.noSubTaxons')}
             </p>
         </f:else>
     </f:if>
 
     <div class="neos-row-fluid">
         <f:link.action action="vocabulary" class="neos-button" title="" arguments="{vocabulary: vocabulary}" >
-            <i class="icon-backward icon-white"></i> Back to Vocabulary
+            <i class="icon-backward icon-white"></i> {f:translate(id: 'module.taxonomy.backToVocabulary')}
         </f:link.action>
         <f:link.action action="newTaxonomy" class="neos-button neos-button-primary" title="" arguments="{parent: taxonomy.contextPath}" >
-            <i class="icon-plus icon-white"></i> Create new Taxon
+            <i class="icon-plus icon-white"></i> {f:translate(id: 'module.taxonomy.createNewTaxon')}
         </f:link.action>
 
     </div>

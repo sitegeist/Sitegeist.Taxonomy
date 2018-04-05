@@ -1,7 +1,7 @@
 Sitegeist.Taxonomy:Taxonomy:
   label: "${String.stripTags(q(node).property('title') + ': ' + q(node).property('_path'))}"
   ui:
-    label: 'Taxonomy'
+    label: i18n
     icon: 'icon-tag'
   superTypes:
     'Neos.Neos:Node': TRUE

@@ -4,19 +4,19 @@
 <f:section name="content">
     <f:form action="createTaxonomy">
         <fieldset>
-            <legend>Create a new Taxonomy below "{parent.path}"</legend>
+            <legend>{f:translate(id: 'module.createNewTaxonomyBelow')} "{parent.path}"</legend>
             <f:form.hidden name="parent" value="{parent.contextPath}" />
 
             <div class="neos-control-group">
-                <label class="neos-control-label" for="title">Taxonomy Title</label>
+                <label class="neos-control-label" for="title">{f:translate(id: 'module.title')}</label>
                 <f:form.textfield name="title" id="title"/>
             </div>
             <div class="neos-control-group">
-                <label class="neos-control-label" for="description">Taxonomy Description</label>
+                <label class="neos-control-label" for="description">{f:translate(id: 'module.description')}</label>
                 <f:form.textarea name="description" id="description"/>
             </div>
 
-            <f:form.submit value="Create Taxon" class="neos-button neos-button-primary" />
+            <f:form.submit value="{f:translate(id: 'module.createTaxon')}" class="neos-button neos-button-primary" />
         </fieldset>
     </f:form>
 </f:section>

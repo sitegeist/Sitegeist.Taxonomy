@@ -24,9 +24,9 @@ Neos:
       management:
         submodules:
           taxonomies:
-            label: "Taxonomies"
+            label: 'Sitegeist.Taxonomy:Main:module.label'
             controller: \Sitegeist\Taxonomy\Controller\ModuleController
-            description: 'Manage Taxonomies'
+            description: 'Sitegeist.Taxonomy:Main:module.description'
             icon: icon-tags
             privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
 
