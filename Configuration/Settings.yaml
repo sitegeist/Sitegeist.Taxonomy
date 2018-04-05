@@ -29,6 +29,12 @@ Neos:
             description: 'Sitegeist.Taxonomy:Main:module.description'
             icon: icon-tags
             privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
+    userInterface:
+      translation:
+        autoInclude:
+          Sitegeist.Taxonomy:
+            - 'Main'
+            - 'NodeTypes/*'
 
   Fusion:
     defaultContext:
