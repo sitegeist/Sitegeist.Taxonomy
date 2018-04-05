@@ -6,7 +6,6 @@ Sitegeist:
       vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
       taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 
-Sitegeist:
   Silhouettes:
     properties:
       taxonomyReferences:
