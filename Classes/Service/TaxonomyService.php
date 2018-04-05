@@ -83,6 +83,12 @@ class TaxonomyService
     protected $taxonomyNodeType;
 
     /**
+     * @var array
+     * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeTypes")
+     */
+    protected $taxonomyNodeTypes;
+
+    /**
      * @var NodeInterface[]
      */
     protected $taxonomyDataRootNodes = [];
@@ -112,10 +118,25 @@ class TaxonomyService
     }
 
     /**
+     * @param NodeInterface $parent
      * @return string
      */
-    public function getTaxonomyNodeType()
+    public function getTaxonomyNodeType(NodeInterface $parent = null)
     {
+        if ($parent !== null) {
+            $currentVocabularyNodeType = null;
+            do {
+                if ($parent->getNodeType()->isOfType($this->getVocabularyNodeType())) {
+                    $currentVocabularyNodeType = $parent->getNodeType()->getName();
+                } else {
+                    $parent = $parent->getParent();
+                }
+            } while ($parent !== null && $currentVocabularyNodeType === null);
+
+            if ($currentVocabularyNodeType !== null && !empty($this->taxonomyNodeTypes[$currentVocabularyNodeType])) {
+                return $this->taxonomyNodeTypes[$currentVocabularyNodeType];
+            }
+        }
         return $this->taxonomyNodeType;
     }
 

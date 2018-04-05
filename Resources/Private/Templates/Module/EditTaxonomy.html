@@ -19,6 +19,8 @@
                 <f:form.textarea name="description" id="description" value="{taxonomy.properties.description}"/>
             </div>
 
+            <f:render partial="{nodeTypeName}" arguments="{_all}" />
+
             <f:link.action class="neos-button" action="vocabulary" arguments="{vocabulary: vocabulary}">{f:translate(id: 'module.cancel')}</f:link.action>
 
             <f:form.submit value="{f:translate(id: 'module.save')}" class="neos-button neos-button-primary" />

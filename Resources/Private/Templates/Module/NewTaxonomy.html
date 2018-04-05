@@ -16,6 +16,8 @@
                 <f:form.textarea name="description" id="description"/>
             </div>
 
+            <f:render partial="{nodeTypeName}" />
+
             <f:form.submit value="{f:translate(id: 'module.createTaxon')}" class="neos-button neos-button-primary" />
         </fieldset>
     </f:form>
