@@ -95,7 +95,16 @@ startingPoint:
 
 Vocabularies and Taxonomies will always be created in all base-dimensions. This way it is ensured that they can
 always be referenced. The title and description of a taxons and vocabularies can be translated as is required for
-the project.    
+the project.
+
+## CLI Commands
+
+The taxonomy package includes some cli commands for managing the taxonomies.
+
+- `taxonomy:list` List all taxonomy vocabularies
+- `taxonomy:import` Import taxonomy content, expects filename + vocabulary-name (with globbing)
+- `taxonomy:export` Export taxonomy content, expects filename + vocabulary-name (with globbing)
+- `taxonomy:prune` Prune taxonomy content, expects vocabulary-name (with globbing)
 
 ## Privileges
 
