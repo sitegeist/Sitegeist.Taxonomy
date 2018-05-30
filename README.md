@@ -2,10 +2,6 @@
 
 > Manage vocabularies and taxonomies in Neos as node in a separate subtree `/taxonomy` distinct from `/sites`
 
-## Status
-
-**This is currently experimental code so do not rely on any part of this.**
-
 ### Authors & Sponsors
 
 * Martin Ficzel - ficzel@sitegeist.de
@@ -116,6 +112,13 @@ of taxonomies:
 - `Sitegeist.Taxonomy:Module.ManageTaxonomyActions` Add, edit and delete taxons. By default granted to Administrators.
 
 Reading and referencing taxonomies from other nodes is currently not limited.
+
+## Installation
+
+Sitegeist.Taxonomy is available via packagist. `"sitegeist/taxonomy" : "^1.0"` to the require section of the composer.json
+or run `composer require sitegeist/taxonomy`.
+
+We use semantic-versioning so every breaking change will increase the major-version number.
 
 ## Contribution
 
