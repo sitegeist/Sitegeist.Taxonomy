@@ -45,16 +45,16 @@
                         <td class="neos-action">
                             <div class="neos-pull-right">
                                 <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="{f:translate(id: 'module.index.showVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
-                                    <i class="icon-eye icon-white"></i>
+                                    <i class="fas fa-eye icon-white"></i>
                                 </f:link.action>
                                 <f:link.action action="editVocabulary" class="neos-button neos-button-primary" title="{f:translate(id: 'module.index.editVocabulary')}" arguments="{vocabulary: vocabulary.contextPath}" >
-                                    <i class="icon-pencil icon-white"></i>
+                                    <i class="fas fa-pencil-alt"></i>
                                 </f:link.action>
                                 <f:if condition="{vocabulary.autoCreated = false}" >
                                     <f:form action="deleteVocabulary" class="neos-inline">
                                         <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
                                         <f:form.button  title="{f:translate(id: 'module.index.deleteVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
-                                            <i class="icon-trash icon-white"></i>
+                                            <i class="fas fa-trash icon-white"></i>
                                         </f:form.button>
                                     </f:form>
                                 </f:if>
@@ -76,7 +76,7 @@
     <div class="neos-row-fluid">
 
         <f:link.action action="newVocabulary"  class="neos-button neos-button-primary" title="" >
-            <i class="icon-plus icon-white"></i> {f:translate(id: 'module.index.createNewVocabulary')}
+            <i class="fas fa-plus icon-white"></i> {f:translate(id: 'module.index.createNewVocabulary')}
         </f:link.action>
 
     </div>
