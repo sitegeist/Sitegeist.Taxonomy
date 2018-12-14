@@ -257,8 +257,7 @@ class ModuleController extends ActionController
             if ($vocabulary->isAutoCreated() === false) {
                 $possibleName = CrUtitlity::renderValidNodeName($title);
                 if ($vocabulary->getName() !== $possibleName) {
-                    $newName = $this->nodeService->generateUniqueNodeName($vocabulary->getParentPath(), $possibleName);
-                    $vocabulary->setName($newName);
+                    $vocabulary->setName($possibleName);
                 }
             }
         }
