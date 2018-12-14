@@ -254,12 +254,6 @@ class ModuleController extends ActionController
 
         if ($previousTitle !== $title) {
             $vocabulary->setProperty('title', $title);
-            if ($vocabulary->isAutoCreated() === false) {
-                $possibleName = CrUtitlity::renderValidNodeName($title);
-                if ($vocabulary->getName() !== $possibleName) {
-                    $vocabulary->setName($possibleName);
-                }
-            }
         }
 
         if ($previousDescription !== $description) {
@@ -384,13 +378,6 @@ class ModuleController extends ActionController
 
         if ($previousTitle !== $title) {
             $taxonomy->setProperty('title', $title);
-            if ($taxonomy->isAutoCreated() === false) {
-                $possibleName = CrUtitlity::renderValidNodeName($title);
-                if ($taxonomy->getName() !== $possibleName) {
-                    $newName = $this->nodeService->generateUniqueNodeName($taxonomy->getParentPath(), $possibleName);
-                    $taxonomy->setName($newName);
-                }
-            }
         }
 
         if ($previousDescription !== $description) {
