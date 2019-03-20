@@ -79,6 +79,11 @@ class ModuleController extends ActionController
     protected $taxonomyService;
 
     /**
+     * @var NodeInterface
+     */
+    protected $defaultRoot;
+
+    /**
      * Initialize the view
      *
      * @param  ViewInterface $view
@@ -102,7 +107,16 @@ class ModuleController extends ActionController
         }
 
         $flowQuery = new FlowQuery([$root]);
-        $vocabularies = $flowQuery->children('[instanceof Sitegeist.Taxonomy:Vocabulary]')->get();
+        $vocabularyNodes = $flowQuery->children('[instanceof Sitegeist.Taxonomy:Vocabulary]')->get();
+
+        // fetch name and base node of vocabulary
+        $vocabularies = [];
+        foreach ($vocabularyNodes as $vocabulary) {
+            $vocabularies[] = [
+                'node' => $vocabulary,
+                'defaultNode' => $this->getNodeInDefaultDimensions($vocabulary)
+            ];
+        }
 
         $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabularies', $vocabularies);
@@ -178,6 +192,44 @@ class ModuleController extends ActionController
     }
 
     /**
+     * @param NodeInterface $node
+     * @return NodeInterface|null
+     */
+    protected function getNodeInDefaultDimensions(NodeInterface $node) : ?NodeInterface
+    {
+        if (!$this->defaultRoot) {
+            $this->defaultRoot = $this->taxonomyService->getRoot();
+        }
+
+        $flowQuery = new FlowQuery([$this->defaultRoot]);
+        $defaultNode = $flowQuery->find('#' . $node->getIdentifier())->get(0);
+        if ($defaultNode && $defaultNode !== $node) {
+            return $defaultNode;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param NodeInterface $node
+     * @return array
+     */
+    public function fetchChildTaxonomies(NodeInterface $node) : array
+    {
+        $flowQuery = new FlowQuery([$node]);
+        $childTaxonomies = $flowQuery->children('[instanceof ' . $this->taxonomyService->getTaxonomyNodeType() . ']')->get();
+        $result = [];
+        foreach ($childTaxonomies as $childTaxonomy) {
+            $result[] = [
+                'node' => $childTaxonomy,
+                'defaultNode' => $this->getNodeInDefaultDimensions($childTaxonomy),
+                'children' => $this->fetchChildTaxonomies($childTaxonomy)
+            ];
+        }
+        return $result;
+    }
+
+    /**
      * Show the given vocabulary
      *
      * @param NodeInterface $vocabulary
@@ -190,6 +242,8 @@ class ModuleController extends ActionController
 
         $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabulary', $vocabulary);
+        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
+        $this->view->assign('taxonomies', $this->fetchChildTaxonomies($vocabulary));
     }
 
     /**
@@ -237,6 +291,7 @@ class ModuleController extends ActionController
     public function editVocabularyAction(NodeInterface $vocabulary)
     {
         $this->view->assign('vocabulary', $vocabulary);
+        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
     }
 
     /**
@@ -281,23 +336,6 @@ class ModuleController extends ActionController
             $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s', $path)));
         }
         $this->redirect('index');
-    }
-
-    /**
-     * Show the given taxonomy
-     *
-     * @param NodeInterface $taxonomy
-     * @return void
-     */
-    public function taxonomyAction(NodeInterface $taxonomy)
-    {
-        $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery
-            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
-            ->get(0);
-
-        $this->view->assign('taxonomy', $taxonomy);
-        $this->view->assign('vocabulary', $vocabulary);
     }
 
     /**
@@ -360,7 +398,11 @@ class ModuleController extends ActionController
             ->get(0);
 
         $this->view->assign('vocabulary', $vocabulary);
+        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
+
         $this->view->assign('taxonomy', $taxonomy);
+        $this->view->assign('defaultTaxonomy', $this->getNodeInDefaultDimensions($taxonomy));
+
     }
 
     /**

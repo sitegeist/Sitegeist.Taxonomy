@@ -7,8 +7,8 @@
                 <target xml:lang="de">Taxonomie</target>
             </trans-unit>
             <trans-unit id="module.description" xml:space="preserve" approved="yes">
-                <source>Manage Taxonomy</source>
-                <target xml:lang="de">Taxonomie Verwaltung</target>
+                <source>Manage Taxonomies</source>
+                <target xml:lang="de">Taxonomie und Vokabular Verwaltung</target>
             </trans-unit>
 
             <trans-unit id="module.name" xml:space="preserve" approved="yes">
@@ -22,10 +22,6 @@
             <trans-unit id="module.title" xml:space="preserve" approved="yes">
                 <source>Title</source>
                 <target xml:lang="de">Titel</target>
-            </trans-unit>
-            <trans-unit id="module.description" xml:space="preserve" approved="yes">
-                <source>Description</source>
-                <target xml:lang="de">Beschreibung</target>
             </trans-unit>
             <trans-unit id="module.save" xml:space="preserve" approved="yes">
                 <source>Save</source>

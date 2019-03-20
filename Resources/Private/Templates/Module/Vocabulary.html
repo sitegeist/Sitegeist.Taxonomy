@@ -5,13 +5,13 @@
 <f:section name="content">
     <div class="neos-row-fluid">
         <legend>
-            {f:translate(id: 'module.vocabulary')} "{vocabulary.properties.title}"
+            {f:translate(id: 'module.vocabulary')} {vocabulary.properties.title}
+            <f:if condition="{defaultVocabulary}">({defaultVocabulary.properties.title})</f:if>
             <div class="neos-pull-right">
                 <f:render partial="LanguageSelection" arguments="{targetAction: 'vocabulary', targetProperty: 'vocabulary', contentDimensionOptions: contentDimensionOptions, contextNode: vocabulary}" />
             </div>
         </legend>
     </div>
-
 
     <p>
         {vocabulary.properties.description}
@@ -24,14 +24,13 @@
                 <tr>
                     <th>
                     </th>
-                    <th>{f:translate(id: 'module.path')}</th>
                     <th>{f:translate(id: 'module.title')}</th>
-                    <th>{f:translate(id: 'module.description')}</th>
+                    <th></th>
                     <th></th>
                 </tr>
                 </thead>
                 <tbody>
-                    <f:for each="{vocabulary.childNodes}" as="taxon">
+                    <f:for each="{taxonomies}" as="taxon">
                         <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
                     </f:for>
                 </tbody>

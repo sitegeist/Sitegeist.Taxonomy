@@ -27,7 +27,7 @@ Neos:
             label: 'Sitegeist.Taxonomy:Main:module.label'
             controller: \Sitegeist\Taxonomy\Controller\ModuleController
             description: 'Sitegeist.Taxonomy:Main:module.description'
-            icon: icon-tags
+            icon: fas fa-tags
             privilegeTarget: 'Sitegeist.Taxonomy:Module.Show'
     userInterface:
       translation:

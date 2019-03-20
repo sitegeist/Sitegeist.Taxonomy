@@ -6,7 +6,7 @@
                 <source>Taxonomy</source>
             </trans-unit>
             <trans-unit id="module.description" xml:space="preserve" approved="yes">
-                <source>Manage Taxonomy</source>
+                <source>Manage taxonomies and vocabularies</source>
             </trans-unit>
 
             <trans-unit id="module.name" xml:space="preserve" approved="yes">
@@ -17,9 +17,6 @@
             </trans-unit>
             <trans-unit id="module.title" xml:space="preserve" approved="yes">
                 <source>Title</source>
-            </trans-unit>
-            <trans-unit id="module.description" xml:space="preserve" approved="yes">
-                <source>Description</source>
             </trans-unit>
             <trans-unit id="module.save" xml:space="preserve" approved="yes">
                 <source>Save</source>

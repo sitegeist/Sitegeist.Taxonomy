@@ -5,6 +5,12 @@
             <trans-unit id="ui.label" xml:space="preserve" approved="yes">
                 <source>Vocabulary</source>
             </trans-unit>
+            <trans-unit id="properties.title" xml:space="preserve" approved="yes">
+                <source>Title</source>
+            </trans-unit>
+            <trans-unit id="properties.description" xml:space="preserve" approved="yes">
+                <source>Description</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

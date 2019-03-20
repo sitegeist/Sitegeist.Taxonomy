@@ -15,55 +15,58 @@
         </legend>
     </div>
 
+    <br/><br>
+
     <f:if condition="{vocabularies}">
         <f:then>
-            <table class="neos-table">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>{f:translate(id: 'module.name')}</th>
-                    <th>{f:translate(id: 'module.title')}</th>
-                    <th>{f:translate(id: 'module.description')}</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <f:for each="{vocabularies}" as="vocabulary">
-                    <tr>
-                        <td>
-                             <i class="{vocabulary.nodeType.fullConfiguration.ui.icon}" ></i>
-                        </td>
-                        <td>
-                            {vocabulary.name}
-                        </td>
-                        <td>
-                            {vocabulary.properties.title}
-                        </td>
-                        <td >
-                            {vocabulary.properties.description}
-                        </td>
-                        <td class="neos-action">
-                            <div class="neos-pull-right">
-                                <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.contextPath}" title="{f:translate(id: 'module.index.showVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
-                                    <i class="fas fa-eye icon-white"></i>
-                                </f:link.action>
-                                <f:link.action action="editVocabulary" class="neos-button neos-button-primary" title="{f:translate(id: 'module.index.editVocabulary')}" arguments="{vocabulary: vocabulary.contextPath}" >
+            <div class="neos-content neos-fluid-container">
+                <div class="neos-row-fluid">
+                <f:for each="{vocabularies}" as="vocabulary" iteration="iterator">
+                    <div class="neos-span3">
+                        <div class="widget ">
+                            <div class="widget-header">
+                                <i class="fas fa-tags neos-pull-left"></i>
+                                <h3>
+                                    <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.node.contextPath}" title="{f:translate(id: 'module.index.showVocabulary')}">
+                                        {vocabulary.node.properties.title} <f:if condition="{vocabulary.defaultNode}">({vocabulary.defaultNode.properties.title})</f:if>
+                                    </f:link.action>
+                                </h3>
+                            </div>
+
+                            <div class="widget-body">
+                                <p>{vocabulary.node.properties.description}</p>
+                            </div>
+
+                            <div class="widget-footer">
+
+                                <f:link.action action="editVocabulary" class="neos-button" title="{f:translate(id: 'module.index.editVocabulary')}" arguments="{vocabulary: vocabulary.node.contextPath}" >
                                     <i class="fas fa-pencil-alt"></i>
                                 </f:link.action>
+
                                 <f:if condition="{vocabulary.autoCreated = false}" >
                                     <f:form action="deleteVocabulary" class="neos-inline">
-                                        <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
-                                        <f:form.button  title="{f:translate(id: 'module.index.deleteVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button neos-button-primary">
+                                        <f:form.hidden name="vocabulary" value="{vocabulary.node.contextPath}" />
+                                        <f:form.button  title="{f:translate(id: 'module.index.deleteVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button">
                                             <i class="fas fa-trash icon-white"></i>
                                         </f:form.button>
                                     </f:form>
                                 </f:if>
                             </div>
-                        </td>
-                    </tr>
+
+                        </div>
+                    </div>
+                    <f:if condition="{iterator.cycle} % 4">
+                        <f:else>
+                            <f:if condition="{iterator.isLast}">
+                                <f:else>
+                                    </div><div class="neos-row-fluid">
+                                </f:else>
+                            </f:if>
+                        </f:else>
+                    </f:if>
                 </f:for>
-                </tbody>
-            </table>
+                </div>
+            </div>
         </f:then>
         <f:else>
             <p>
