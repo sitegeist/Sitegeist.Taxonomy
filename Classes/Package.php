@@ -16,20 +16,24 @@ class Package extends BasePackage
      */
     public function boot(Bootstrap $bootstrap)
     {
-        $dispatcher = $bootstrap->getSignalSlotDispatcher();
-        $dispatcher->connect(
-            Node::class,
-            'nodeAdded',
-            ContentRepositoryHooks::class,
-            'nodeAdded'
-        );
+        if (PHP_SAPI === 'cli') {
+            // no automagic on the cli
+        } else {
+            $dispatcher = $bootstrap->getSignalSlotDispatcher();
+            $dispatcher->connect(
+                Node::class,
+                'nodeAdded',
+                ContentRepositoryHooks::class,
+                'nodeAdded'
+            );
 
-        $dispatcher = $bootstrap->getSignalSlotDispatcher();
-        $dispatcher->connect(
-            Node::class,
-            'nodeRemoved',
-            ContentRepositoryHooks::class,
-            'nodeRemoved'
-        );
+            $dispatcher = $bootstrap->getSignalSlotDispatcher();
+            $dispatcher->connect(
+                Node::class,
+                'nodeRemoved',
+                ContentRepositoryHooks::class,
+                'nodeRemoved'
+            );
+        }
     }
 }

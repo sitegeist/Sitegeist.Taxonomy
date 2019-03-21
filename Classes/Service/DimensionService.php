@@ -72,6 +72,34 @@ class DimensionService
     /**
      * @return array|ContentSubgraph[]
      */
+    public function getDimensionSubgraphByTargetValues($targetValues)
+    {
+        $interDimensionalFallbackGraph = $this->fallbackGraphService->getInterDimensionalFallbackGraph();
+        $allSubgraphs = $interDimensionalFallbackGraph->getSubgraphs();
+        $matchingSubgraphs = array_filter(
+            $allSubgraphs,
+            function($subgraph) use ($targetValues){
+                foreach($subgraph->getDimensionValues() as $targetDimension => $targetValue) {
+                    $value = (string) $subgraph->getDimensionValue($targetDimension);
+                    if (!array_key_exists($targetDimension, $targetValues)) {
+                        return false;
+                    }
+                    if ($targetValues[$targetDimension] != $value) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        if (count($matchingSubgraphs) == 1) {
+            return array_pop($matchingSubgraphs);
+        }
+    }
+
+    /**
+     * @return array|ContentSubgraph[]
+     */
     public function getAllDimensionSubgraphs()
     {
         $interDimensionalFallbackGraph = $this->fallbackGraphService->getInterDimensionalFallbackGraph();
@@ -89,21 +117,7 @@ class DimensionService
         if (count($baseDimensionSubgraphs) > 0) {
             $nodeContext = $node->getContext();
             foreach ($baseDimensionSubgraphs as $baseDimensionSubgraph) {
-                $baseDimensionValues = [
-                    'dimensions' => array_map(
-                        function (ContentDimensionValue $contentDimensionValue) {
-                            return [$contentDimensionValue->getValue()];
-                        },
-                        $baseDimensionSubgraph->getDimensionValues()
-                    ),
-                    'targetDimensions' => array_map(
-                        function (ContentDimensionValue $contentDimensionValue) {
-                            return $contentDimensionValue->getValue();
-                        },
-                        $baseDimensionSubgraph->getDimensionValues()
-                    ),
-                ];
-
+                $baseDimensionValues = $this->getDimensionValuesForSubgraph($baseDimensionSubgraph);
                 $baseDimensionContext = array_merge($nodeContext->getProperties(), $baseDimensionValues);
                 $targetContext = $this->contextFactory->create($baseDimensionContext);
                 $adoptedNode = $targetContext->adoptNode($node, true);
@@ -134,5 +148,28 @@ class DimensionService
         }
         $this->persistenceManager->persistAll();
         return $results;
+    }
+
+    /**
+     * @param ContentSubgraph $baseDimensionSubgraph
+     * @return array
+     */
+    public function getDimensionValuesForSubgraph(ContentSubgraph $baseDimensionSubgraph): array
+    {
+        $baseDimensionValues = [
+            'dimensions' => array_map(
+                function (ContentDimensionValue $contentDimensionValue) {
+                    return [$contentDimensionValue->getValue()];
+                },
+                $baseDimensionSubgraph->getDimensionValues()
+            ),
+            'targetDimensions' => array_map(
+                function (ContentDimensionValue $contentDimensionValue) {
+                    return $contentDimensionValue->getValue();
+                },
+                $baseDimensionSubgraph->getDimensionValues()
+            ),
+        ];
+        return $baseDimensionValues;
     }
 }
