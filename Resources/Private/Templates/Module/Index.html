@@ -42,15 +42,31 @@
                                 </f:link.action>
 
                                 <f:if condition="{vocabulary.autoCreated = false}" >
-                                    <f:form action="deleteVocabulary" class="neos-inline">
-                                        <f:form.hidden name="vocabulary" value="{vocabulary.node.contextPath}" />
-                                        <f:form.button  title="{f:translate(id: 'module.index.deleteVocabulary')}" data="{neos-toggle: 'tooltip'}" class="neos-button">
-                                            <i class="fas fa-trash icon-white"></i>
-                                        </f:form.button>
-                                    </f:form>
+                                    <button class="neos-button neos-button-danger" title="{f:translate(id: 'module.index.deleteVocabulary')}" data-toggle="modal" href="#deleteVocabulary_{vocabulary.node.identifier}" data-neos-toggle="tooltip">
+                                        <i class="fas fa-trash-alt icon-white"></i>
+                                    </button>
+
+                                    <div class="neos-hide" id="deleteVocabulary_{vocabulary.node.identifier}">
+                                        <div class="neos-modal-centered">
+                                            <div class="neos-modal-content">
+                                                <div class="neos-modal-header">
+                                                    <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
+                                                    <div class="neos-header">Do you really want to delete the vocabulary "{vocabulary.node.properties.title}"? This action cannot be undone.</div>
+                                                </div>
+                                                <div class="neos-modal-footer">
+                                                    <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
+                                                    <f:form action="deleteVocabulary"  arguments="{vocabulary: vocabulary.node}" class="neos-inline">
+                                                        <button class="neos-button neos-button-danger" title="Delete this vocabulary">
+                                                            Yes, delete this vocabulary
+                                                        </button>
+                                                    </f:form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="neos-modal-backdrop neos-in"></div>
+                                    </div>
                                 </f:if>
                             </div>
-
                         </div>
                     </div>
                     <f:if condition="{iterator.cycle} % 4">
