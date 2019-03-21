@@ -105,12 +105,32 @@ class DimensionService
                 ];
 
                 $baseDimensionContext = array_merge($nodeContext->getProperties(), $baseDimensionValues);
-                $modifiedContext = $this->contextFactory->create($baseDimensionContext);
-
-                if ($modifiedContext->getNode($node->getPath()) == null) {
-                    $results[] = $modifiedContext->adoptNode($node);
-                }
+                $targetContext = $this->contextFactory->create($baseDimensionContext);
+                $adoptedNode = $targetContext->adoptNode($node, true);
+                $results[] = $adoptedNode;
             }
+        }
+        $this->persistenceManager->persistAll();
+        return $results;
+    }
+
+    /**
+     * @param NodeInterface $node
+     * @return NodeInterface[] removed variants;
+     */
+    public function removeOtherVariants(NodeInterface $node)
+    {
+        $results = [];
+        /**
+         * @var array<NodeInterface> $otherNodeVariants
+         */
+        $otherNodeVariants = $node->getOtherNodeVariants();
+        foreach ($otherNodeVariants as $nodeVariant) {
+            /**
+             * @var NodeInterface $nodeVariant
+             */
+            $nodeVariant->remove();
+            $results[] = $nodeVariant;
         }
         $this->persistenceManager->persistAll();
         return $results;

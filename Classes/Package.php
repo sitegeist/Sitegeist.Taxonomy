@@ -23,5 +23,13 @@ class Package extends BasePackage
             ContentRepositoryHooks::class,
             'nodeAdded'
         );
+
+        $dispatcher = $bootstrap->getSignalSlotDispatcher();
+        $dispatcher->connect(
+            Node::class,
+            'nodeRemoved',
+            ContentRepositoryHooks::class,
+            'nodeRemoved'
+        );
     }
 }

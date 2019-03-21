@@ -58,4 +58,24 @@ class ContentRepositoryHooks
             }
         }
     }
+
+    /**
+     * Signal that is triggered on node remove
+     *
+     * @param NodeInterface $node
+     */
+    public function nodeRemoved(NodeInterface $node)
+    {
+        $this->systemLogger->log(new Message(sprintf("CREATED NODE %S", $node->getContextPath())));
+
+        if ($node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType()) ||
+            $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType()) ||
+            $node->getNodeType()->isOfType($this->taxonomyService->getTaxonomyNodeType())) {
+            if ($node->isAutoCreated() == false && $this->preventCascade == false) {
+                $this->preventCascade = true;
+                $this->dimensionService->removeOtherVariants($node);
+                $this->preventCascade = false;
+            }
+        }
+    }
 }
