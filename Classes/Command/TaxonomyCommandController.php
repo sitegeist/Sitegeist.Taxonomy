@@ -8,6 +8,7 @@ use Neos\ContentRepository\Domain\Service\ImportExport\NodeExportService;
 use Neos\ContentRepository\Domain\Service\ImportExport\NodeImportService;
 use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Eel\FlowQuery\FlowQuery;
+use Sitegeist\Taxonomy\Service\DimensionService;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -45,6 +46,12 @@ class TaxonomyCommandController extends CommandController
      * @Flow\Inject
      */
     protected $taxonomyService;
+
+    /**
+     * @var DimensionService
+     * @Flow\Inject
+     */
+    protected $dimensionService;
 
     /**
      * List taxonomy vocabularies
@@ -180,4 +187,44 @@ class TaxonomyCommandController extends CommandController
             $this->outputLine('Pruned vocabulary %s', [$vocabularyName]);
         }
     }
+
+    /**
+     * Reset a taxonimy dimension and create fresh variants from the base dimension
+     *
+     * @param string $vocabularyNode vocabularay nodename(path) to prune (globbing is supported)
+     * @param string $dimensionValues The dimensionvalues to prune for as json like `{language:'en_UK'}`
+     * @return void
+     */
+    public function resetDimensionCommand($vocabulary, $dimensionValues)
+    {
+        $taxonomyRoot = $this->taxonomyService->getRoot();
+
+        /**
+         * @var array<ContentSubgraph> $allSubgraphs
+         */
+        $allSubgraphs = $this->dimensionService->getAllDimensionSubgraphs();
+
+        $baseSubgraphs =  $this->dimensionService->getBaseDimensionSubgraphs();
+
+        foreach ($baseSubgraphs as $baseDimensionSubgraph) {
+
+            $baseDimensionValues = [
+                'dimensions' => array_map(
+                    function ( \Neos\ContentRepository\Domain\Model\IntraDimension\ContentDimensionValue $contentDimensionValue) {
+                        return [$contentDimensionValue->getValue()];
+                    },
+                    $baseDimensionSubgraph->getDimensionValues()
+                ),
+                'targetDimensions' => array_map(
+                    function ( \Neos\ContentRepository\Domain\Model\IntraDimension\ContentDimensionValue $contentDimensionValue) {
+                        return $contentDimensionValue->getValue();
+                    },
+                    $baseDimensionSubgraph->getDimensionValues()
+                ),
+            ];
+
+            $this->outputLine(json_encode($baseDimensionValues));
+        }
+    }
+
 }

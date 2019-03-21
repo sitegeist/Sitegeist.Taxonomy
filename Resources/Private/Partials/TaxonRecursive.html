@@ -2,15 +2,19 @@
 
 <tr>
     <td>
-        <i class="{taxon.node.nodeType.fullConfiguration.ui.icon}" ></i>
-    </td>
-    <td>
         <f:for each="{taxon.parents}" as="parentNode" iteration="iterator">
             &nbsp; &nbsp; &nbsp;
-            <f:if condition="{iterator.isLast}">
-                <i class="fas fa-caret-right" ></i> &nbsp;
-            </f:if>
         </f:for>
+
+        <f:if condition="{taxon.parents}">
+            <f:then>
+                <i class="fas fa-caret-right" ></i>
+            </f:then>
+            <f:else>
+                <i class="{taxon.node.nodeType.fullConfiguration.ui.icon}" ></i>
+            </f:else>
+        </f:if>
+        &nbsp;
         {taxon.node.properties.title}
     </td>
     <td>
