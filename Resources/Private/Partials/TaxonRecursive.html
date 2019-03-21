@@ -1,15 +1,20 @@
 {namespace neos=Neos\Neos\ViewHelpers}
-{namespace taxonomy=Sitegeist\Taxonomy\ViewHelpers}
 
 <tr>
     <td>
         <i class="{taxon.node.nodeType.fullConfiguration.ui.icon}" ></i>
     </td>
     <td>
-        <taxonomy:pathInformation node="{taxon.node}" />
+        <f:for each="{taxon.parents}" as="parentNode" iteration="iterator">
+            &nbsp; &nbsp; &nbsp;
+            <f:if condition="{iterator.isLast}">
+                <i class="fas fa-caret-right" ></i> &nbsp;
+            </f:if>
+        </f:for>
+        {taxon.node.properties.title}
     </td>
     <td>
-        {taxon.node.properties.title} <f:if condition="{taxon.defaultNode}">({taxon.defaultNode.properties.title})</f:if>
+        <f:if condition="{taxon.defaultNode}">{taxon.defaultNode.properties.title}</f:if>
     </td>
     <td>
         {taxon.node.properties.description}
@@ -41,7 +46,6 @@
 </tr>
 
 <f:for each="{taxon.children}" as="child">
-    children
     <f:render partial="TaxonRecursive" arguments="{taxon: child}" />
 </f:for>
 

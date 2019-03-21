@@ -212,9 +212,10 @@ class ModuleController extends ActionController
 
     /**
      * @param NodeInterface $node
+     * @param array<NodeInterface> $parents
      * @return array
      */
-    public function fetchChildTaxonomies(NodeInterface $node) : array
+    public function fetchChildTaxonomies(NodeInterface $node, array $parents = []) : array
     {
         $flowQuery = new FlowQuery([$node]);
         $childTaxonomies = $flowQuery->children('[instanceof ' . $this->taxonomyService->getTaxonomyNodeType() . ']')->get();
@@ -223,7 +224,8 @@ class ModuleController extends ActionController
             $result[] = [
                 'node' => $childTaxonomy,
                 'defaultNode' => $this->getNodeInDefaultDimensions($childTaxonomy),
-                'children' => $this->fetchChildTaxonomies($childTaxonomy)
+                'children' => $this->fetchChildTaxonomies($childTaxonomy, array_merge($parents, [$childTaxonomy])),
+                'parents' => $parents
             ];
         }
         return $result;

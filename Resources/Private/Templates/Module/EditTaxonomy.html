@@ -2,28 +2,55 @@
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <h2>{taxonomy.path}</h2>
-    <legend>{f:translate(id: 'module.editTaxonomy')}: {taxonomy.properties.title} <f:if condition="{defaultTaxonomy}">({defaultTaxonomy.properties.title})</f:if></legend>
+
+    <div class="neos-row-fluid">
+        <div class="neos-span6">
+            <legend>{f:translate(id: 'module.editTaxonomy')}: {taxonomy.properties.title}</legend>
+        </div>
+        <f:if condition="{defaultTaxonomy}">
+            <div class="neos-span6">
+                <legend>{f:translate(id: 'module.baseTaxonomy')}: {defaultTaxonomy.properties.title}</legend>
+            </div>
+        </f:if>
+    </div>
 
     <f:form action="updateTaxonomy">
         <fieldset>
 
             <f:form.hidden name="taxonomy" value="{taxonomy.contextPath}" />
 
-            <div class="neos-control-group">
-                <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Taxonomy')}</label>
-                <f:form.textfield name="title" class="neos-span12" id="title" value="{taxonomy.properties.title}"/>
-                <f:if condition="{defaultTaxonomy}"><p>({defaultTaxonomy.properties.title})</p></f:if>
+            <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Taxonomy')}</label>
+            <div class="neos-row-fluid">
+                <div class="neos-span6">
+                    <div class="neos-control-group">
+                        <f:form.textfield name="title" class="neos-span12" id="title" value="{taxonomy.properties.title}"/>
+                    </div>
+                </div>
+                <f:if condition="{defaultTaxonomy}">
+                    <div class="neos-span6">
+                        <input type="text" class="neos-span12" value="{defaultTaxonomy.properties.title}" />
+                    </div>
+                </f:if>
             </div>
-            <div class="neos-control-group">
-                <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Taxonomy')}</label>
-                <f:form.textarea name="description" class="neos-span12"  id="description" value="{taxonomy.properties.description}"/>
-                <f:if condition="{defaultTaxonomy}"><p>({defaultTaxonomy.properties.description})</p></f:if>
+
+            <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Taxonomy')}</label>
+
+            <div class="neos-row-fluid">
+                <div class="neos-span6">
+                    <div class="neos-control-group">
+                        <f:form.textarea name="description" class="neos-span12"  id="description" value="{taxonomy.properties.description}"/>
+                    </div>
+                </div>
+                <f:if condition="{defaultTaxonomy}">
+                    <div class="neos-span6">
+                        <input type="text" class="neos-span12" value="{defaultTaxonomy.properties.description}" />
+                    </div>
+                </f:if>
             </div>
 
             <f:link.action class="neos-button" action="vocabulary" arguments="{vocabulary: vocabulary}">{f:translate(id: 'module.cancel')}</f:link.action>
-
             <f:form.submit value="{f:translate(id: 'module.save')}" class="neos-button neos-button-primary" />
+
         </fieldset>
     </f:form>
 </f:section>

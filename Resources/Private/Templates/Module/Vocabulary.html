@@ -1,5 +1,4 @@
 {namespace neos=Neos\Neos\ViewHelpers}
-{namespace taxonomy=Sitegeist\Taxonomy\ViewHelpers}
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
@@ -21,17 +20,20 @@
         <f:then>
             <table class="neos-table">
                 <thead>
-                <tr>
-                    <th>
-                    </th>
-                    <th>{f:translate(id: 'module.title')}</th>
-                    <th></th>
-                    <th></th>
-                </tr>
+                    <tr>
+                        <th></th>
+                        <th>
+                            {f:translate(id: 'module.title')}
+                        </th>
+                        <th>
+                            <f:if condition="{defaultVocabulary}">Default</f:if>
+                        </th>
+                        <th></th>
+                    </tr>
                 </thead>
                 <tbody>
                     <f:for each="{taxonomies}" as="taxon">
-                        <f:render partial="TaxonRecursive" arguments="{taxon: taxon, basePath: vocabulary.path ,level: 0 }" />
+                        <f:render partial="TaxonRecursive" arguments="{taxon: taxon}" />
                     </f:for>
                 </tbody>
             </table>

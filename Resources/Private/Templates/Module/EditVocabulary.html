@@ -2,28 +2,54 @@
 <f:layout name="BackendSubModule" />
 
 <f:section name="content">
-    <h2>{vocabulary.path}</h2>
-    <legend>{f:translate(id: 'module.editVocabulary')}: {vocabulary.properties.title} <f:if condition="{defaultVocabulary}">({defaultVocabulary.properties.title})</f:if></legend>
+    <div class="neos-row-fluid">
+        <div class="neos-span6">
+            <legend>{f:translate(id: 'module.editVocabulary')}: {vocabulary.properties.title}</legend>
+        </div>
+        <f:if condition="{defaultVocabulary}">
+            <div class="neos-span6">
+                <legend>{f:translate(id: 'module.baseVocabulary')}: {defaultVocabulary.properties.title}</legend>
+            </div>
+        </f:if>
+    </div>
 
     <f:form action="updateVocabulary">
         <fieldset>
 
             <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
 
-            <div class="neos-control-group">
-                <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Taxonomy')} </label>
-                <f:form.textfield name="title" class="neos-span12" id="title" value="{vocabulary.properties.title}"/>
-                <f:if condition="{defaultVocabulary}"><p>({defaultVocabulary.properties.title})</p></f:if>
+            <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Taxonomy')} </label>
+            <div class="neos-row-fluid">
+                <div class="neos-span6">
+                    <div class="neos-control-group">
+                        <f:form.textfield name="title" class="neos-span12" id="title" value="{vocabulary.properties.title}"/>
+                    </div>
+                </div>
+                <f:if condition="{defaultVocabulary}">
+                    <div class="neos-span6">
+                        <input type="text" class="neos-span12" value="{vocabulary.properties.title}" readonly/>
+                    </div>
+                </f:if>
             </div>
-            <div class="neos-control-group">
-                <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Taxonomy')}</label>
-                <f:form.textarea name="description" class="neos-span12" id="description" value="{vocabulary.properties.description}"/>
-                <f:if condition="{defaultVocabulary}"><p>({defaultVocabulary.properties.description})</p></f:if>
+
+            <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Taxonomy')}</label>
+
+            <div class="neos-row-fluid">
+                <div class="neos-span6">
+                    <div class="neos-control-group">
+                        <f:form.textarea name="description" class="neos-span12" id="description" value="{vocabulary.properties.description}"/>
+                    </div>
+                </div>
+                <f:if condition="{defaultVocabulary}">
+                    <div class="neos-span6">
+                        <input type="text" class="neos-span12" value="{vocabulary.properties.description}" readonly/>
+                    </div>
+                </f:if>
             </div>
 
             <f:link.action class="neos-button" action="index">{f:translate(id: 'module.cancel')}</f:link.action>
-
             <f:form.submit value="{f:translate(id: 'module.save')}" class="neos-button neos-button-primary" />
+
         </fieldset>
     </f:form>
 </f:section>

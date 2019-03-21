@@ -60,6 +60,9 @@
             <trans-unit id="module.editVocabulary" xml:space="preserve" approved="yes">
                 <source>Edit Vocabulary</source>
             </trans-unit>
+            <trans-unit id="module.baseVocabulary" xml:space="preserve" approved="yes">
+                <source>Base Vocabulary</source>
+            </trans-unit>
             <trans-unit id="module.createNewVocabulary" xml:space="preserve" approved="yes">
                 <source>Create a new Vocabulary</source>
             </trans-unit>
