@@ -281,7 +281,7 @@ class ModuleController extends ActionController
         $this->flashMessageContainer->addMessage(
             new Message(sprintf('Created vocabulary %s at path %s', $title, $vocabulary->getPath()))
         );
-        $this->redirect('index');
+        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
 
     /**
@@ -306,6 +306,7 @@ class ModuleController extends ActionController
      */
     public function updateVocabularyAction(NodeInterface $vocabulary, $title, $description = '')
     {
+        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
         $previousTitle = $vocabulary->getProperty('title');
         $previousDescription = $vocabulary->getProperty('description');
 
@@ -318,7 +319,7 @@ class ModuleController extends ActionController
         }
 
         $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s', $title)));
-        $this->redirect('index');
+        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
 
     /**

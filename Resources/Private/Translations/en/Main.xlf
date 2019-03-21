@@ -73,6 +73,9 @@
             <trans-unit id="module.taxonomy" xml:space="preserve" approved="yes">
                 <source>Taxonomy</source>
             </trans-unit>
+            <trans-unit id="module.baseTaxonomy" xml:space="preserve" approved="yes">
+                <source>Base Taxonomy</source>
+            </trans-unit>
             <trans-unit id="module.taxonomy.noSubTaxons" xml:space="preserve" approved="yes">
                 <source>No sub-taxons yet. Please create them.</source>
             </trans-unit>
