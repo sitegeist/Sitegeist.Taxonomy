@@ -5,6 +5,8 @@
     <f:form action="createVocabulary">
         <fieldset>
             <legend>{f:translate(id: 'module.createNewVocabulary')}</legend>
+            <f:form.hidden name="taxonomyRoot" value="{taxonomyRoot.contextPath}" />
+
             <div class="neos-control-group">
                 <label class="neos-control-label" for="title">{f:translate(id: 'module.title')}</label>
                 <f:form.textfield class="neos-span6" name="title" id="title"/>

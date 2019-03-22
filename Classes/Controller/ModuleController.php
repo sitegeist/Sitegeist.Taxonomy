@@ -251,23 +251,25 @@ class ModuleController extends ActionController
     /**
      * Display a form that allows to create a new vocabulary
      *
+     * @param NodeInterface $taxonomyRoot
      * @return void
      */
-    public function newVocabularyAction()
+    public function newVocabularyAction(NodeInterface $taxonomyRoot)
     {
+        $this->view->assign('taxonomyRoot', $taxonomyRoot);
+
     }
 
     /**
      * Create a new vocabulary
      *
+     * @param NodeInterface $taxonomyRoot
      * @param string $title
      * @param string $description
      * @return void
      */
-    public function createVocabularyAction($title, $description = '')
+    public function createVocabularyAction(NodeInterface $taxonomyRoot, $title, $description = '')
     {
-        $context = $this->contextFactory->create();
-        $taxonomyRoot = $this->taxonomyService->getRoot($context);
         $vocabularyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType());
 
         $nodeTemplate = new NodeTemplate();
@@ -338,7 +340,8 @@ class ModuleController extends ActionController
             $vocabulary->remove();
             $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s', $path)));
         }
-        $this->redirect('index');
+        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
+        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
 
     /**
