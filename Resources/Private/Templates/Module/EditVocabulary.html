@@ -47,7 +47,7 @@
                 </f:if>
             </div>
 
-            <f:link.action class="neos-button" action="index">{f:translate(id: 'module.cancel')}</f:link.action>
+            <f:link.action class="neos-button" action="index" arguments="{root: taxonomyRoot}">{f:translate(id: 'module.cancel')}</f:link.action>
             <f:form.submit value="{f:translate(id: 'module.save')}" class="neos-button neos-button-primary" />
 
         </fieldset>

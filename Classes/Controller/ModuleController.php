@@ -294,6 +294,8 @@ class ModuleController extends ActionController
      */
     public function editVocabularyAction(NodeInterface $vocabulary)
     {
+        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
+        $this->view->assign('taxonomyRoot', $taxonomyRoot);
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
     }
