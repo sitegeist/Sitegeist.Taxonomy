@@ -24,7 +24,7 @@ Neos:
       resources:
         javascript:
           'Sitegeist.Taxonomy:TaxonomyEditor':
-            resource: 'resource://Sitegeist.Taxonomy/Public/TaxonomyEditor/Plugin.js'
+            resource: 'resource://Sitegeist.Taxonomy/Public/JavaScript/TaxonomyEditor/Plugin.js'
 
     modules:
       management:

@@ -9,6 +9,9 @@
     "build": "neos-react-scripts build && uglifyjs --compress --mangle -o ../../../Public/JavaScript/TaxonomyEditor/Plugin.js -- ../../../Public/JavaScript/TaxonomyEditor/Plugin.js",
     "watch": "neos-react-scripts watch"
   },
+  "dependencies": {
+    "react-sortable-hoc": "^0.6.8"
+  },
   "devDependencies": {
     "@neos-project/react-ui-components": "~3.1.0",
     "@neos-project/neos-ui-extensibility": "~3.1.0"
