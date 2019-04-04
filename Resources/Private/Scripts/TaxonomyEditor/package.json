@@ -1,0 +1,19 @@
+{
+  "description": "Sitegeist.Taxonomy",
+  "license": "GPL-3.0+",
+  "private": true,
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {
+    "build": "neos-react-scripts build && uglifyjs --compress --mangle -o ../../../Public/JavaScript/TaxonomyEditor/Plugin.js -- ../../../Public/JavaScript/TaxonomyEditor/Plugin.js",
+    "watch": "neos-react-scripts watch"
+  },
+  "devDependencies": {
+    "@neos-project/react-ui-components": "~3.1.0",
+    "@neos-project/neos-ui-extensibility": "~3.1.0"
+  },
+  "neos": {
+    "buildTargetDirectory": "../../../Public/JavaScript/TaxonomyEditor"
+  }
+}

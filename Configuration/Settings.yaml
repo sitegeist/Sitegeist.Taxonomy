@@ -20,6 +20,12 @@ Sitegeist:
 
 Neos:
   Neos:
+    Ui:
+      resources:
+        javascript:
+          'Sitegeist.Taxonomy:TaxonomyEditor':
+            resource: 'resource://Sitegeist.Taxonomy/Public/TaxonomyEditor/Plugin.js'
+
     modules:
       management:
         submodules:
