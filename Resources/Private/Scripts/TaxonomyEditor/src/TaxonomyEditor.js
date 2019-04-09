@@ -54,14 +54,15 @@ export default class TaxonomyEditor extends PureComponent {
 		renderSecondaryInspector(undefined, undefined);
 	}
 
-	handleOpenSecondaryScreen = () => {
+	handleOpenSecondaryScreen = (e) => {
+		e.preventDefault();
 		const {secondaryEditorsRegistry, renderSecondaryInspector} = this.props;
-		const {component: ImageDatabaseFrame} = secondaryEditorsRegistry
+		const {component: TaxonomyFrame} = secondaryEditorsRegistry
 			.get('Sitegeist.Taxonomy:TaxonomyFrame');
 
 		renderSecondaryInspector('CANUSA_IMAGE_DATABASE', () => (
-			<TaxonomyFrame onSelect={this.handleAddTaxonomy}/>
-	));
+				<TaxonomyFrame onSelect={this.handleAddTaxonomy}/>
+		));
 	}
 
 	handleAddTaxonomy = taxonomyIdentifier => {
