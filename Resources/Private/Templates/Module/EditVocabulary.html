@@ -4,11 +4,11 @@
 <f:section name="content">
     <div class="neos-row-fluid">
         <div class="neos-span6">
-            <legend>{f:translate(id: 'module.editVocabulary')}: {vocabulary.properties.title}</legend>
+            <legend>{f:translate(id: 'vocabulary')}: {vocabulary.properties.title}</legend>
         </div>
         <f:if condition="{defaultVocabulary}">
             <div class="neos-span6">
-                <legend>{f:translate(id: 'module.baseVocabulary')}: {defaultVocabulary.properties.title}</legend>
+                <legend>{f:translate(id: 'generic.default')}: {defaultVocabulary.properties.title}</legend>
             </div>
         </f:if>
     </div>
@@ -18,7 +18,7 @@
 
             <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
 
-            <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Taxonomy')} </label>
+            <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Vocabulary')}</label>
             <div class="neos-row-fluid">
                 <div class="neos-span6">
                     <div class="neos-control-group">
@@ -27,12 +27,12 @@
                 </div>
                 <f:if condition="{defaultVocabulary}">
                     <div class="neos-span6">
-                        <input type="text" class="neos-span12" value="{defaultVocabulary.properties.title}" readonly/>
+                        <input type="text" class="neos-span12" value="{defaultVocabulary.properties.title}" readonly />
                     </div>
                 </f:if>
             </div>
 
-            <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Taxonomy')}</label>
+            <label class="neos-control-label" for="description">{f:translate(id: 'properties.description', source: 'NodeTypes/Vocabulary')}</label>
 
             <div class="neos-row-fluid">
                 <div class="neos-span6">
@@ -42,13 +42,13 @@
                 </div>
                 <f:if condition="{defaultVocabulary}">
                     <div class="neos-span6">
-                        <input type="text" class="neos-span12" value="{defaultVocabulary.properties.description}" readonly/>
+                        <input type="text" class="neos-span12" value="{defaultVocabulary.properties.description}" readonly />
                     </div>
                 </f:if>
             </div>
 
-            <f:link.action class="neos-button" action="index" arguments="{root: taxonomyRoot}">{f:translate(id: 'module.cancel')}</f:link.action>
-            <f:form.submit value="{f:translate(id: 'module.save')}" class="neos-button neos-button-primary" />
+            <f:link.action class="neos-button" action="index" arguments="{root: taxonomyRoot}">{f:translate(id: 'generic.cancel')}</f:link.action>
+            <f:form.submit value="{f:translate(id: 'generic.save')}" class="neos-button neos-button-primary" />
 
         </fieldset>
     </f:form>

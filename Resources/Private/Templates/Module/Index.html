@@ -6,7 +6,7 @@
 
     <div class="neos-row-fluid">
         <legend>
-            {f:translate(id: 'module.index.vocabularies')}
+            {f:translate(id: 'vocabularies')}
             <div class="neos-pull-right">
                 <f:render partial="LanguageSelection" arguments="{targetAction: 'index', targetProperty: 'root', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomyRoot}" />
             </div>
@@ -25,7 +25,7 @@
                             <div class="widget-header">
                                 <i class="fas fa-tags neos-pull-left"></i>
                                 <h3>
-                                    <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.node.contextPath}" title="{f:translate(id: 'module.index.showVocabulary')}">
+                                    <f:link.action action="vocabulary" arguments="{vocabulary: vocabulary.node.contextPath}" title="{f:translate(id: 'vocabulary.show')}">
                                         {vocabulary.node.properties.title} <f:if condition="{vocabulary.defaultNode}">({vocabulary.defaultNode.properties.title})</f:if>
                                     </f:link.action>
                                 </h3>
@@ -39,12 +39,12 @@
 
                                 <f:security.ifAccess privilegeTarget="Sitegeist.Taxonomy:Module.ManageVocabularyActions">
 
-                                <f:link.action action="editVocabulary" class="neos-button" title="{f:translate(id: 'module.index.editVocabulary')}" arguments="{vocabulary: vocabulary.node.contextPath}" >
+                                <f:link.action action="editVocabulary" class="neos-button" title="{f:translate(id: 'generic.edit')}" arguments="{vocabulary: vocabulary.node.contextPath}" >
                                     <i class="fas fa-pencil-alt"></i>
                                 </f:link.action>
 
                                 <f:if condition="{vocabulary.autoCreated = false}" >
-                                    <button class="neos-button neos-button-danger" title="{f:translate(id: 'module.index.deleteVocabulary')}" data-toggle="modal" href="#deleteVocabulary_{vocabulary.node.identifier}" data-neos-toggle="tooltip">
+                                    <button class="neos-button neos-button-danger" title="{f:translate(id: 'generic.delete')}" data-toggle="modal" href="#deleteVocabulary_{vocabulary.node.identifier}" data-neos-toggle="tooltip">
                                         <i class="fas fa-trash-alt icon-white"></i>
                                     </button>
 
@@ -89,7 +89,7 @@
         </f:then>
         <f:else>
             <p>
-                {f:translate(id: 'module.index.noVocabularies')}
+                {f:translate(id: 'noVocabularies')}
             </p>
         </f:else>
     </f:if>
@@ -99,7 +99,7 @@
     <div class="neos-row-fluid">
 
         <f:link.action action="newVocabulary"  class="neos-button neos-button-primary" title="" arguments="{taxonomyRoot: taxonomyRoot}">
-            <i class="fas fa-plus icon-white"></i> {f:translate(id: 'module.index.createNewVocabulary')}
+            <i class="fas fa-plus icon-white"></i> {f:translate(id: 'vocabulary.create')}
         </f:link.action>
 
     </div>

@@ -354,6 +354,9 @@ class ModuleController extends ActionController
      */
     public function newTaxonomyAction(NodeInterface $parent)
     {
+        $flowQuery = new FlowQuery([$parent]);
+        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
+        $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('parent', $parent);
     }
 
