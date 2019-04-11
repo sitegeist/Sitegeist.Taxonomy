@@ -25,6 +25,9 @@
     </td>
     <td>
         <div class="neos-pull-right">
+
+            <f:security.ifAccess privilegeTarget="Sitegeist.Taxonomy:Module.ManageTaxonomyActions">
+
             <f:link.action action="newTaxonomy" arguments="{parent : taxon.node.contextPath}" title="{f:translate(id: 'module.taxonRecursive.addSubTaxon')}"  class="neos-button neos-button-primary">
                 <i class="fas fa-plus"></i>
             </f:link.action>
@@ -60,6 +63,8 @@
                 </div>
 
             </f:if>
+
+            </f:security.ifAccess>
 
         </div>
     </td>

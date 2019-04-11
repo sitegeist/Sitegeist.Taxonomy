@@ -44,6 +44,8 @@
         </f:else>
     </f:if>
 
+    <f:security.ifAccess privilegeTarget="Sitegeist.Taxonomy:Module.ManageTaxonomyActions">
+
     <div class="neos-row-fluid">
         <f:link.action action="index" class="neos-button" title="" arguments="{root: taxonomyRoot}" >
             <i class="fas fa-backward icon-white"></i> {f:translate(id: 'module.vocabulary.backToIndex')}
@@ -52,5 +54,7 @@
             <i class="fas fa-plus icon-white"></i> {f:translate(id: 'module.vocabulary.createNewTaxon')}
         </f:link.action>
     </div>
+
+    </f:security.ifAccess>
 
 </f:section>
