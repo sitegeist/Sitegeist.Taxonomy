@@ -1,96 +1,115 @@
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
+import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
-import {Button, IconButton} from '@neos-project/react-ui-components';
-import {SortableContainer, SortableElement, arrayMove} from 'react-sortable-hoc';
 import {neos} from '@neos-project/neos-ui-decorators';
-import TaxonomyFrame from './TaxonomyFrame';
 
-const TaxonomyItem = SortableElement(({value, onDelete}) => ( // eslint-disable-line
-	<li style={{position: 'relative'}}>
-		<div style={{padding: '5px 10px'}}>{value}</div>
-		<div style={{position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, cursor: 'move'}}/>
-		<div style={{position: 'absolute', top: '5px', right: '5px'}}>
-			{/* eslint-disable */}
-			<Button onClick={() => onDelete(value)}>X</Button>
-			{/* eslint-enable */}
-		</div>
-	</li>
-));
+import {Button} from '@neos-project/react-ui-components';
 
-const TaxonomyList = SortableContainer(({items, onDeleteItem}) => ( // eslint-disable-line
-	<ul
-		style={{
-			WebkitTouchCallout: 'none',
-				WebkitUserSelect: 'none',
-				KhtmlUserSelect: 'none',
-				MozUserSelect: 'none',
-				msUserSelect: 'none',
-				userSelect: 'none'
-		}}
-	>
-		{items.map((value, index) => (
-			<TaxonomyItem
-			key={`${value}`}
-			index={index}
-			value={value}
-			onDelete={onDeleteItem}
-			/>
-		))}
-	</ul>
-));
+@neos(globalRegistry => {
+	const secondaryEditorsRegistry = globalRegistry.get('inspector').get('secondaryEditors');
+	const editorsRegistry = globalRegistry.get('inspector').get('editors');
 
-@neos(globalRegistry => ({
-	secondaryEditorsRegistry: globalRegistry.get('inspector').get('secondaryEditors')
-}))
+	const {component: ReferencesEditor} = editorsRegistry.get('Neos.Neos/Inspector/Editors/ReferencesEditor');
+	const {component: TaxonomyTreeSelect} = secondaryEditorsRegistry.get('Sitegeist.Taxonomy:TaxonomyTreeSelect');
+
+
+	return {
+		ReferencesEditor,
+		TaxonomyTreeSelect
+	};
+})
 export default class TaxonomyEditor extends PureComponent {
 
     static propTypes = {
-        value: PropTypes.string,
-        commit: PropTypes.func.isRequired,
+		value: PropTypes.string,
+		renderSecondaryInspector: PropTypes.func.isRequired,
+		commit: PropTypes.func.isRequired,
+		options: PropTypes.array,
+
+		ReferencesEditor: PropTypes.func.isRequired,
+		TaxonomyTreeSelect: PropTypes.func.isRequired
     };
+
+	state = {
+		secondaryInspectorPortal: null,
+		openTaxonomyBranchesInSecondaryInspector: []
+	};
+
+	componentWillUnmount() {
+		this.handleCloseSecondaryScreen();
+	}
 
 	handleCloseSecondaryScreen = () => {
 		const {renderSecondaryInspector} = this.props;
 		renderSecondaryInspector(undefined, undefined);
 	}
 
-	handleOpenSecondaryScreen = (e) => {
-		e.preventDefault();
-		const {secondaryEditorsRegistry, renderSecondaryInspector} = this.props;
-		const {component: TaxonomyFrame} = secondaryEditorsRegistry
-			.get('Sitegeist.Taxonomy:TaxonomyFrame');
-
-		renderSecondaryInspector('CANUSA_IMAGE_DATABASE', () => (
-				<TaxonomyFrame onSelect={this.handleAddTaxonomy}/>
-		));
+	handleOpenSecondaryScreen = () => {
+		const {TaxonomyTreeSelect, renderSecondaryInspector} = this.props;
+		renderSecondaryInspector('TAXONOMY_TREE_SELECT', () => {
+			return (<div ref={secondaryInspectorPortal => this.setState({secondaryInspectorPortal})}/>);
+		});
 	}
 
-	handleAddTaxonomy = taxonomyIdentifier => {
-		console.log(taxonomyIdentifier)
-	}
-
-	handleDelete = taxonomyIdentifier => {
+	handleToggleTaxonomyInSecondaryInspector = taxonomyIdentifier => {
 		const {value, commit} = this.props;
-		commit(value.filter(item => item !== taxonomyIdentifier));
+
+		if (value.includes(taxonomyIdentifier)) {
+			commit(value.filter(item => item !== taxonomyIdentifier));
+		} else {
+			commit([...value, taxonomyIdentifier]);
+		}
 	}
+
+	handleToggleTaxonomyBranchInSecondaryInspector = taxonomyIdentifier => this.setState(state => {
+		if (state.openTaxonomyBranchesInSecondaryInspector.includes(taxonomyIdentifier)) {
+			return {
+				openTaxonomyBranchesInSecondaryInspector:
+					state.openTaxonomyBranchesInSecondaryInspector.filter(item => item !== taxonomyIdentifier)
+			};
+		} else {
+			return {
+				openTaxonomyBranchesInSecondaryInspector:
+					[...state.openTaxonomyBranchesInSecondaryInspector, taxonomyIdentifier]
+			};
+		}
+	});
 
 	handleSort = ({oldIndex, newIndex}) => {
 		const {value, commit} = this.props;
 		commit(arrayMove(value, oldIndex, newIndex));
 	}
 
+	handleCommit = value => {
+		const {commit} = this.props;
+
+		commit(value);
+	}
+
     render() {
-		const {value} = this.props;
+		const {ReferencesEditor, TaxonomyTreeSelect, value, options} = this.props;
+		const {secondaryInspectorPortal, openTaxonomyBranchesInSecondaryInspector} = this.state;
 
 		return (
-            <div>
-				<TaxonomyList
-					items={value}
-					onSortEnd={this.handleSort}
-					onDeleteItem={this.handleDelete}
-				/>
-                <IconButton style="lighter" icon="search" title="Reset" onClick={this.handleOpenSecondaryScreen}/>
-            </div>
+            <Fragment>
+				<ReferencesEditor
+					{...this.props}
+					commit={this.handleCommit}
+					/>
+				<Button onClick={this.handleOpenSecondaryScreen}>
+					Blubb
+				</Button>
+				{secondaryInspectorPortal ? createPortal(
+					<TaxonomyTreeSelect
+						value={value}
+						options={options}
+						onToggleTaxonomy={this.handleToggleTaxonomyInSecondaryInspector}
+						onToggleTaxonomyBranch={this.handleToggleTaxonomyBranchInSecondaryInspector}
+						openBranches={openTaxonomyBranchesInSecondaryInspector}
+						/>,
+					secondaryInspectorPortal
+				) : null}
+			</Fragment>
         );
     }
 }

@@ -1,7 +1,7 @@
 import manifest from '@neos-project/neos-ui-extensibility';
 
 import TaxonomyEditor from './TaxonomyEditor';
-import TaxonomyFrame from './TaxonomyFrame';
+import TaxonomyTreeSelect from './TaxonomyTreeSelect';
 
 manifest('Sitegeist.Taxonomy:TaxonomyEditor', {}, globalRegistry => {
     const editorsRegistry = globalRegistry.get('inspector').get('editors');
@@ -11,7 +11,7 @@ manifest('Sitegeist.Taxonomy:TaxonomyEditor', {}, globalRegistry => {
         component: TaxonomyEditor
     });
 
-	secondaryEditorsRegistry.set('Sitegeist.Taxonomy:TaxonomyFrame', {
-		component: TaxonomyFrame
+	secondaryEditorsRegistry.set('Sitegeist.Taxonomy:TaxonomyTreeSelect', {
+		component: TaxonomyTreeSelect
 	});
 });
