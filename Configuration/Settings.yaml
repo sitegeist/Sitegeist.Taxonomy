@@ -45,3 +45,18 @@ Neos:
   Fusion:
     defaultContext:
       Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper
+
+  Flow:
+    mvc:
+      routes:
+        'Sitegeist.Taxonomy':
+          position: 'before Neos.Neos'
+    security:
+      authentication:
+        providers:
+          Neos.Neos:Backend:
+            requestPatterns:
+              'Sitegeist.Taxonomy:secondaryInspector':
+                pattern: ControllerObjectName
+                patternOptions:
+                  controllerObjectNamePattern: 'Sitegeist\Taxonomy\Controller\SecondaryInspectorController'

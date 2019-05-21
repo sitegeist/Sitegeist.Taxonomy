@@ -3,7 +3,9 @@ import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import {neos} from '@neos-project/neos-ui-decorators';
 
-import {Button} from '@neos-project/react-ui-components';
+import {Button, Icon} from '@neos-project/react-ui-components';
+
+import styles from './TaxonomyEditor.css';
 
 @neos(globalRegistry => {
 	const secondaryEditorsRegistry = globalRegistry.get('inspector').get('secondaryEditors');
@@ -22,6 +24,7 @@ export default class TaxonomyEditor extends PureComponent {
 
     static propTypes = {
 		value: PropTypes.string,
+		identifier: PropTypes.string,
 		renderSecondaryInspector: PropTypes.func.isRequired,
 		commit: PropTypes.func.isRequired,
 		options: PropTypes.array,
@@ -32,7 +35,7 @@ export default class TaxonomyEditor extends PureComponent {
 
 	state = {
 		secondaryInspectorPortal: null,
-		openTaxonomyBranchesInSecondaryInspector: []
+		openTaxonomyBranchesInSecondaryInspector: null
 	};
 
 	componentWillUnmount() {
@@ -62,18 +65,29 @@ export default class TaxonomyEditor extends PureComponent {
 	}
 
 	handleToggleTaxonomyBranchInSecondaryInspector = taxonomyIdentifier => this.setState(state => {
-		if (state.openTaxonomyBranchesInSecondaryInspector.includes(taxonomyIdentifier)) {
+		if (state.openTaxonomyBranchesInSecondaryInspector !== null) {
+			if (state.openTaxonomyBranchesInSecondaryInspector.includes(taxonomyIdentifier)) {
+				return {
+					openTaxonomyBranchesInSecondaryInspector:
+						state.openTaxonomyBranchesInSecondaryInspector.filter(item => item !== taxonomyIdentifier)
+				};
+			} else {
+				return {
+					openTaxonomyBranchesInSecondaryInspector:
+						[...state.openTaxonomyBranchesInSecondaryInspector, taxonomyIdentifier]
+				};
+			}
+		}
+	});
+
+	handleInitializeTaxonomyBranchesInSecondaryInspector = taxonomyIdentifiers => this.setState(state => {
+		if (state.openTaxonomyBranchesInSecondaryInspector === null) {
 			return {
-				openTaxonomyBranchesInSecondaryInspector:
-					state.openTaxonomyBranchesInSecondaryInspector.filter(item => item !== taxonomyIdentifier)
-			};
-		} else {
-			return {
-				openTaxonomyBranchesInSecondaryInspector:
-					[...state.openTaxonomyBranchesInSecondaryInspector, taxonomyIdentifier]
+				openTaxonomyBranchesInSecondaryInspector: taxonomyIdentifiers
 			};
 		}
 	});
+
 
 	handleSort = ({oldIndex, newIndex}) => {
 		const {value, commit} = this.props;
@@ -87,29 +101,40 @@ export default class TaxonomyEditor extends PureComponent {
 	}
 
     render() {
-		const {ReferencesEditor, TaxonomyTreeSelect, value, options} = this.props;
+		const {ReferencesEditor, TaxonomyTreeSelect, value, identifier, options} = this.props;
 		const {secondaryInspectorPortal, openTaxonomyBranchesInSecondaryInspector} = this.state;
 
 		return (
-            <Fragment>
-				<ReferencesEditor
-					{...this.props}
-					commit={this.handleCommit}
-					/>
-				<Button onClick={this.handleOpenSecondaryScreen}>
-					Blubb
-				</Button>
-				{secondaryInspectorPortal ? createPortal(
-					<TaxonomyTreeSelect
-						value={value}
-						options={options}
-						onToggleTaxonomy={this.handleToggleTaxonomyInSecondaryInspector}
-						onToggleTaxonomyBranch={this.handleToggleTaxonomyBranchInSecondaryInspector}
-						openBranches={openTaxonomyBranchesInSecondaryInspector}
-						/>,
-					secondaryInspectorPortal
-				) : null}
-			</Fragment>
-        );
-    }
+				<div className={styles.taxonomyEditor}>
+					<ReferencesEditor
+						{...this.props}
+						options={{
+							...options,
+							nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
+						}}
+						commit={this.handleCommit}
+						/>
+					<Button
+						className={styles.button}
+						onClick={this.handleOpenSecondaryScreen}
+						isActive={Boolean(secondaryInspectorPortal)}
+						>
+						<Icon className={styles.icon} icon="sitemap"/>
+						Toggle Taxonomy Tree
+					</Button>
+					{secondaryInspectorPortal ? createPortal(
+						<TaxonomyTreeSelect
+							value={value}
+							identifier={identifier}
+							options={options}
+							onToggleTaxonomy={this.handleToggleTaxonomyInSecondaryInspector}
+							onToggleTaxonomyBranch={this.handleToggleTaxonomyBranchInSecondaryInspector}
+							onInitializeTaxonomyBranches={this.handleInitializeTaxonomyBranchesInSecondaryInspector}
+							openBranches={openTaxonomyBranchesInSecondaryInspector || []}
+							/>,
+						secondaryInspectorPortal
+					) : null}
+				</div>
+			);
+		}
 }

@@ -1,0 +1,9 @@
+-
+  name:  'Sitegeist.Taxonomy: Secondary Inspector'
+  uriPattern: 'taxonomy/secondary-inspector/{@action}'
+  defaults:
+    '@package': 'Sitegeist.Taxonomy'
+    '@subpackage': ''
+    '@controller': 'SecondaryInspector'
+    '@format': 'json'
+  httpMethods: ['GET']
