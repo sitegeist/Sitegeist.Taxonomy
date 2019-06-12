@@ -199,4 +199,28 @@ class TaxonomyService
             return $vocabulary->getNode($taxonomyPath);
         }
     }
+
+    /**
+     * @param NodeInterface $startingPoint
+     * @return array
+     */
+    public function getTaxonomyTreeAsArray(NodeInterface $startingPoint): array
+    {
+        $result = [];
+
+        $result['identifier'] = $startingPoint->getIdentifier();
+        $result['path'] = $startingPoint->getPath();
+        $result['nodeType'] = $startingPoint->getNodeType()->getName();
+        $result['label'] = $startingPoint->getLabel();
+        $result['title'] = $startingPoint->getProperty('title');
+        $result['description'] = $startingPoint->getProperty('description');
+
+        $result['children'] = [];
+
+        foreach ($startingPoint->getChildNodes() as $childNode) {
+            $result['children'][] = $this->getTaxonomyTreeAsArray($childNode);
+        }
+
+        return $result;
+    }
 }

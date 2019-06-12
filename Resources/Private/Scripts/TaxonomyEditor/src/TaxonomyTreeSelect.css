@@ -1,0 +1,62 @@
+.taxonomyTreeSelect {
+    padding: 1em;
+    overflow: auto;
+    max-height: calc(100vh - 82px);
+}
+
+.list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 0 15px;
+}
+
+.item {
+    position: relative;
+}
+
+.details {
+    margin-left: -15px;
+}
+
+.isDirty {
+    position: absolute;
+    top: 0;
+    left: -25px;
+    height: 24px;
+    border-left: 2px solid var(--colors-Warn);
+}
+
+.label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+
+    .icon {
+        display: inline-block;
+        width: 2em;
+        text-align: center;
+    }
+
+    .title {
+        display: inline-block;
+        margin-right: 1em;
+
+        .checkbox:checked + & {
+            color: var(--colors-PrimaryBlue);
+        }
+    }
+
+    .nodePath {
+        display: inline-block;
+        opacity: .5;
+    }
+}
+
+label.label {
+    cursor: pointer;
+}
+
+
+.checkbox {
+    display: none;
+}

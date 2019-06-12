@@ -6,6 +6,8 @@ privilegeTargets:
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newVocabulary|createVocabulary|editVocabulary|updateVocabulary|deleteVocabulary)Action())'
     'Sitegeist.Taxonomy:Module.ManageTaxonomyActions':
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newTaxonomy|createTaxonomy|editTaxonomy|updateTaxonomy|deleteTaxonomy)Action())'
+    'Sitegeist.Taxonomy:SecondaryInspector.Tree':
+      matcher: 'method(Sitegeist\Taxonomy\Controller\SecondaryInspectorController->treeAction())'
 
 roles:
 
@@ -20,6 +22,9 @@ roles:
       -
         privilegeTarget: 'Sitegeist.Taxonomy:Module.ManageTaxonomyActions'
         permission: ABSTAIN
+      -
+        privilegeTarget: 'Sitegeist.Taxonomy:SecondaryInspector.Tree'
+        permission: GRANT
 
   'Neos.Neos:Administrator':
     privileges:

@@ -1,5 +1,5 @@
 Sitegeist.Taxonomy:Root:
-  label: 'Taxonomy:Root'
+  label: ${'Taxonomy:Root'}
   superTypes:
     'Neos.Neos:Node': TRUE
   constraints:
