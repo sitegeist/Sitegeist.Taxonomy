@@ -55,7 +55,8 @@ export default class TaxonomyEditor extends PureComponent {
 	}
 
 	handleToggleTaxonomyInSecondaryInspector = taxonomyIdentifier => {
-		const {value, commit} = this.props;
+		const value = Array.isArray(this.props.value) ? this.props.value : [];
+		const {commit} = this.props;
 
 		if (value.includes(taxonomyIdentifier)) {
 			commit(value.filter(item => item !== taxonomyIdentifier));
@@ -88,12 +89,6 @@ export default class TaxonomyEditor extends PureComponent {
 		}
 	});
 
-
-	handleSort = ({oldIndex, newIndex}) => {
-		const {value, commit} = this.props;
-		commit(arrayMove(value, oldIndex, newIndex));
-	}
-
 	handleCommit = value => {
 		const {commit} = this.props;
 
@@ -124,7 +119,7 @@ export default class TaxonomyEditor extends PureComponent {
 					</Button>
 					{secondaryInspectorPortal ? createPortal(
 						<TaxonomyTreeSelect
-							value={value}
+							value={Array.isArray(value) ? value : []}
 							identifier={identifier}
 							options={options}
 							onToggleTaxonomy={this.handleToggleTaxonomyInSecondaryInspector}

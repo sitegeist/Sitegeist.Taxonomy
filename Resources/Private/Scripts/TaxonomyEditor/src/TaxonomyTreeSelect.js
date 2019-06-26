@@ -15,7 +15,8 @@ import styles from './TaxonomyTreeSelect.css';
 
 @connect((state, {identifier}) => {
 	const contextForNodeLinking = selectors.UI.NodeLinking.contextForNodeLinking(state);
-	const sourceValue = $get(['properties', identifier], selectors.CR.Nodes.focusedSelector(state));
+	const unsanitizedSourceValue = $get(['properties', identifier], selectors.CR.Nodes.focusedSelector(state));
+	const sourceValue = Array.isArray(unsanitizedSourceValue) ? unsanitizedSourceValue : [];
 
 	return {contextForNodeLinking, sourceValue};
 })
