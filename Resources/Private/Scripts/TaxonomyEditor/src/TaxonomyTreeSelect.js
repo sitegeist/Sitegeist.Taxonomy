@@ -89,15 +89,17 @@ export default class TaxonomyTreeSelect extends PureComponent {
 						id={`taxonomy-treeselect-node-label-${node.identifier}`}
 						checked={value.includes(node.identifier)}
 						onClick={e => e.stopPropagation()}
-						onChange={() => onToggleTaxonomy(node.identifier)}
 					/>
 					<label
 						className={styles.label}
 						htmlFor={`taxonomy-treeselect-node-label-${node.identifier}`}
-						onClick={e => e.stopPropagation()}
+						onClick={e => {
+							e.stopPropagation();
+							e.preventDefault();
+							onToggleTaxonomy(node.identifier)
+						}}
 						title={node.description}
 					>
-
 						<Icon className={styles.icon} icon={$get('ui.icon', nodeType)} />
 
 						<span className={styles.title}>
@@ -147,7 +149,6 @@ export default class TaxonomyTreeSelect extends PureComponent {
 									className={styles.summary}
 									style={{paddingLeft: (depth * 18) + 'px'}}
 									onClick={e => {
-										console.log(e.currentTarget, e.target);
 										e.preventDefault();
 										e.stopPropagation();
 										onToggleTaxonomyBranch(node.identifier);
