@@ -1,6 +1,6 @@
 # Sitegeist.Taxonomy
 
-> Manage vocabularies and taxonomies in Neos as node in a separate subtree `/taxonomy` distinct from `/sites`
+> Manage vocabularies and taxonomies in Neos as node in a separate subtree `/taxonomies` distinct from `/sites`
 
 ### Authors & Sponsors
 
@@ -32,7 +32,7 @@ it also provides a separate backend module for managing vocabularies and taxonmi
 
 Sitegeist.Taxonomy defines three basic node types:
 
-- `Sitegeist.Taxonomy:Root` - The root node at the path `/taxonomy`, allows only vocabulary nodes as children
+- `Sitegeist.Taxonomy:Root` - The root node at the path `/taxonomies`, allows only vocabulary nodes as children
 - `Sitegeist.Taxonomy:Vocabulary` - The root of a hierarchy of meaning, allows only taxonomies nodes as children   
 - `Sitegeist.Taxonomy:Taxonomy` - Item in the hierarchy that represents a specific meaning, allows only taxonomy
   nodes as children
@@ -72,7 +72,7 @@ Since taxonomies are nodes, they are simply referenced via `reference` or `refer
           group: taxonomy
           editorOptions:
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
-            startingPoint: '/taxonomy'
+            startingPoint: '/taxonomies'
             placeholder: 'assign Taxonomies'
 ```
 
@@ -84,7 +84,7 @@ startingPoint:
       ui:
         inspector:
           editorOptions:
-            startingPoint: '/taxonomy/animals/mammals'
+            startingPoint: '/taxonomies/animals/mammals'
 ```
 
 ## Content-Dimensions
