@@ -280,7 +280,7 @@ class ModuleController extends ActionController
 
         $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
 
-        $this->flashMessageContainer->addMessage(
+        $this->controllerContext->getFlashMessageContainer()->addMessage(
             new Message(sprintf('Created vocabulary %s at path %s', $title, $vocabulary->getPath()))
         );
         $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
@@ -322,7 +322,7 @@ class ModuleController extends ActionController
             $vocabulary->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated vocabulary %s', $title)));
+        $this->controllerContext->getFlashMessageContainer()->addMessage(new Message(sprintf('Updated vocabulary %s', $title)));
         $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
 
@@ -340,7 +340,7 @@ class ModuleController extends ActionController
         } else {
             $path = $vocabulary->getPath();
             $vocabulary->remove();
-            $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted vocabulary %s', $path)));
+            $this->controllerContext->getFlashMessageContainer()->addMessage(new Message(sprintf('Deleted vocabulary %s', $path)));
         }
         $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
         $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
@@ -378,7 +378,7 @@ class ModuleController extends ActionController
 
         $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
 
-        $this->flashMessageContainer->addMessage(
+        $this->controllerContext->getFlashMessageContainer()->addMessage(
             new Message(sprintf('Created taxonomy %s at path %s', $title, $taxonomy->getPath()))
         );
 
@@ -437,7 +437,7 @@ class ModuleController extends ActionController
             $taxonomy->setProperty('description', $description);
         }
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Updated taxonomy %s', $taxonomy->getPath())));
+        $this->controllerContext->getFlashMessageContainer()->addMessage(new Message(sprintf('Updated taxonomy %s', $taxonomy->getPath())));
 
         $flowQuery = new FlowQuery([$taxonomy]);
         $vocabulary = $flowQuery
@@ -466,7 +466,7 @@ class ModuleController extends ActionController
 
         $taxonomy->remove();
 
-        $this->flashMessageContainer->addMessage(new Message(sprintf('Deleted taxonomy %s', $taxonomy->getPath())));
+        $this->controllerContext->getFlashMessageContainer()->addMessage(new Message(sprintf('Deleted taxonomy %s', $taxonomy->getPath())));
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 }
