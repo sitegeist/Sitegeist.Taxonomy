@@ -4,9 +4,9 @@ namespace Sitegeist\Taxonomy\Hooks;
 use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\Flow\Log\SystemLoggerInterface;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Sitegeist\Taxonomy\Service\DimensionService;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class ContentRepositoryHooks
@@ -17,10 +17,10 @@ class ContentRepositoryHooks
 {
 
     /**
-     * @var SystemLoggerInterface
+     * @var LoggerInterface
      * @Flow\Inject
      */
-    protected $systemLogger;
+    protected $logger;
 
     /**
      * @var TaxonomyService
@@ -46,7 +46,7 @@ class ContentRepositoryHooks
      */
     public function nodeAdded(NodeInterface $node)
     {
-        $this->systemLogger->log(new Message(sprintf("CREATED NODE %S", $node->getContextPath())));
+        $this->logger->info(sprintf("CREATED NODE %S", $node->getContextPath()));
 
         if ($node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType()) ||
             $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType()) ||
@@ -66,7 +66,7 @@ class ContentRepositoryHooks
      */
     public function nodeRemoved(NodeInterface $node)
     {
-        $this->systemLogger->log(new Message(sprintf("CREATED NODE %S", $node->getContextPath())));
+        $this->logger->info(sprintf("CREATED NODE %S", $node->getContextPath()));
 
         if ($node->getNodeType()->isOfType($this->taxonomyService->getRootNodeType()) ||
             $node->getNodeType()->isOfType($this->taxonomyService->getVocabularyNodeType()) ||
