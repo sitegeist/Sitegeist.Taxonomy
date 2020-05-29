@@ -175,7 +175,7 @@ class TaxonomyService
             $context = $this->contextFactory->create();
         }
 
-        $root = $this->getRoot();
+        $root = $this->getRoot($context);
         return $root->getNode($vocabularyName);
     }
 
