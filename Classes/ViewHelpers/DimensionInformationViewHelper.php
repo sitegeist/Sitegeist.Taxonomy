@@ -16,7 +16,7 @@ class DimensionInformationViewHelper extends AbstractViewHelper
      */
     public function initializeArguments()
     {
-        $this->registerArgument('node', NodeInterface::class, 'Node', true);
+        $this->registerArgument('node', NodeInterface::class, 'Node', false);
         $this->registerArgument('dimension', 'string', 'Dimension', false, null);
     }
     
