@@ -7,7 +7,7 @@ use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 
 class DimensionInformationViewHelper extends AbstractViewHelper
 {
-    
+
     /**
      * Initialize arguments.
      *
@@ -16,10 +16,10 @@ class DimensionInformationViewHelper extends AbstractViewHelper
      */
     public function initializeArguments()
     {
-        $this->registerArgument('node', NodeInterface::class, 'Node', false);
+        $this->registerArgument('node', NodeInterface::class, 'Node', true);
         $this->registerArgument('dimension', 'string', 'Dimension', false, null);
     }
-    
+
     /**
      * @param NodeInterface $node
      * @param string $dimension dimension name
