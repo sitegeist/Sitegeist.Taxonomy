@@ -6,6 +6,14 @@
                 <source>Vocabulary</source>
                 <target xml:lang="de">Vocabular</target>
             </trans-unit>
+            <trans-unit id="properties.title" xml:space="preserve" approved="yes">
+                <source>Title</source>
+                <target xml:lang="de">Titel</target>
+            </trans-unit>
+            <trans-unit id="properties.description" xml:space="preserve" approved="yes">
+                <source>Description</source>
+                <target xml:lang="de">Beschreibung</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
