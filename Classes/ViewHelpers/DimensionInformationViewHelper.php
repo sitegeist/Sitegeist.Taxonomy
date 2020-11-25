@@ -21,17 +21,15 @@ class DimensionInformationViewHelper extends AbstractViewHelper
     }
 
     /**
-     * @param NodeInterface $node
-     * @param string $dimension dimension name
      * @return string value with replaced text
      * @api
      */
-    public function render(NodeInterface $node, $dimension = null)
+    public function render()
     {
         return self::renderStatic(
             [
-                'node' => $node,
-                'dimension' =>  $dimension
+                'node' => $this->arguments['node'],
+                'dimension' =>  $this->arguments['dimension']
             ],
             $this->buildRenderChildrenClosure(),
             $this->renderingContext
