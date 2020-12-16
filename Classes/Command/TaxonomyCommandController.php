@@ -8,8 +8,7 @@ use Neos\ContentRepository\Domain\Service\ImportExport\NodeExportService;
 use Neos\ContentRepository\Domain\Service\ImportExport\NodeImportService;
 use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Eel\FlowQuery\FlowQuery;
-use Neos\Flow\Persistence\Generic\PersistenceManager;
-use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Sitegeist\Taxonomy\Service\DimensionService;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
@@ -56,7 +55,7 @@ class TaxonomyCommandController extends CommandController
     protected $dimensionService;
 
     /**
-     * @var PersistenceManager
+     * @var PersistenceManagerInterface
      * @Flow\Inject
      */
     protected $persistenceManager;
