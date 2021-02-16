@@ -16,6 +16,8 @@
                 <f:form.textarea class="neos-span6" name="description" id="description"/>
             </div>
 
+            <f:render partial="{nodeTypeName}" />
+
             <f:link.action class="neos-button" action="vocabulary" arguments="{vocabulary: vocabulary}">{f:translate(id: 'generic.cancel')}</f:link.action>
             <f:form.submit value="{f:translate(id: 'taxon.create')}" class="neos-button neos-button-primary" />
         </fieldset>

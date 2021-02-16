@@ -362,6 +362,7 @@ class ModuleController extends ActionController
         $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('parent', $parent);
+        $this->view->assign('nodeTypeName', $this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType($parent)));
     }
 
     /**
@@ -370,15 +371,22 @@ class ModuleController extends ActionController
      * @param NodeInterface $parent
      * @param string $title
      * @param string $description
+     * @param array $additionalData
      * @return void
      */
-    public function createTaxonomyAction(NodeInterface $parent, $title, $description = '')
+    public function createTaxonomyAction(NodeInterface $parent, $title, $description = '', array $additionalData = null)
     {
         $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType()));
+        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType($parent)));
         $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
         $nodeTemplate->setProperty('title', $title);
         $nodeTemplate->setProperty('description', $description);
+
+        if ($additionalData !== null) {
+            foreach ($additionalData as $key => $value) {
+                $nodeTemplate->setProperty($key, $value);
+            }
+        }
 
         $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
 
@@ -417,7 +425,7 @@ class ModuleController extends ActionController
 
         $this->view->assign('taxonomy', $taxonomy);
         $this->view->assign('defaultTaxonomy', $this->getNodeInDefaultDimensions($taxonomy));
-
+        $this->view->assign('nodeTypeName', $this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType($taxonomy)));
     }
 
     /**
@@ -426,9 +434,10 @@ class ModuleController extends ActionController
      * @param NodeInterface $taxonomy
      * @param string $title
      * @param string $description
+     * @param array $additionalData
      * @return void
      */
-    public function updateTaxonomyAction(NodeInterface $taxonomy, $title, $description = '')
+    public function updateTaxonomyAction(NodeInterface $taxonomy, $title, $description = '', array $additionalData = null)
     {
         $previousTitle = $taxonomy->getProperty('title');
         $previousDescription = $taxonomy->getProperty('description');
@@ -439,6 +448,12 @@ class ModuleController extends ActionController
 
         if ($previousDescription !== $description) {
             $taxonomy->setProperty('description', $description);
+        }
+
+        if ($additionalData !== null) {
+            foreach ($additionalData as $key => $value) {
+                $taxonomy->setProperty($key, $value);
+            }
         }
 
         $this->addFlashMessage(
