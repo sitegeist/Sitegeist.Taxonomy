@@ -114,6 +114,7 @@ class ModuleController extends ActionController
         foreach ($vocabularyNodes as $vocabulary) {
             $vocabularies[] = [
                 'node' => $vocabulary,
+                'isAutoCreated' => $vocabulary->isAutocreated(),
                 'defaultNode' => $this->getNodeInDefaultDimensions($vocabulary)
             ];
         }
