@@ -213,6 +213,12 @@ class TaxonomyService
         foreach ($startingPoint->getChildNodes() as $childNode) {
             $result['children'][] = $this->getTaxonomyTreeAsArray($childNode);
         }
+        usort($result['children'], function (array $childA, array $childB) {
+            return strcmp(
+                $childA['title'] ?: '',
+                $childB['title'] ?: ''
+            );
+        });
 
         return $result;
     }
