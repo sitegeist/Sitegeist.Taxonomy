@@ -117,6 +117,12 @@ class ModuleController extends ActionController
                 'defaultNode' => $this->getNodeInDefaultDimensions($vocabulary)
             ];
         }
+        usort($vocabularies, function (array $vocabularyA, array $vocabularyB) {
+            return strcmp(
+                $vocabularyA['node']->getProperty('title') ?: '',
+                $vocabularyB['node']->getProperty('title') ?: ''
+            );
+        });
 
         $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabularies', $vocabularies);
@@ -245,7 +251,14 @@ class ModuleController extends ActionController
         $this->view->assign('taxonomyRoot', $root);
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
-        $this->view->assign('taxonomies', $this->fetchChildTaxonomies($vocabulary));
+        $taxonomies = $this->fetchChildTaxonomies($vocabulary);
+        usort($taxonomies, function (array $taxonomyA, array $taxonomyB) {
+            return strcmp(
+                $taxonomyA['node']->getProperty('title') ?: '',
+                $taxonomyB['node']->getProperty('title') ?: ''
+            );
+        });
+        $this->view->assign('taxonomies', $taxonomies);
     }
 
     /**
