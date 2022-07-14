@@ -40,7 +40,7 @@ Sitegeist.Taxonomy defines three basic node types:
 If you have to enforce the existence of a specific vocabulary or taxonomy you can use a derived node type:
 
 ```YAML
-    Vendor.Site.Taxonomy.Root:
+    Vendor.Site:Taxonomy.Root:
       superTypes:
         Sitegeist.Taxonomy:Root: TRUE
       childNodes:
@@ -54,7 +54,7 @@ And configure the taxonomy-package to use this root node type instead of the def
     Sitegeist:
       Taxonomy:
         contentRepository:
-          rootNodeType: 'Vendor.Site.Taxonomy.Root'
+          rootNodeType: 'Vendor.Site:Taxonomy.Root'
           vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
           taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 ```
