@@ -1,0 +1,70 @@
+prototype(Sitegeist.Taxonomy:Action.TaxonForm) < prototype(Neos.Fusion:Component) {
+
+  targetAction = null
+
+  renderer = afx`
+    <Sitegeist.Taxonomy:Component.FlashMessages />
+
+    <div class="neos-row-fluid">
+      <div class="neos-span6">
+        <legend>
+          {Translation.translate('taxon.createBelow', '', [], 'Main', 'Sitegeist.Taxonomy')}
+          : {vocabulary.properties.title}
+        </legend>
+      </div>
+    </div>
+
+    <Neos.Fusion.Form:Form form.target.action={props.targetAction} form.data.properties={vocabulary.properties} >
+      <fieldset>
+        <Neos.Fusion.Form:Hidden
+          field.name="parentNodeAggregateId"
+          field.value={parentNodeAggregateId}
+          @if={parentNodeAggregateId}
+        />
+
+        <label class="neos-control-label" for="title">
+          {Translation.translate('properties.title', '', [], 'Main', 'NodeTypes/Vocabulary')}
+        </label>
+
+        <div class="neos-row-fluid">
+          <div class="neos-span6">
+            <div class="neos-control-group">
+              <Neos.Fusion.Form:Neos.BackendModule.FieldContainer
+                field.name="properties[title]"
+                label="title"
+                >
+                <Neos.Fusion.Form:Textfield  attributes.class="neos-span12" attributes.id="title"  />
+              </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+            </div>
+          </div>
+        </div>
+
+        <label class="neos-control-label" for="description">
+          {Translation.translate('properties.description', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        </label>
+
+        <div class="neos-row-fluid">
+          <div class="neos-span6">
+            <div class="neos-control-group">
+              <Neos.Fusion.Form:Neos.BackendModule.FieldContainer
+                field.name="properties[description]"
+                label="description"
+              >
+                <Neos.Fusion.Form:Textfield attributes.class="neos-span12" attributes.id="description" />
+              </Neos.Fusion.Form:Neos.BackendModule.FieldContainer>
+            </div>
+          </div>
+        </div>
+
+        <Neos.Fusion:Link.Action class="neos-button" href.action="index" href.arguments="{root: taxonomyRoot}">
+          {Translation.translate('generic.cancel', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        </Neos.Fusion:Link.Action>
+        <Neos.Fusion.Form:Submit
+          field.value={Translation.translate('generic.save', '', [], 'Main', 'Sitegeist.Taxonomy')}
+          attributes.class="neos-button neos-button-primary"
+        />
+
+      </fieldset>
+    </Neos.Fusion.Form:Form>
+  `
+}

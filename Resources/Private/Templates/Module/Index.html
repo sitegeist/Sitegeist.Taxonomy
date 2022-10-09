@@ -8,7 +8,7 @@
         <legend>
             {f:translate(id: 'vocabularies')}
             <div class="neos-pull-right">
-                <f:render partial="LanguageSelection" arguments="{targetAction: 'index', targetProperty: 'root', contentDimensionOptions: contentDimensionOptions, contextNode: taxonomyRoot}" />
+                <f:render partial="LanguageSelection" arguments="{targetAction: 'index', targetProperty: 'root', dimensionOptions: dimensionOptions, dimensionSpacePoint: dimensionSpacePoint}" />
             </div>
         </legend>
     </div>
@@ -39,16 +39,16 @@
 
                                 <f:security.ifAccess privilegeTarget="Sitegeist.Taxonomy:Module.ManageVocabularyActions">
 
-                                <f:link.action action="editVocabulary" class="neos-button" title="{f:translate(id: 'generic.edit')}" arguments="{vocabulary: vocabulary.node.contextPath}" >
+                                <f:link.action action="editVocabulary" class="neos-button" title="{f:translate(id: 'generic.edit')}" arguments="{vocabularyId: vocabulary.node.nodeAggregateId.value}" >
                                     <i class="fas fa-pencil-alt"></i>
                                 </f:link.action>
 
                                 <f:if condition="!{vocabulary.node.autoCreated}" >
-                                    <button class="neos-button neos-button-danger" title="{f:translate(id: 'generic.delete')}" data-toggle="modal" href="#deleteVocabulary_{vocabulary.node.identifier}" data-neos-toggle="tooltip">
+                                    <button class="neos-button neos-button-danger" title="{f:translate(id: 'generic.delete')}" data-toggle="modal" href="#deleteVocabulary_{vocabulary.node.nodeAggregateId.value}" data-neos-toggle="tooltip">
                                         <i class="fas fa-trash-alt icon-white"></i>
                                     </button>
 
-                                    <div class="neos-hide" id="deleteVocabulary_{vocabulary.node.identifier}">
+                                    <div class="neos-hide" id="deleteVocabulary_{vocabulary.node.nodeAggregateId.value}">
                                         <div class="neos-modal-centered">
                                             <div class="neos-modal-content">
                                                 <div class="neos-modal-header">
@@ -57,7 +57,7 @@
                                                 </div>
                                                 <div class="neos-modal-footer">
                                                     <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
-                                                    <f:form action="deleteVocabulary"  arguments="{vocabulary: vocabulary.node}" class="neos-inline">
+                                                    <f:form action="deleteVocabulary"  arguments="{vocabularyId: vocabulary.node.nodeAggregateId.value}" class="neos-inline">
                                                         <button class="neos-button neos-button-danger" title="Delete this vocabulary">
                                                             Yes, delete this vocabulary
                                                         </button>

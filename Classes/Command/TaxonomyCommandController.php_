@@ -25,7 +25,6 @@ class TaxonomyCommandController extends CommandController
     protected $configuration;
 
     /**
-     * @Flow\Inject
      * @var NodeImportService
      */
     protected $nodeImportService;

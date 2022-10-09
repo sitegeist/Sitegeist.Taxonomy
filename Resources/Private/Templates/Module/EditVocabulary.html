@@ -16,7 +16,7 @@
     <f:form action="updateVocabulary">
         <fieldset>
 
-            <f:form.hidden name="vocabulary" value="{vocabulary.contextPath}" />
+            <f:form.hidden name="vocabularyId" value="{vocabulary.nodeAggregateId.value}" />
 
             <label class="neos-control-label" for="title">{f:translate(id: 'properties.title', source: 'NodeTypes/Vocabulary')}</label>
             <div class="neos-row-fluid">

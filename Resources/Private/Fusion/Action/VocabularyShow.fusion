@@ -1,0 +1,137 @@
+prototype(Sitegeist.Taxonomy:Action.VocabularyShow) < prototype(Neos.Fusion:Component) {
+
+  renderer = afx`
+    <Sitegeist.Taxonomy:Component.FlashMessages/>
+
+    <div class="neos-row-fluid">
+      <legend>
+        {Translation.translate('vocabulary', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        : {vocabulary.properties.title}
+      </legend>
+    </div>
+
+    <p>
+      {vocabulary.properties.description}
+    </p>
+
+
+    <table class="neos-table" @if={taxonomies}>
+      <thead>
+      <tr>
+        <th>
+          {Translation.translate('properties.title', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        </th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <Neos.Fusion:Loop items={taxonomies} itemName="taxon">
+        <Sitegeist.Taxonomy:Action.VocabularyShow.TaxonRecursive taxon={taxon}/>
+      </Neos.Fusion:Loop>
+      </tbody>
+    </table>
+
+    <Neos.Fusion:Fragment @if={Security.hasAccess("Sitegeist.Taxonomy:Module.ManageTaxonomyActions")}>
+
+
+      <div class="neos-row-fluid">
+        <Neos.Fusion:Link.Action
+          href.action="index"
+          class="neos-button"
+          title=""
+          >
+          {Translation.translate('generic.back', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        </Neos.Fusion:Link.Action>
+        <Neos.Fusion:Link.Action
+          href.action="newTaxonomy"
+          href.arguments.parentNodeAggregateId={vocabulary.nodeAggregateId.value}
+          class="neos-button neos-button-primary"
+          title=""
+          >
+          {Translation.translate('taxon.create', '', [], 'Main', 'Sitegeist.Taxonomy')}
+        </Neos.Fusion:Link.Action>
+      </div>
+
+    </Neos.Fusion:Fragment>
+  `
+}
+
+prototype(Sitegeist.Taxonomy:Action.VocabularyShow.TaxonRecursive) < prototype(Neos.Fusion:Component) {
+
+  renderer = afx`
+    <tr>
+      <td>
+        <Neos.Fusion:Loop items={taxon.parents}>
+          &nbsp; &nbsp; &nbsp;
+        </Neos.Fusion:Loop>
+
+        <i class="fas fa-caret-right" @if={taxon.parents}></i>
+        <i class={taxon.node.nodeType.fullConfiguration.ui.icon} @if={!taxon.parents}></i>
+        &nbsp;
+        {taxon.node.properties.title}
+      </td>
+      <td>
+        {taxon.node.properties.description}
+      </td>
+      <td>
+        <!--
+        <div class="neos-pull-right">
+
+          <f:security.ifAccess privilegeTarget="Sitegeist.Taxonomy:Module.ManageTaxonomyActions">
+
+            <f:link.action action="newTaxonomy" arguments="{parent : taxon.node.contextPath}"
+                           title="{f:translate(id: 'taxon.createBelow')}" class="neos-button neos-button-primary">
+              <i class="fas fa-plus"></i>
+            </f:link.action>
+
+            <f:form action="editTaxonomy" class="neos-inline">
+              <f:form.hidden name="taxonomy" value="{taxon.node.contextPath}"/>
+              <f:form.button title="{f:translate(id: 'generic.edit')}" data="{neos-toggle: 'tooltip'}"
+                             class="neos-button neos-button-primary">
+                <i class="fas fa-pencil-alt"></i>
+              </f:form.button>
+            </f:form>
+
+            <f:if condition="{taxon.autoCreated = false}">
+              <button class="neos-button neos-button-danger" title="{f:translate(id: 'generic.delete')}"
+                      data-toggle="modal" href="#deleteTaxonomx_{taxon.node.identifier}" data-neos-toggle="tooltip">
+                <i class="fas fa-trash-alt icon-white"></i>
+              </button>
+
+              <div class="neos-hide" id="deleteTaxonomx_{taxon.node.identifier}">
+                <div class="neos-modal-centered">
+                  <div class="neos-modal-content">
+                    <div class="neos-modal-header">
+                      <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
+                      <div class="neos-header">Do you really want to delete the taxonomy "{taxon.node.properties.title}
+                        "? This action cannot be undone.
+                      </div>
+                    </div>
+                    <div class="neos-modal-footer">
+                      <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
+                      <f:form action="deleteTaxonomy" arguments="{taxonomy: taxon.node}" class="neos-inline">
+                        <button class="neos-button neos-button-danger" title="Delete this taxonomy">Yes, delete this
+                          taxonomy
+                        </button>
+                      </f:form>
+                    </div>
+                  </div>
+                </div>
+                <div class="neos-modal-backdrop neos-in"></div>
+              </div>
+
+            </f:if>
+
+          </f:security.ifAccess>
+
+        </div>
+        -->
+      </td>
+    </tr>
+
+    <Neos.Fusion:Loop items={taxon.children} as="child">
+      <Sitegeist.Taxonomy:Action.VocabularyShow.TaxonRecursive taxon={child}/>
+    </Neos.Fusion:Loop>
+  `
+}
+

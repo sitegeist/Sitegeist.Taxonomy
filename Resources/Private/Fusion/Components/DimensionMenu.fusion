@@ -1,0 +1,27 @@
+prototype(Sitegeist.Taxonomy:Component.DimensionMenu) < prototype(Neos.Fusion:Component) {
+    dimensionOptions = ${dimensionOptions || []}
+    dimensions = ${dimensions || []}
+
+    renderer = afx`
+      <Neos.Fusion.Form:Form
+        attributes.class="neos-inline"
+        form.target='#'
+        form.method="get"
+        form.data.nodeAggregateId={nodeAggregateId}
+        form.data.dimensions={props.dimensions}
+      >
+
+        <Neos.Fusion.Form:Hidden name="nodeAggregateId" />
+
+        <Neos.Fusion:Loop items={props.dimensionOptions} itemName="dimensionConfiguration" itemKey="dimensionKey">
+          <Neos.Fusion.Form:Select field.name={"dimensions[" + dimensionKey + "]"} >
+            <Neos.Fusion:Loop items={dimensionConfiguration.values} itemName="valueConfiguration">
+              <Neos.Fusion.Form:Select.Option option.value={valueConfiguration.value}>{valueConfiguration.label}</Neos.Fusion.Form:Select.Option>
+            </Neos.Fusion:Loop>
+          </Neos.Fusion.Form:Select>
+        </Neos.Fusion:Loop>
+
+      </Neos.Fusion.Form:Form>
+    `
+}
+

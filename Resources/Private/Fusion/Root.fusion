@@ -1,0 +1,20 @@
+include: resource://Neos.Fusion/Private/Fusion/Root.fusion
+include: resource://Neos.Fusion.Form/Private/Fusion/Root.fusion
+include: **/*.fusion
+
+Sitegeist.Taxonomy.ModuleController.index = Sitegeist.Taxonomy:Action.Index
+Sitegeist.Taxonomy.ModuleController.newVocabulary = Sitegeist.Taxonomy:Action.VocabularyForm {
+  targetAction = "createVocabulary"
+}
+Sitegeist.Taxonomy.ModuleController.editVocabulary = Sitegeist.Taxonomy:Action.VocabularyForm {
+  targetAction = "updateVocabulary"
+}
+
+Sitegeist.Taxonomy.ModuleController.vocabulary = Sitegeist.Taxonomy:Action.VocabularyShow {
+  targetAction = "createVocabulary"
+}
+Sitegeist.Taxonomy.ModuleController.newTaxonomy = Sitegeist.Taxonomy:Action.TaxonForm {
+  targetAction = "createTaxonomy"
+}
+
+
