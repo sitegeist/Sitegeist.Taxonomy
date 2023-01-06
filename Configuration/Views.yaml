@@ -1,0 +1,6 @@
+-
+  requestFilter: 'isPackage("Sitegeist.Taxonomy") && isController("Module")'
+  viewObjectName: 'Neos\Fusion\View\FusionView'
+  options:
+    fusionPathPatterns:
+      - 'resource://Sitegeist.Taxonomy/Private/Fusion/Backend'

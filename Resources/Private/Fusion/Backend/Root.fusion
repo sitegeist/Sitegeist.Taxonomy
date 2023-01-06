@@ -1,0 +1,12 @@
+include: resource://Neos.Fusion/Private/Fusion/Root.fusion
+include: resource://Neos.Fusion.Form/Private/Fusion/Root.fusion
+include: **/*.fusion
+
+
+Sitegeist.Taxonomy.ModuleController.index = Sitegeist.Taxonomy:Views.Module.Vocabulary.List
+Sitegeist.Taxonomy.ModuleController.newVocabulary = Sitegeist.Taxonomy:Views.Module.Vocabulary.New
+Sitegeist.Taxonomy.ModuleController.editVocabulary = Sitegeist.Taxonomy:Views.Module.Vocabulary.Edit
+
+Sitegeist.Taxonomy.ModuleController.vocabulary = Sitegeist.Taxonomy:Views.Module.Taxonomy.List
+Sitegeist.Taxonomy.ModuleController.newTaxonomy = Sitegeist.Taxonomy:Views.Module.Taxonomy.New
+Sitegeist.Taxonomy.ModuleController.editTaxonomy = Sitegeist.Taxonomy:Views.Module.Taxonomy.Edit
