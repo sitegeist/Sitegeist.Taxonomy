@@ -3,18 +3,21 @@
   "license": "GPL-3.0+",
   "private": true,
   "engines": {
-    "node": ">=8"
+    "node": ">=16"
   },
   "scripts": {
-    "build": "neos-react-scripts build && uglifyjs --compress --mangle -o ../../../Public/JavaScript/TaxonomyEditor/Plugin.js -- ../../../Public/JavaScript/TaxonomyEditor/Plugin.js",
+    "build": "neos-react-scripts build",
     "watch": "neos-react-scripts watch"
   },
   "dependencies": {
-    "react-sortable-hoc": "^0.6.8"
+    "core-js": "^3.27.1",
+    "react-sortable-hoc": "^0.6.8",
+    "regenerator-runtime": "^0.13.11"
   },
   "devDependencies": {
-    "@neos-project/react-ui-components": "~3.1.0",
-    "@neos-project/neos-ui-extensibility": "~3.1.0"
+    "@neos-project/build-essentials": "^8.2.0",
+    "@neos-project/neos-ui-extensibility": "^8.2.0",
+    "@neos-project/react-ui-components": "^8.2.0"
   },
   "neos": {
     "buildTargetDirectory": "../../../Public/JavaScript/TaxonomyEditor"
