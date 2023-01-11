@@ -1,0 +1,71 @@
+.TaxonomyEditor__button___2QdwU.TaxonomyEditor__button___2QdwU {
+    margin-top: 1em;
+    text-align: left;
+}
+
+.TaxonomyEditor__icon___2yFts.TaxonomyEditor__icon___2yFts {
+    margin-right: 1em;
+}
+.TaxonomyTreeSelect__taxonomyTreeSelect___2RpWx {
+    padding: 1em;
+    overflow: auto;
+    max-height: calc(100vh - 82px);
+}
+
+.TaxonomyTreeSelect__list___3w-ZX {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 0 15px;
+}
+
+.TaxonomyTreeSelect__item___teI03 {
+    position: relative;
+}
+
+.TaxonomyTreeSelect__details___15JXk {
+    margin-left: -15px;
+}
+
+.TaxonomyTreeSelect__isDirty___z5kIO {
+    position: absolute;
+    top: 0;
+    left: -25px;
+    height: 24px;
+    border-left: 2px solid #ff8700;
+}
+
+.TaxonomyTreeSelect__label___i897j {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+}
+
+.TaxonomyTreeSelect__label___i897j .TaxonomyTreeSelect__icon___32hds {
+        display: inline-block;
+        width: 2em;
+        text-align: center;
+    }
+
+.TaxonomyTreeSelect__label___i897j .TaxonomyTreeSelect__title___3x-X3 {
+        display: inline-block;
+        margin-right: 1em;
+    }
+
+.TaxonomyTreeSelect__checkbox___1ANen:checked + .TaxonomyTreeSelect__label___i897j .TaxonomyTreeSelect__title___3x-X3 {
+            color: #00ADEE;
+        }
+
+.TaxonomyTreeSelect__label___i897j .TaxonomyTreeSelect__nodePath___GlOGF {
+        display: inline-block;
+        opacity: .5;
+    }
+
+label.TaxonomyTreeSelect__label___i897j {
+    cursor: pointer;
+}
+
+.TaxonomyTreeSelect__checkbox___1ANen {
+    display: none;
+}
+
+/*# sourceMappingURL=Plugin.css.map*/

@@ -12,6 +12,8 @@ import {selectors} from '@neos-project/neos-ui-redux-store';
 import {Icon} from '@neos-project/react-ui-components';
 
 import styles from './TaxonomyTreeSelect.css';
+import "regenerator-runtime/runtime";
+import "core-js/stable";
 
 @connect((state, {identifier}) => {
 	const contextForNodeLinking = selectors.UI.NodeLinking.contextForNodeLinking(state);
