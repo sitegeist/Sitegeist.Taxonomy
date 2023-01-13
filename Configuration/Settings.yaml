@@ -1,5 +1,9 @@
 Sitegeist:
   Taxonomy:
+    backendModule:
+      fusionPathPatterns:
+        Sitegeist.Taxonomy: 'resource://Sitegeist.Taxonomy/Private/Fusion/Backend'
+
     contentRepository:
       rootNodeName: 'taxonomies'
       rootNodeType: 'Sitegeist.Taxonomy:Root'

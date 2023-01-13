@@ -17,6 +17,7 @@ use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Fusion\View\FusionView;
 use Sitegeist\Taxonomy\Service\DimensionService;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
@@ -35,6 +36,15 @@ use Neos\Utility\Arrays;
  */
 class ModuleController extends ActionController
 {
+    /**
+     * @var string
+     */
+    protected $defaultViewObjectName = FusionView::class;
+
+    /**
+     * @var FusionView
+     */
+    protected $view;
 
     /**
      * @Flow\Inject
@@ -59,6 +69,12 @@ class ModuleController extends ActionController
      * @var PersistenceManagerInterface
      */
     protected $persistenceManager;
+
+    /**
+     * @var array
+     * @Flow\InjectConfiguration(path="backendModule.fusionPathPatterns")
+     */
+    protected $fusionPathPatterns;
 
     /**
      * @var string
@@ -91,6 +107,7 @@ class ModuleController extends ActionController
      */
     public function initializeView(ViewInterface $view)
     {
+        $this->view->setFusionPathPatterns($this->fusionPathPatterns);
         $this->view->assign('contentDimensionOptions', $this->getContentDimensionOptions());
     }
 
@@ -496,4 +513,6 @@ class ModuleController extends ActionController
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
+
+
 }

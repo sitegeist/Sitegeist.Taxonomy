@@ -27,6 +27,10 @@ multiple sites and the taxonomy documents can be defined without interfering wit
 
 It also provides a separate backend module for managing vocabularies and taxonomies.
 
+## Installation
+
+Sitegeist.Taxonomy is available via packagist `composer require sitegeist/taxonomy`.
+We use semantic-versioning, so every breaking change will increase the major version number.
 
 ## Storing vocabularies and taxonomies in the ContentRepository
 
@@ -113,12 +117,15 @@ of taxonomies:
 
 Reading and referencing taxonomies from other nodes is currently not limited.
 
-## Installation
+## Extensibility
 
-Sitegeist.Taxonomy is available via packagist. `"sitegeist/taxonomy" : "^1.0"` to the require section of the composer.json
-or run `composer require sitegeist/taxonomy`.
+Packages can add additional fields to the forms of taxonomies and vocabularies. To do this 
+the following steps are required.
 
-We use semantic-versioning, so every breaking change will increase the major version number.
+1. Extend the NodeTypes `Sitegeist.Taxonomy:Taxonomy` or `Sitegeist.Taxonomy:Vocabulary` in your package.
+2. Add tha path to your additional `Root.fusion` to the Setting in path `Sitegeist.Taxonomy.backendModule.fusionPathPatterns`.
+3. In the fusion code define each field as prototype that accepts the props `taxon` & `defaultTaxon` resp. `vocabulary` & `defaultVocabulary`. 
+4. Register those prototypesNames by adding them to the property `additionalFieldPrototypeNames` of the prototype `Sitegeist.Taxonomy:Form.Taxonomy` or `Sitegeist.Taxonomy:Form.Vocabulary`
 
 ## Contribution
 

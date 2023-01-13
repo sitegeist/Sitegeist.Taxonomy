@@ -1,0 +1,64 @@
+prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component) {
+
+    i18nMain = ${Translation.value('').package("Sitegeist.Taxonomy").source('Main')}
+    i18nVocabulary = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Vocabulary')}
+
+    targetAction = null
+    vocabulary = null
+    defaultVocabulary = null
+    taxonomyRoot = null
+
+    additionalFieldPrototypeNames = Neos.Fusion:DataStructure
+
+    renderer = afx`
+        <Neos.Fusion.Form:Form form.target.action={props.targetAction} form.data.properties={props.vocabulary ? props.vocabulary.properties : null}>
+
+            <Neos.Fusion.Form:Hidden field.name="vocabulary" field.value={props.vocabulary.contextPath} @if={props.vocabulary}/>
+            <Neos.Fusion.Form:Hidden field.name="taxonomyRoot" field.value={props.taxonomyRoot.contextPath} @if={props.taxonomyRoot}/>
+
+            <fieldset>
+                <div class="neos-control-group">
+                    <label class="neos-control-label" for="title">
+                        {props.i18nVocabulary.id('properties.title')}
+                        <span @if={props.defaultVocabulary}>: {props.defaultVocabulary.properties.title}</span>
+                    </label>
+                    <Neos.Fusion.Form:Textarea attributes.class="neos-span6" field.name="properties[title]" />
+                </div>
+
+                <div class="neos-control-group">
+                    <label class="neos-control-label" for="description">
+                        {props.i18nVocabulary.id('properties.description')}
+                        <span @if={props.defaultVocabulary}>: {props.defaultVocabulary.properties.description}</span>
+                    </label>
+                    <Neos.Fusion.Form:Textarea attributes.class="neos-span6 form-inline" field.name="properties[description]"/>
+                </div>
+
+                <Neos.Fusion:Fragment @if={props.additionalFieldPrototypeNames}>
+                    <Neos.Fusion:Loop items={props.additionalFieldPrototypeNames} itemKey="key" itemName="prototypeName">
+                        <div class="neos-control-group">
+                            <Neos.Fusion:Renderer
+                                type={prototypeName}
+                                element.name={key}
+                                element.vocabulary={props.vocabulary}
+                                element.defaultVocabulary={props.defaultVocabulary}
+                            />
+                        </div>
+                    </Neos.Fusion:Loop>
+                </Neos.Fusion:Fragment>
+
+                <div class="neos-control-group">
+                    <Neos.Fusion:Link.Action
+                        class="neos-button"
+                        href.action="index"
+                        href.arguments.root={taxonomyRoot}
+                    >
+                        {props.i18nMain.id('generic.cancel')}
+                    </Neos.Fusion:Link.Action>
+                    &nbsp;
+                    <Neos.Fusion.Form:Button attributes.class="neos-button neos-button-primary">{props.i18nMain.id('generic.save') + ''}</Neos.Fusion.Form:Button>
+                </div>
+            </fieldset>
+        </Neos.Fusion.Form:Form>
+    `
+
+}
