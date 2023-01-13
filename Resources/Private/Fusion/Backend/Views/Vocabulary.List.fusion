@@ -69,7 +69,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
                                                     </div>
                                                     <div class="neos-modal-footer">
                                                         <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
-                                                        <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabulary={vocabulary.node} class="neos-inline">
+                                                        <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabulary={vocabulary.node} attributes.class="neos-inline">
                                                             <button class="neos-button neos-button-danger" title="Delete this vocabulary">
                                                                 Yes, delete this vocabulary
                                                             </button>
