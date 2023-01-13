@@ -59,31 +59,33 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
                                         <button class="neos-button neos-button-danger" title={props.i18n.id('generic.delete')} data-toggle="modal" href={'#deleteVocabulary_' + vocabulary.node.identifier} data-neos-toggle="tooltip">
                                             <i class="fas fa-trash-alt icon-white"></i>
                                         </button>
-
-                                        <div class="neos-hide" id={'deleteVocabulary_' + vocabulary.node.identifier}>
-                                            <div class="neos-modal-centered">
-                                                <div class="neos-modal-content">
-                                                    <div class="neos-modal-header">
-                                                        <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
-                                                        <div class="neos-header">Do you really want to delete the vocabulary "{vocabulary.node.properties.title}"? This action cannot be undone.</div>
-                                                    </div>
-                                                    <div class="neos-modal-footer">
-                                                        <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
-                                                        <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabulary={vocabulary.node} attributes.class="neos-inline">
-                                                            <button class="neos-button neos-button-danger" title="Delete this vocabulary">
-                                                                Yes, delete this vocabulary
-                                                            </button>
-                                                        </Neos.Fusion.Form:Form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="neos-modal-backdrop neos-in"></div>
-                                        </div>
                                     </Neos.Fusion:Fragment>
 
                                 </Neos.Fusion:Fragment>
 
                             </div>
+
+                            <Neos.Fusion:Fragment @if={!vocabulary.node.autoCreated} >
+                                <div class="neos-hide" id={'deleteVocabulary_' + vocabulary.node.identifier}>
+                                    <div class="neos-modal-centered">
+                                        <div class="neos-modal-content">
+                                            <div class="neos-modal-header">
+                                                <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
+                                                <div class="neos-header">Do you really want to delete the vocabulary "{vocabulary.node.properties.title}"? This action cannot be undone.</div>
+                                            </div>
+                                            <div class="neos-modal-footer">
+                                                <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
+                                                <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabulary={vocabulary.node} attributes.class="neos-inline">
+                                                    <button class="neos-button neos-button-danger" title="Delete this vocabulary">
+                                                        Yes, delete this vocabulary
+                                                    </button>
+                                                </Neos.Fusion.Form:Form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="neos-modal-backdrop neos-in"></div>
+                                </div>
+                            </Neos.Fusion:Fragment>
                         </div>
                     </div>
                     {((iterator.cycle % 4) && (!iterator.isLast)) ? '' : '</div><div class="neos-row-fluid">'}

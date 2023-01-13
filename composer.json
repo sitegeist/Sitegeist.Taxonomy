@@ -6,7 +6,7 @@
     "require": {
         "neos/neos": "^7.1 || ^8.0 || dev-master",
         "neos/neos-ui": "^7.1 || ^8.0 || dev-master",
-        "neos/fusion-form": ">2.1",
+        "neos/fusion-form": ">=2.1.0",
         "neos/content-repository": "*"
     },
     "autoload": {
