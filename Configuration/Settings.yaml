@@ -26,6 +26,10 @@ Neos:
           'Sitegeist.Taxonomy:TaxonomyEditor':
             resource: 'resource://Sitegeist.Taxonomy/Public/JavaScript/TaxonomyEditor/Plugin.js'
 
+        stylesheets:
+          'Sitegeist.Taxonomy:TaxonomyEditor':
+            resource: 'resource://Sitegeist.Taxonomy/Public/JavaScript/TaxonomyEditor/Plugin.css'
+
     modules:
       management:
         submodules:
