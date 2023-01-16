@@ -10,7 +10,7 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
     parent = null
     vocabulary = null
 
-    additionalFieldPrototypeNames = Neos.Fusion:DataStructure
+    additionalFieldPrototypeNames = ${Configuration.setting('Sitegeist.Taxonomy.backendModule.additionalTaxonomyFieldPrototypes')}
 
     renderer = afx`
         <Neos.Fusion.Form:Form form.target.action={props.targetAction} form.data.properties={props.taxonomy.properties}>

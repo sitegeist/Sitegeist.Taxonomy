@@ -72,9 +72,9 @@ class ModuleController extends ActionController
 
     /**
      * @var array
-     * @Flow\InjectConfiguration(path="backendModule.fusionPathPatterns")
+     * @Flow\InjectConfiguration(path="backendModule.additionalFusionIncludePathes")
      */
-    protected $fusionPathPatterns;
+    protected $additionalFusionIncludePathes;
 
     /**
      * @var string
@@ -107,7 +107,11 @@ class ModuleController extends ActionController
      */
     public function initializeView(ViewInterface $view)
     {
-        $this->view->setFusionPathPatterns($this->fusionPathPatterns);
+        $fusionPathes = ['resource://Sitegeist.Taxonomy/Private/Fusion/Backend'];
+        if ($this->additionalFusionIncludePathes && is_array($this->additionalFusionIncludePathes)) {
+            $fusionPathes = Arrays::arrayMergeRecursiveOverrule($fusionPathes, $this->additionalFusionIncludePathes);
+        }
+        $this->view->setFusionPathPatterns($fusionPathes);
         $this->view->assign('contentDimensionOptions', $this->getContentDimensionOptions());
     }
 

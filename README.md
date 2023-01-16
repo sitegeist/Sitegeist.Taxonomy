@@ -123,9 +123,10 @@ Packages can add additional fields to the forms of taxonomies and vocabularies. 
 the following steps are required.
 
 1. Extend the NodeTypes `Sitegeist.Taxonomy:Taxonomy` or `Sitegeist.Taxonomy:Vocabulary` in your package.
-2. Add tha path to your additional `Root.fusion` to the Setting in path `Sitegeist.Taxonomy.backendModule.fusionPathPatterns`.
-3. In the fusion code define each field as prototype that accepts the props `taxon` & `defaultTaxon` resp. `vocabulary` & `defaultVocabulary`. 
-4. Register those prototypesNames by adding them to the property `additionalFieldPrototypeNames` of the prototype `Sitegeist.Taxonomy:Form.Taxonomy` or `Sitegeist.Taxonomy:Form.Vocabulary`
+2. Add tha path to your additional `Root.fusion` to the Setting in path `Sitegeist.Taxonomy.backendModule.additionalFusionIncludePathes`.
+3. In the fusion code define each field as prototype that accepts the props `name` plus `taxon` & `defaultTaxon` resp. `vocabulary` & `defaultVocabulary`. 
+4. Register addtional prototypesNames by adding them to the Settings `Sitegeist.Taxonomy.backendModule.additionalVocabularyFieldPrototypes` or
+   `Sitegeist.Taxonomy.backendModule.additionalTaxonomyFieldPrototypes`
 
 ## Contribution
 

@@ -8,7 +8,7 @@ prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component)
     defaultVocabulary = null
     taxonomyRoot = null
 
-    additionalFieldPrototypeNames = Neos.Fusion:DataStructure
+    additionalFieldPrototypeNames = ${Configuration.setting('Sitegeist.Taxonomy.backendModule.additionalVocabularyFieldPrototypes')}
 
     renderer = afx`
         <Neos.Fusion.Form:Form form.target.action={props.targetAction} form.data.properties={props.vocabulary ? props.vocabulary.properties : null}>
