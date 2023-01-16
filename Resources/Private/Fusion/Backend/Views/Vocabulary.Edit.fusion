@@ -1,0 +1,19 @@
+prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.Edit) < prototype(Neos.Fusion:Component) {
+
+    i18nMain = ${Translation.value('').package("Sitegeist.Taxonomy").source('Main')}
+    i18nVocabulary = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Vocabulary')}
+
+    renderer = afx`
+        <div class="neos-row-fluid">
+            <legend>{props.i18nMain.id('vocabulary')}: {vocabulary.properties.title}</legend>
+            <legend @if={defaultVocabulary}>{props.i18nMain.id('generic.default')}: {defaultVocabulary.properties.title}</legend>
+        </div>
+        <Sitegeist.Taxonomy:Form.Vocabulary
+            targetAction="updateVocabulary"
+            taxonomyRoot={taxonomyRoot}
+            vocabulary={vocabulary}
+            defaultVocabulary={defaultVocabulary}
+        />
+    `
+
+}

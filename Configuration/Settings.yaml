@@ -1,5 +1,13 @@
 Sitegeist:
   Taxonomy:
+    backendModule:
+      # fusion files or folders that are to be included in the backend module
+      additionalFusionIncludePathes: []
+      # names of additional prototypes to be rendered in vocabulary forms
+      additionalVocabularyFieldPrototypes: []
+      # names of additional prototypes to be rendered in taxonomy forms
+      additionalTaxonomyFieldPrototypes: []
+
     contentRepository:
       rootNodeName: 'taxonomies'
       rootNodeType: 'Sitegeist.Taxonomy:Root'

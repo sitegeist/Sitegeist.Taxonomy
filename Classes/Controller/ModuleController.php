@@ -17,6 +17,7 @@ use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Fusion\View\FusionView;
 use Sitegeist\Taxonomy\Service\DimensionService;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
@@ -35,6 +36,15 @@ use Neos\Utility\Arrays;
  */
 class ModuleController extends ActionController
 {
+    /**
+     * @var string
+     */
+    protected $defaultViewObjectName = FusionView::class;
+
+    /**
+     * @var FusionView
+     */
+    protected $view;
 
     /**
      * @Flow\Inject
@@ -59,6 +69,12 @@ class ModuleController extends ActionController
      * @var PersistenceManagerInterface
      */
     protected $persistenceManager;
+
+    /**
+     * @var array
+     * @Flow\InjectConfiguration(path="backendModule.additionalFusionIncludePathes")
+     */
+    protected $additionalFusionIncludePathes;
 
     /**
      * @var string
@@ -91,6 +107,11 @@ class ModuleController extends ActionController
      */
     public function initializeView(ViewInterface $view)
     {
+        $fusionPathes = ['resource://Sitegeist.Taxonomy/Private/Fusion/Backend'];
+        if ($this->additionalFusionIncludePathes && is_array($this->additionalFusionIncludePathes)) {
+            $fusionPathes = Arrays::arrayMergeRecursiveOverrule($fusionPathes, $this->additionalFusionIncludePathes);
+        }
+        $this->view->setFusionPathPatterns($fusionPathes);
         $this->view->assign('contentDimensionOptions', $this->getContentDimensionOptions());
     }
 
@@ -150,6 +171,7 @@ class ModuleController extends ActionController
             $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
         }
         $modifiedContext = $this->contextFactory->create(array_merge($contextProperties, $newContextProperties));
+
         $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
 
         $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
@@ -277,24 +299,27 @@ class ModuleController extends ActionController
      * Create a new vocabulary
      *
      * @param NodeInterface $taxonomyRoot
-     * @param string $title
-     * @param string $description
+     * @param array $properties
      * @return void
      */
-    public function createVocabularyAction(NodeInterface $taxonomyRoot, $title, $description = '')
+    public function createVocabularyAction(NodeInterface $taxonomyRoot, array $properties)
     {
         $vocabularyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType());
+        $vocabularyProperties = $vocabularyNodeType->getProperties();
 
         $nodeTemplate = new NodeTemplate();
         $nodeTemplate->setNodeType($vocabularyNodeType);
-        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
-        $nodeTemplate->setProperty('title', $title);
-        $nodeTemplate->setProperty('description', $description);
+        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($properties['title']));
+        foreach($properties as $name => $value) {
+            if (array_key_exists($name, $vocabularyProperties)) {
+                $nodeTemplate->setProperty($name, $value);
+            }
+        }
 
         $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
 
         $this->addFlashMessage(
-            sprintf('Created vocabulary %s at path %s', $title, $vocabulary->getPath())
+            sprintf('Created vocabulary %s at path %s', $properties['title'], $vocabulary->getLabel())
         );
         $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
@@ -317,26 +342,24 @@ class ModuleController extends ActionController
      * Apply changes to the given vocabulary
      *
      * @param NodeInterface $vocabulary
-     * @param string $title
-     * @param string $description
+     * @param array $properties
      * @return void
      */
-    public function updateVocabularyAction(NodeInterface $vocabulary, $title, $description = '')
+    public function updateVocabularyAction(NodeInterface $vocabulary, array $properties)
     {
         $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
-        $previousTitle = $vocabulary->getProperty('title');
-        $previousDescription = $vocabulary->getProperty('description');
-
-        if ($previousTitle !== $title) {
-            $vocabulary->setProperty('title', $title);
-        }
-
-        if ($previousDescription !== $description) {
-            $vocabulary->setProperty('description', $description);
+        $vocabularyProperties = $vocabulary->getNodeType()->getProperties();
+        foreach($properties as $name => $value) {
+            if (array_key_exists($name, $vocabularyProperties)) {
+                $previous = $vocabulary->getProperty($name);
+                if ($previous !== $value) {
+                    $vocabulary->setProperty($name, $value);
+                }
+            }
         }
 
         $this->addFlashMessage(
-            sprintf('Updated vocabulary %s', $title)
+            sprintf('Updated vocabulary %s', $vocabulary->getLabel())
         );
         $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
     }
@@ -381,22 +404,28 @@ class ModuleController extends ActionController
      * Create a new taxonomy
      *
      * @param NodeInterface $parent
-     * @param string $title
-     * @param string $description
+     * @param array $properties
      * @return void
      */
-    public function createTaxonomyAction(NodeInterface $parent, $title, $description = '')
+    public function createTaxonomyAction(NodeInterface $parent, array $properties)
     {
+        $taxonomyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType());
+        $taxomonyProperties = $taxonomyNodeType->getProperties();
+
         $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType()));
-        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($title));
-        $nodeTemplate->setProperty('title', $title);
-        $nodeTemplate->setProperty('description', $description);
+        $nodeTemplate->setNodeType($taxonomyNodeType);
+        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($properties['title']));
+
+        foreach($properties as $name => $value) {
+            if (array_key_exists($name, $taxomonyProperties)) {
+                $nodeTemplate->setProperty($name, $value);
+            }
+        }
 
         $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
 
         $this->addFlashMessage(
-            sprintf('Created taxonomy %s at path %s', $title, $taxonomy->getPath())
+            sprintf('Created taxonomy %s at path %s', $taxonomy->getLabel(), $taxonomy->getPath())
         );
 
         $flowQuery = new FlowQuery([$taxonomy]);
@@ -430,28 +459,25 @@ class ModuleController extends ActionController
 
         $this->view->assign('taxonomy', $taxonomy);
         $this->view->assign('defaultTaxonomy', $this->getNodeInDefaultDimensions($taxonomy));
-
     }
 
     /**
      * Apply changes to the given taxonomy
      *
      * @param NodeInterface $taxonomy
-     * @param string $title
-     * @param string $description
+     * @param array $properties
      * @return void
      */
-    public function updateTaxonomyAction(NodeInterface $taxonomy, $title, $description = '')
+    public function updateTaxonomyAction(NodeInterface $taxonomy, array $properties)
     {
-        $previousTitle = $taxonomy->getProperty('title');
-        $previousDescription = $taxonomy->getProperty('description');
-
-        if ($previousTitle !== $title) {
-            $taxonomy->setProperty('title', $title);
-        }
-
-        if ($previousDescription !== $description) {
-            $taxonomy->setProperty('description', $description);
+        $taxonomyProperties = $taxonomy->getNodeType()->getProperties();
+        foreach($properties as $name => $value) {
+            if (array_key_exists($name, $taxonomyProperties)) {
+                $previous = $taxonomy->getProperty($name);
+                if ($previous !== $value) {
+                    $taxonomy->setProperty($name, $value);
+                }
+            }
         }
 
         $this->addFlashMessage(
@@ -491,4 +517,6 @@ class ModuleController extends ActionController
 
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
+
+
 }

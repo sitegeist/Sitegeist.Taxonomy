@@ -1,0 +1,13 @@
+prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.New) < prototype(Neos.Fusion:Component) {
+
+    i18nMain = ${Translation.value('').package("Sitegeist.Taxonomy").source('Main')}
+    i18nVocabulary = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Vocabulary')}
+
+    renderer = afx`
+        <legend>{props.i18nMain.id('vocabulary.create')}</legend>
+        <Sitegeist.Taxonomy:Form.Vocabulary
+            targetAction="createVocabulary"
+            taxonomyRoot={taxonomyRoot}
+        />
+    `
+}

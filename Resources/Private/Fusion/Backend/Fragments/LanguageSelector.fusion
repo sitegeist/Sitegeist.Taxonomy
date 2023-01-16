@@ -1,0 +1,34 @@
+prototype(Sitegeist.Taxonomy:Views.Fragments.LanguageSelector) < prototype(Neos.Fusion:Component) {
+
+    targetAction = null
+    targetProperty = null
+    contentDimensionOptions = null
+    contextNode = null
+
+    renderer = afx`
+        <Neos.Fusion.Form:Form @if={props.contextNode}
+           form.target.action="changeContext"
+           form.data.dimensions={props.contextNode.context.targetDimensions}
+           attributes.class="neos-inline"
+           form.method="get"
+        >
+            <Neos.Fusion.Form:Hidden field.name="contextNode" field.value={props.contextNode.contextPath} />
+            <Neos.Fusion.Form:Hidden field.name="targetAction" field.value={props.targetAction} />
+            <Neos.Fusion.Form:Hidden field.name="targetProperty" field.value={props.targetProperty} />
+
+            <Neos.Fusion:Loop items={props.contentDimensionOptions} itemName="dimensionConfiguration" itemKey="dimensionKey" iterationName="iterator">
+                {iterator.isFirst ? '' : '&nbsp;'}
+                <Neos.Fusion.Form:Select
+                    field.name={"dimensions[" + dimensionKey + "]"}
+                    attributes.onchange="this.form.submit()"
+                >
+                    <Neos.Fusion:Loop items={dimensionConfiguration.presets} itemName="presetName" itemKey="presetIdentifier">
+                        <Neos.Fusion.Form:Select.Option option.value={presetIdentifier}>{presetName}</Neos.Fusion.Form:Select.Option>
+                    </Neos.Fusion:Loop>
+                </Neos.Fusion.Form:Select>
+
+            </Neos.Fusion:Loop>
+
+        </Neos.Fusion.Form:Form>
+    `
+}

@@ -1,0 +1,18 @@
+prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.Edit) < prototype(Neos.Fusion:Component) {
+
+    i18nMain = ${Translation.value('').package("Sitegeist.Taxonomy").source('Main')}
+    i18nVocabulary = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Vocabulary')}
+    i18nTaxonomy = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Taxonomy')}
+
+    renderer = afx`
+        <legend>{props.i18nMain.id('taxon')}: {taxonomy.properties.title}</legend>
+        <legend @if={defaultTaxonomy}>{props.i18nMain.id('generic.default')}: {defaultTaxonomy.properties.title}</legend>
+        <Sitegeist.Taxonomy:Form.Taxonomy
+            targetAction="updateTaxonomy"
+            taxonomy={taxonomy}
+            defaultTaxonomy={defaultTaxonomy}
+            vocabulary={vocabulary}
+        />
+    `
+
+}

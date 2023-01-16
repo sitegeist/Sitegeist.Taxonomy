@@ -1,0 +1,14 @@
+prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.New) < prototype(Neos.Fusion:Component) {
+
+    i18nMain = ${Translation.value('').package("Sitegeist.Taxonomy").source('Main')}
+    i18nTaxonomy = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Taxonomy')}
+
+    renderer = afx`
+        <legend>{props.i18nMain.id('taxon.createBelow')} "{parent.properties.title}"</legend>
+        <Sitegeist.Taxonomy:Form.Taxonomy
+            targetAction="createTaxonomy"
+            parent={parent}
+            vocabulary={vocabulary}
+        />
+    `
+}
