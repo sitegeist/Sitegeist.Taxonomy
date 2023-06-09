@@ -12,22 +12,36 @@ namespace Sitegeist\Taxonomy\Controller;
  * source code.
  */
 
+use Neos\ContentRepository\Core\ContentRepository;
+use Neos\ContentRepository\Core\DimensionSpace\OriginDimensionSpacePoint;
+use Neos\ContentRepository\Core\Feature\NodeCreation\Command\CreateNodeAggregateWithNode;
+use Neos\ContentRepository\Core\Feature\NodeModification\Command\SetNodeProperties;
+use Neos\ContentRepository\Core\Feature\NodeModification\Dto\PropertyValuesToWrite;
+use Neos\ContentRepository\Core\Feature\NodeRemoval\Command\RemoveNodeAggregate;
+use Neos\ContentRepository\Core\Feature\NodeVariation\Command\CreateNodeVariant;
+use Neos\ContentRepository\Core\NodeType\NodeTypeManager;
+use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
+use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeVariantSelectionStrategy;
+use Neos\ContentRepository\Core\SharedModel\User\UserId;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\Error\Messages\Error;
 use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Fusion\View\FusionView;
-use Sitegeist\Taxonomy\Service\DimensionService;
+use Neos\Neos\FrontendRouting\NodeAddress;
+use Neos\Neos\FrontendRouting\NodeAddressFactory;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
-use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
 use Neos\Eel\FlowQuery\FlowQuery;
-use Neos\ContentRepository\Domain\Model\NodeTemplate;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Service\NodeServiceInterface;
-use Neos\ContentRepository\Utility as CrUtitlity;
 use Neos\Utility\Arrays;
 
 /**
@@ -46,23 +60,6 @@ class ModuleController extends ActionController
      */
     protected $view;
 
-    /**
-     * @Flow\Inject
-     * @var ContextFactoryInterface
-     */
-    protected $contextFactory;
-
-    /**
-     * @Flow\Inject
-     * @var NodeTypeManager
-     */
-    protected $nodeTypeManager;
-
-    /**
-     * @Flow\Inject
-     * @var NodeServiceInterface
-     */
-    protected $nodeService;
 
     /**
      * @Flow\Inject
@@ -77,18 +74,6 @@ class ModuleController extends ActionController
     protected $additionalFusionIncludePathes;
 
     /**
-     * @var string
-     * @Flow\InjectConfiguration(package="Neos.ContentRepository", path="contentDimensions")
-     */
-    protected $contentDimensions;
-
-    /**
-     * @var DimensionService
-     * @Flow\Inject
-     */
-    protected $dimensionService;
-
-    /**
      * @var TaxonomyService
      * @Flow\Inject
      */
@@ -98,6 +83,22 @@ class ModuleController extends ActionController
      * @var NodeInterface
      */
     protected $defaultRoot;
+
+    /**
+     * @var ContentRepository
+     */
+    protected $contentRepository;
+
+    /**
+     * @var NodeAddressFactory
+     */
+    protected $nodeAddressFactory;
+
+    public function initializeObject()
+    {
+        $this->contentRepository = $this->taxonomyService->getContentRepository();
+        $this->nodeAddressFactory = NodeAddressFactory::create($this->contentRepository);
+    }
 
     /**
      * Initialize the view
@@ -112,411 +113,408 @@ class ModuleController extends ActionController
             $fusionPathes = Arrays::arrayMergeRecursiveOverrule($fusionPathes, $this->additionalFusionIncludePathes);
         }
         $this->view->setFusionPathPatterns($fusionPathes);
-        $this->view->assign('contentDimensionOptions', $this->getContentDimensionOptions());
     }
 
     /**
      * Show an overview of available vocabularies
-     *
-     * @param NodeInterface $root
-     * @return void
      */
-    public function indexAction(NodeInterface $root = null)
+    public function indexAction(string $rootNodeAddress = null): void
     {
-        if (!$root) {
-            $root = $this->taxonomyService->getRoot();
-        }
+        if (is_null($rootNodeAddress)) {
+            $subgraph = $this->taxonomyService->findSubgraph();
+            $rootNode = $this->taxonomyService->getRoot($subgraph);
+        } else {
+            $rootNode = $this->getNodeByNodeAddress($rootNodeAddress);
+            $subgraph = $this->getSubgraphForNode($rootNode);
+       }
 
-        $flowQuery = new FlowQuery([$root]);
-        $vocabularyNodes = $flowQuery->children('[instanceof Sitegeist.Taxonomy:Vocabulary]')->get();
+        $vocabularies = $this->taxonomyService->getVocabularies($subgraph);
 
-        // fetch name and base node of vocabulary
-        $vocabularies = [];
-        foreach ($vocabularyNodes as $vocabulary) {
-            $vocabularies[] = [
-                'node' => $vocabulary,
-                'defaultNode' => $this->getNodeInDefaultDimensions($vocabulary)
-            ];
-        }
-        usort($vocabularies, function (array $vocabularyA, array $vocabularyB) {
-            return strcmp(
-                $vocabularyA['node']->getProperty('title') ?: '',
-                $vocabularyB['node']->getProperty('title') ?: ''
-            );
-        });
-
-        $this->view->assign('taxonomyRoot', $root);
+        $this->view->assign('rootNode', $rootNode);
+        $this->view->assign('rootNodeAddress', $rootNode ? $this->nodeAddressFactory->createFromNode($rootNode)->serializeForUri() : null);
         $this->view->assign('vocabularies', $vocabularies);
     }
 
-    /**
-     * Switch to a modified content context and redirect to the given action
-     *
-     * @param string $targetAction the target action to redirect to
-     * @param string $targetProperty the property in the target action that will accept the node
-     * @param NodeInterface $contextNode the node to adjust the context for
-     * @param array $dimensions array with dimensionName, presetName combinations
-     * @return void
-     */
-    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
-    {
-        $contextProperties = $contextNode->getContext()->getProperties();
-
-        $newContextProperties = [];
-        foreach ($dimensions as $dimensionName => $presetName) {
-            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues(
-                $dimensionName,
-                $presetName
-            );
-            $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
-        }
-        $modifiedContext = $this->contextFactory->create(array_merge($contextProperties, $newContextProperties));
-
-        $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
-
-        $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
-    }
-
-    /**
-     * Prepare all available content dimensions for use in a select box
-     *
-     * @return array the list of available content dimensions and their presets
-     */
-    protected function getContentDimensionOptions()
-    {
-        $result = [];
-
-        if (is_array($this->contentDimensions) === false || count($this->contentDimensions) === 0) {
-            return $result;
-        }
-
-        foreach ($this->contentDimensions as $dimensionName => $dimensionConfiguration) {
-            $dimensionOption = [];
-            $dimensionOption['label'] = array_key_exists('label', $dimensionConfiguration) ?
-                $dimensionConfiguration['label'] : $dimensionName;
-            $dimensionOption['presets'] = [];
-
-            foreach ($dimensionConfiguration['presets'] as $presetKey => $presetConfiguration) {
-                $dimensionOption['presets'][$presetKey] = array_key_exists('label', $presetConfiguration) ?
-                    $presetConfiguration['label'] : $presetKey;
-            }
-
-            $result[$dimensionName] = $dimensionOption;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get the content dimension values for a given content dimension and preset
-     *
-     * @param $dimensionName
-     * @param $presetName
-     * @return array the values assiged to the preset identified by $dimensionName and $presetName
-     */
-    protected function getContentDimensionValues($dimensionName, $presetName)
-    {
-        return $this->contentDimensions[$dimensionName]['presets'][$presetName]['values'];
-    }
-
-    /**
-     * @param NodeInterface $node
-     * @return NodeInterface|null
-     */
-    protected function getNodeInDefaultDimensions(NodeInterface $node) : ?NodeInterface
-    {
-        if (!$this->defaultRoot) {
-            $this->defaultRoot = $this->taxonomyService->getRoot();
-        }
-
-        $flowQuery = new FlowQuery([$this->defaultRoot]);
-        $defaultNode = $flowQuery->find('#' . $node->getIdentifier())->get(0);
-        if ($defaultNode && $defaultNode !== $node) {
-            return $defaultNode;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param NodeInterface $node
-     * @param array<NodeInterface> $parents
-     * @return array
-     */
-    public function fetchChildTaxonomies(NodeInterface $node, array $parents = []) : array
-    {
-        $flowQuery = new FlowQuery([$node]);
-        $childTaxonomies = $flowQuery->children('[instanceof ' . $this->taxonomyService->getTaxonomyNodeType() . ']')->get();
-        $result = [];
-        foreach ($childTaxonomies as $childTaxonomy) {
-            $result[] = [
-                'node' => $childTaxonomy,
-                'defaultNode' => $this->getNodeInDefaultDimensions($childTaxonomy),
-                'children' => $this->fetchChildTaxonomies($childTaxonomy, array_merge($parents, [$childTaxonomy])),
-                'parents' => $parents
-            ];
-        }
-        return $result;
-    }
+//    /**
+//     * Switch to a modified content context and redirect to the given action
+//     *
+//     * @param string $targetAction the target action to redirect to
+//     * @param string $targetProperty the property in the target action that will accept the node
+//     * @param NodeInterface $contextNode the node to adjust the context for
+//     * @param array $dimensions array with dimensionName, presetName combinations
+//     * @return void
+//     */
+//    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
+//    {
+//        $contextProperties = $contextNode->getContext()->getProperties();
+//
+//        $newContextProperties = [];
+//        foreach ($dimensions as $dimensionName => $presetName) {
+//            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues(
+//                $dimensionName,
+//                $presetName
+//            );
+//            $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
+//        }
+//        $modifiedContext = $this->contextFactory->create(array_merge($contextProperties, $newContextProperties));
+//
+//        $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
+//
+//        $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
+//    }
+//
+//    /**
+//     * @param NodeInterface $node
+//     * @return NodeInterface|null
+//     */
+//    protected function getNodeInDefaultDimensions(NodeInterface $node) : ?NodeInterface
+//    {
+//        if (!$this->defaultRoot) {
+//            $this->defaultRoot = $this->taxonomyService->getRoot();
+//        }
+//
+//        $flowQuery = new FlowQuery([$this->defaultRoot]);
+//        $defaultNode = $flowQuery->find('#' . $node->getIdentifier())->get(0);
+//        if ($defaultNode && $defaultNode !== $node) {
+//            return $defaultNode;
+//        } else {
+//            return null;
+//        }
+//    }
 
     /**
      * Show the given vocabulary
-     *
-     * @param NodeInterface $vocabulary
-     * @return void
      */
-    public function vocabularyAction(NodeInterface $vocabulary)
+    public function vocabularyAction(string $vocabularyNodeAddress)
     {
-        $flowQuery = new FlowQuery([$vocabulary]);
-        $root = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getRootNodeType() . ']')->get(0);
+        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->getSubgraphForNode($vocabularyNode);
 
-        $this->view->assign('taxonomyRoot', $root);
-        $this->view->assign('vocabulary', $vocabulary);
-        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
-        $taxonomies = $this->fetchChildTaxonomies($vocabulary);
-        usort($taxonomies, function (array $taxonomyA, array $taxonomyB) {
-            return strcmp(
-                $taxonomyA['node']->getProperty('title') ?: '',
-                $taxonomyB['node']->getProperty('title') ?: ''
-            );
-        });
-        $this->view->assign('taxonomies', $taxonomies);
+        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $this->view->assign('rootNode', $rootNode);
+        $this->view->assign('vocabularyNode', $vocabularyNode);
+
+        $vocabularySubtree = $subgraph->findSubtree(
+            $vocabularyNode->nodeAggregateId,
+            FindSubtreeFilter::create(
+                $this->taxonomyService->getTaxonomyNodeType()
+            )
+        );
+
+        $this->view->assign('vocabularySubtree', $vocabularySubtree);
     }
 
     /**
      * Display a form that allows to create a new vocabulary
-     *
-     * @param NodeInterface $taxonomyRoot
-     * @return void
      */
-    public function newVocabularyAction(NodeInterface $taxonomyRoot)
+    public function newVocabularyAction(string $rootNodeAddress = null): void
     {
-        $this->view->assign('taxonomyRoot', $taxonomyRoot);
-
+        $node = $this->getNodeByNodeAddress($rootNodeAddress);
+        $this->view->assign('rootNode', $node);
     }
 
     /**
      * Create a new vocabulary
      *
-     * @param NodeInterface $taxonomyRoot
+     * @param string $rootNodeAddress root node address
      * @param array $properties
-     * @return void
      */
-    public function createVocabularyAction(NodeInterface $taxonomyRoot, array $properties)
+    public function createVocabularyAction(string $rootNodeAddress, array $properties)
     {
-        $vocabularyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getVocabularyNodeType());
-        $vocabularyProperties = $vocabularyNodeType->getProperties();
+        $contentRepository = $this->taxonomyService->getContentRepository();
 
-        $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($vocabularyNodeType);
-        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($properties['title']));
-        foreach($properties as $name => $value) {
-            if (array_key_exists($name, $vocabularyProperties)) {
-                $nodeTemplate->setProperty($name, $value);
+        $rootNode = $this->getNodeByNodeAddress($rootNodeAddress);
+        $subgraph = $this->getSubgraphForNode($rootNode);
+        $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
+        $nodeAddress = $this->nodeAddressFactory->createFromUriString($rootNodeAddress);
+        $nodeAggregateId = NodeAggregateId::create();
+        $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
+
+        // create node
+        $commandResult = $contentRepository->handle(
+            new CreateNodeAggregateWithNode(
+                $liveWorkspace->currentContentStreamId,
+                $nodeAggregateId,
+                $this->taxonomyService->getVocabularyNodeTypeName(),
+                $originDimensionSpacePoint,
+                $rootNode->nodeAggregateId,
+                null,
+                null,
+                PropertyValuesToWrite::fromArray($properties)
+            )
+        );
+        $commandResult->block();
+
+        // create required generalizations
+        foreach ($generalizations as $dimensionSpacePoint) {
+            $originDimensionSpacePoint2 = OriginDimensionSpacePoint::fromDimensionSpacePoint($dimensionSpacePoint);
+            if ($originDimensionSpacePoint->equals($originDimensionSpacePoint2)) {
+                continue;
             }
+
+            $commandResult = $contentRepository->handle(
+                new CreateNodeVariant(
+                    $liveWorkspace->currentContentStreamId,
+                    $nodeAggregateId,
+                    $originDimensionSpacePoint,
+                    $originDimensionSpacePoint2
+                )
+            );
+            $commandResult->block();
         }
 
-        $vocabulary = $taxonomyRoot->createNodeFromTemplate($nodeTemplate);
+        $newVocabularyNode = $subgraph->findNodeById($nodeAggregateId);
 
         $this->addFlashMessage(
-            sprintf('Created vocabulary %s at path %s', $properties['title'], $vocabulary->getLabel())
+            sprintf('Created vocabulary %s', $newVocabularyNode->getLabel()),
+            'Create Vocabulary'
         );
-        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
+
+        $this->redirect('index');
     }
 
     /**
      * Show a form that allows to modify the given vocabulary
-     *
-     * @param NodeInterface $vocabulary
-     * @return void
      */
-    public function editVocabularyAction(NodeInterface $vocabulary)
+    public function editVocabularyAction(string $vocabularyNodeAddress)
     {
-        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
-        $this->view->assign('taxonomyRoot', $taxonomyRoot);
-        $this->view->assign('vocabulary', $vocabulary);
-        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
+        $contentRepository = $this->taxonomyService->getContentRepository();
+        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
+
+        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
+            $vocabularyNode->subgraphIdentity->contentStreamId,
+            $vocabularyNode->subgraphIdentity->dimensionSpacePoint,
+            $vocabularyNode->subgraphIdentity->visibilityConstraints,
+        );
+
+        $rootNode = $this->taxonomyService->getRoot($subgraph);
+
+        $this->view->assign('rootNode', $rootNode);
+        $this->view->assign('vocabularyNode', $vocabularyNode);
     }
 
     /**
      * Apply changes to the given vocabulary
-     *
-     * @param NodeInterface $vocabulary
-     * @param array $properties
-     * @return void
      */
-    public function updateVocabularyAction(NodeInterface $vocabulary, array $properties)
+    public function updateVocabularyAction(string $vocabularyNodeAddress, array $properties)
     {
-        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
-        $vocabularyProperties = $vocabulary->getNodeType()->getProperties();
-        foreach($properties as $name => $value) {
-            if (array_key_exists($name, $vocabularyProperties)) {
-                $previous = $vocabulary->getProperty($name);
-                if ($previous !== $value) {
-                    $vocabulary->setProperty($name, $value);
-                }
-            }
-        }
+        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $rootNode = $this->taxonomyService->getRoot($subgraph);
+
+        $commandResult = $this->contentRepository->handle(
+            new SetNodeProperties(
+                $vocabularyNode->subgraphIdentity->contentStreamId,
+                $vocabularyNode->nodeAggregateId,
+                $vocabularyNode->originDimensionSpacePoint,
+                PropertyValuesToWrite::fromArray($properties)
+            )
+        );
+        $commandResult->block();
+        $updatedVocabularyNode = $subgraph->findNodeById($vocabularyNode->nodeAggregateId);
 
         $this->addFlashMessage(
-            sprintf('Updated vocabulary %s', $vocabulary->getLabel())
+            sprintf('Updated vocabulary %s', $updatedVocabularyNode->getLabel())
         );
-        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
+        $this->redirect('index', null, null, ['rootNodeAddress' => $this->nodeAddressFactory->createFromNode($rootNode)]);
     }
 
     /**
      * Delete the given vocabulary
-     *
-     * @param NodeInterface $vocabulary
-     * @return void
-     * @throws \Exception
      */
-    public function deleteVocabularyAction(NodeInterface $vocabulary)
+    public function deleteVocabularyAction(string $vocabularyNodeAddress)
     {
-        if ($vocabulary->isAutoCreated()) {
-            throw new \Exception('cannot delete autocrated vocabularies');
-        } else {
-            $path = $vocabulary->getPath();
-            $vocabulary->remove();
-            $this->addFlashMessage(
-                sprintf('Deleted vocabulary %s', $path)
-            );
-        }
-        $taxonomyRoot = $this->taxonomyService->getRoot($vocabulary->getContext());
-        $this->redirect('index', null, null, ['root' => $taxonomyRoot]);
+        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(\Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName::forLive());
+
+        $commandResult = $this->contentRepository->handle(
+            new RemoveNodeAggregate(
+                $liveWorkspace->currentContentStreamId,
+                $vocabularyNode->nodeAggregateId,
+                $vocabularyNode->originDimensionSpacePoint->toDimensionSpacePoint(),
+                NodeVariantSelectionStrategy::STRATEGY_ALL_VARIANTS
+            )
+        );
+        $commandResult->block();
+
+        $this->addFlashMessage(
+            sprintf('Deleted vocabulary %s', $vocabularyNode->getLabel())
+        );
+
+        $this->redirect('index', null, null, ['rootNodeAddress' => $this->nodeAddressFactory->createFromNode($rootNode)]);
+
     }
 
     /**
      * Show a form to create a new taxonomy
-     *
-     * @param NodeInterface $parent
-     * @return void
      */
-    public function newTaxonomyAction(NodeInterface $parent)
+    public function newTaxonomyAction(string $parentNodeAddress)
     {
-        $flowQuery = new FlowQuery([$parent]);
-        $vocabulary = $flowQuery->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')->get(0);
-        $this->view->assign('vocabulary', $vocabulary);
-        $this->view->assign('parent', $parent);
+        $parentNode = $this->getNodeByNodeAddress($parentNodeAddress);
+        $subgraph = $this->getSubgraphForNode($parentNode);
+        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $vocabularyNode = null;
+
+        if ($parentNode->nodeType->isOfType($this->taxonomyService->getTaxonomyNodeType())) {
+            $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
+        } elseif ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeType())) {
+            $vocabularyNode = $parentNode;
+        }
+
+        $this->view->assign('rootNode', $rootNode);
+        $this->view->assign('vocabularyNode', $vocabularyNode);
+        $this->view->assign('parentNode', $parentNode);
     }
 
     /**
      * Create a new taxonomy
-     *
-     * @param NodeInterface $parent
-     * @param array $properties
-     * @return void
      */
-    public function createTaxonomyAction(NodeInterface $parent, array $properties)
+    public function createTaxonomyAction(string $parentNodeAddress, array $properties): void
     {
-        $taxonomyNodeType = $this->nodeTypeManager->getNodeType($this->taxonomyService->getTaxonomyNodeType());
-        $taxomonyProperties = $taxonomyNodeType->getProperties();
+        $parentNode = $this->getNodeByNodeAddress($parentNodeAddress);
+        $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
+        $subgraph = $this->getSubgraphForNode($parentNode);
+        $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $generalizations = $this->contentRepository->getVariationGraph()->getRootGeneralizations();
+        $nodeAddress = $this->nodeAddressFactory->createFromUriString($parentNodeAddress);
+        $nodeAggregateId = NodeAggregateId::create();
+        $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
-        $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($taxonomyNodeType);
-        $nodeTemplate->setName(CrUtitlity::renderValidNodeName($properties['title']));
+        // create node
+        $commandResult = $this->contentRepository->handle(
+            new CreateNodeAggregateWithNode(
+                $liveWorkspace->currentContentStreamId,
+                $nodeAggregateId,
+                $this->taxonomyService->getTaxonomyNodeTypeName(),
+                $originDimensionSpacePoint,
+                $parentNode->nodeAggregateId,
+                null,
+                null,
+                PropertyValuesToWrite::fromArray($properties)
+            )
+        );
+        $commandResult->block();
 
-        foreach($properties as $name => $value) {
-            if (array_key_exists($name, $taxomonyProperties)) {
-                $nodeTemplate->setProperty($name, $value);
+        // create required generalizations
+        foreach ($generalizations as $dimensionSpacePoint) {
+            $originDimensionSpacePoint2 = OriginDimensionSpacePoint::fromDimensionSpacePoint($dimensionSpacePoint);
+            if ($originDimensionSpacePoint->equals($originDimensionSpacePoint2)) {
+                continue;
             }
+
+            $commandResult = $this->contentRepository->handle(
+                new CreateNodeVariant(
+                    $liveWorkspace->currentContentStreamId,
+                    $nodeAggregateId,
+                    $originDimensionSpacePoint,
+                    $originDimensionSpacePoint2
+                )
+            );
+            $commandResult->block();
         }
 
-        $taxonomy = $parent->createNodeFromTemplate($nodeTemplate);
+        $newTaxonomyNode = $subgraph->findNodeById($nodeAggregateId);
 
         $this->addFlashMessage(
-            sprintf('Created taxonomy %s at path %s', $taxonomy->getLabel(), $taxonomy->getPath())
+            sprintf('Created taxonomy %s', $newTaxonomyNode->getLabel()),
+            'Create taxomony'
         );
-
-        $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery
-            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
-            ->get(0);
 
         $this->redirect(
             'vocabulary',
             null,
             null,
-            ['vocabulary' => $vocabulary->getContextPath()]
+            ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]
         );
     }
 
     /**
      * Display a form that allows to modify the given taxonomy
-     *
-     * @param NodeInterface $taxonomy
-     * @return void
      */
-    public function editTaxonomyAction(NodeInterface $taxonomy)
+    public function editTaxonomyAction(string $taxonomyNodeAddress)
     {
-        $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery
-            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
-            ->get(0);
+        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
 
-        $this->view->assign('vocabulary', $vocabulary);
-        $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
-
-        $this->view->assign('taxonomy', $taxonomy);
-        $this->view->assign('defaultTaxonomy', $this->getNodeInDefaultDimensions($taxonomy));
+        $this->view->assign('vocabularyNode', $vocabularyNode);
+        $this->view->assign('taxonomyNode', $taxonomyNode);
     }
 
     /**
      * Apply changes to the given taxonomy
-     *
-     * @param NodeInterface $taxonomy
-     * @param array $properties
-     * @return void
      */
-    public function updateTaxonomyAction(NodeInterface $taxonomy, array $properties)
+    public function updateTaxonomyAction(string $taxonomyNodeAddress, array $properties)
     {
-        $taxonomyProperties = $taxonomy->getNodeType()->getProperties();
-        foreach($properties as $name => $value) {
-            if (array_key_exists($name, $taxonomyProperties)) {
-                $previous = $taxonomy->getProperty($name);
-                if ($previous !== $value) {
-                    $taxonomy->setProperty($name, $value);
-                }
-            }
-        }
+        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
+        $subgraph = $this->getSubgraphForNode($taxonomyNode);
+
+        $commandResult = $this->contentRepository->handle(
+            new SetNodeProperties(
+                $taxonomyNode->subgraphIdentity->contentStreamId,
+                $taxonomyNode->nodeAggregateId,
+                $taxonomyNode->originDimensionSpacePoint,
+                PropertyValuesToWrite::fromArray($properties)
+            )
+        );
+        $commandResult->block();
+        $updatedTaxonomyNode = $subgraph->findNodeById($vocabularyNode->nodeAggregateId);
 
         $this->addFlashMessage(
-            sprintf('Updated taxonomy %s', $taxonomy->getPath())
+            sprintf('Updated taxonomy %s', $updatedTaxonomyNode->getLabel())
         );
 
-        $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery
-            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
-            ->get(0);
-
-        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary->getContextPath()]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
     }
 
     /**
      * Delete the given taxonomy
-     *
-     * @param NodeInterface $taxonomy
-     * @return void
      */
-    public function deleteTaxonomyAction(NodeInterface $taxonomy)
+    public function deleteTaxonomyAction(string $taxonomyNodeAddress)
     {
-        if ($taxonomy->isAutoCreated()) {
-            throw new \Exception('cannot delete autocrated taxonomies');
-        }
+        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
+        $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
 
-        $flowQuery = new FlowQuery([$taxonomy]);
-        $vocabulary = $flowQuery
-            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
-            ->get(0);
-
-        $taxonomy->remove();
+        $commandResult = $this->contentRepository->handle(
+            new RemoveNodeAggregate(
+                $liveWorkspace->currentContentStreamId,
+                $taxonomyNode->nodeAggregateId,
+                $taxonomyNode->originDimensionSpacePoint->toDimensionSpacePoint(),
+                NodeVariantSelectionStrategy::STRATEGY_ALL_VARIANTS
+            )
+        );
+        $commandResult->block();
 
         $this->addFlashMessage(
-            sprintf('Deleted taxonomy %s', $taxonomy->getPath())
+            sprintf('Deleted taxonomy %s', $taxonomyNode->getLabel())
         );
 
-        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
     }
 
+    protected function getNodeByNodeAddress(?string $serializedNodeAddress): ?Node
+    {
+        $contentRepository = $this->taxonomyService->getContentRepository();
+        $nodeAddress = NodeAddressFactory::create($contentRepository)->createFromUriString($serializedNodeAddress);
+        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
+            $nodeAddress->contentStreamId,
+            $nodeAddress->dimensionSpacePoint,
+            VisibilityConstraints::withoutRestrictions()
+        );
+        return $subgraph->findNodeById($nodeAddress->nodeAggregateId);
+    }
 
+    protected function getSubgraphForNode(Node $node): ContentSubgraphInterface
+    {
+        $contentRepository = $this->taxonomyService->getContentRepository();
+        return $contentRepository->getContentGraph()->getSubgraph(
+            $node->subgraphIdentity->contentStreamId,
+            $node->subgraphIdentity->dimensionSpacePoint,
+            $node->subgraphIdentity->visibilityConstraints,
+        );
+    }
 }

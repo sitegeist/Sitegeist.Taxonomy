@@ -7,8 +7,8 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.New) < prototype(Neos.Fusion:
         <legend>{props.i18nMain.id('taxon.createBelow')} "{parent.properties.title}"</legend>
         <Sitegeist.Taxonomy:Form.Taxonomy
             targetAction="createTaxonomy"
-            parent={parent}
-            vocabulary={vocabulary}
+            parentNode={parentNode}
+            vocabularyNode={vocabularyNode}
         />
     `
 }

@@ -1,6 +1,21 @@
 <?php
 namespace Sitegeist\Taxonomy\Service;
 
+use http\Exception\InvalidArgumentException;
+use Neos\ContentGraph\DoctrineDbalAdapter\Domain\Repository\ContentSubgraph;
+use Neos\ContentRepository\Core\ContentRepository;
+use Neos\ContentRepository\Core\Factory\ContentRepositoryId;
+use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeAggregateWithNode;
+use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
+use Neos\ContentRepository\Core\SharedModel\User\UserId;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
+use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 
@@ -12,6 +27,8 @@ use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Fusion\Exception\RuntimeException;
+use Neos\Neos\Service\UserService;
 
 /**
  * Class TaxonomyService
@@ -23,39 +40,15 @@ class TaxonomyService
 
     /**
      * @Flow\Inject
-     * @var NodeDataRepository
+     * @var ContentRepositoryRegistry
      */
-    protected $nodeDataRepository;
-
-    /**
-     * @Flow\Inject
-     * @var NodeFactory
-     */
-    protected $nodeFactory;
-
-    /**
-     * @Flow\Inject
-     * @var ContextFactoryInterface
-     */
-    protected $contextFactory;
-
-    /**
-     * @Flow\Inject
-     * @var NodeTypeManager
-     */
-    protected $nodeTypeManager;
-
-    /**
-     * @Flow\Inject
-     * @var PersistenceManagerInterface
-     */
-    protected $persistenceManager;
+    protected $crRegistry;
 
     /**
      * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeName")
+     * @Flow\InjectConfiguration(path="contentRepository.identifier")
      */
-    protected $rootNodeName;
+    protected $crIdentifier;
 
     /**
      * @var string
@@ -74,19 +67,6 @@ class TaxonomyService
      * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
      */
     protected $taxonomyNodeType;
-
-    /**
-     * @var NodeInterface[]
-     */
-    protected $taxonomyDataRootNodes = [];
-
-    /**
-     * @return string
-     */
-    public function getRootNodeName()
-    {
-        return $this->rootNodeName;
-    }
 
     /**
      * @return string
@@ -112,56 +92,102 @@ class TaxonomyService
         return $this->taxonomyNodeType;
     }
 
-    /**
-     * @param Context $context
-     * @return NodeInterface
-     */
-    public function getRoot(Context $context = null)
+    public function getRootNodeTypeName(): NodeTypeName
     {
-        if ($context === null) {
-            $context = $this->contextFactory->create();
-        }
+        return NodeTypeName::fromString($this->rootNodeType);
+    }
 
-        $contextHash = md5(json_encode($context->getProperties()));
+    public function getVocabularyNodeTypeName(): NodeTypeName
+    {
+        return NodeTypeName::fromString($this->vocabularyNodeType);
+    }
 
-        // return memoized root-node
-        if (array_key_exists($contextHash, $this->taxonomyDataRootNodes)
-            && $this->taxonomyDataRootNodes[$contextHash] instanceof NodeInterface
-        ) {
-            return $this->taxonomyDataRootNodes[$contextHash];
-        }
+    public function getTaxonomyNodeTypeName(): NodeTypeName
+    {
+        return NodeTypeName::fromString($this->taxonomyNodeType);
+    }
 
-        // return existing root-node
-        //
-        // TODO: Find a better way to determine the root node
-        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath(
-            '/' . $this->getRootNodeName(),
-            $context->getWorkspace()
+    public function getContentRepository(): ContentRepository
+    {
+        return $this->crRegistry->get(ContentRepositoryId::fromString($this->crIdentifier));
+    }
+
+    public function findSubgraph(): ContentSubgraphInterface
+    {
+        $contentRepository = $this->getContentRepository();
+        $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
+        $contentGraph = $contentRepository->getContentGraph();
+        $subgraph = $contentGraph->getSubgraph(
+            $liveWorkspace->currentContentStreamId,
+            reset($generalizations),
+            VisibilityConstraints::withoutRestrictions()
+        );
+        return $subgraph;
+    }
+
+    public function findVocabularyForNode(Node $node): Node
+    {
+        $subgraph = $this->getContentRepository()->getContentGraph()->getSubgraph(
+            $node->subgraphIdentity->contentStreamId,
+            $node->subgraphIdentity->dimensionSpacePoint,
+            $node->subgraphIdentity->visibilityConstraints,
         );
 
-        if ($taxonomyDataRootNodeData !== null) {
-            $this->taxonomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
-                $taxonomyDataRootNodeData,
-                $context
-            );
+        $parentNode = $node;
+        while ($parentNode instanceof Node) {
+            if ($parentNode->nodeType->isOfType($this->getVocabularyNodeType())) {
+                return $parentNode;
+            }
+            $parentNode = $subgraph->findParentNode($parentNode->nodeAggregateId);
+        }
+        throw new \InvalidArgumentException('Node seems to be outside of vocabulary');
+    }
 
-            return $this->taxonomyDataRootNodes[$contextHash];
+    public function getRoot(ContentSubgraphInterface $subgraph): Node
+    {
+        $contentRepository = $this->getContentRepository();
+        $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $contentGraph = $contentRepository->getContentGraph();
+
+        try {
+            $rootNodeAggregate = $contentGraph->findRootNodeAggregateByType(
+                $liveWorkspace->currentContentStreamId,
+                NodeTypeName::fromString($this->getRootNodeType())
+            );
+            return $subgraph->findNodeById($rootNodeAggregate->nodeAggregateId);
+        } catch (\Exception $e) {
+            // ignore and create a new root
         }
 
-        // create root-node
-        $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->rootNodeType));
-        $nodeTemplate->setName($this->getRootNodeName());
+        $commandResult = $contentRepository->handle(
+            new CreateRootNodeAggregateWithNode(
+                $liveWorkspace->currentContentStreamId,
+                NodeAggregateId::create(),
+                NodeTypeName::fromString($this->getRootNodeType()),
+                UserId::forSystemUser()
+            )
+        );
+        $commandResult->block();
 
-        $rootNode = $context->getRootNode();
-        $this->taxonomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
+        $rootNodeAggregate = $contentGraph->findRootNodeAggregateByType(
+            $liveWorkspace->currentContentStreamId,
+            NodeTypeName::fromString($this->getRootNodeType())
+        );
 
-        // We fetch the workspace to be sure it's known to the persistence manager and persist all
-        // so the workspace and site node are persisted before we import any nodes to it.
-        $this->taxonomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
-        $this->persistenceManager->persistAll();
+        return $subgraph->findNodeById($rootNodeAggregate->nodeAggregateId);
+    }
 
-        return $this->taxonomyDataRootNodes[$contextHash];
+    /**
+     * @return Nodes
+     */
+    public function getVocabularies(ContentSubgraphInterface $subgraph): Nodes
+    {
+        $root = $this->getRoot($subgraph);
+        return $subgraph->findChildNodes(
+            $root->nodeAggregateId,
+            FindChildNodesFilter::create($this->vocabularyNodeType)
+        );
     }
 
     /**

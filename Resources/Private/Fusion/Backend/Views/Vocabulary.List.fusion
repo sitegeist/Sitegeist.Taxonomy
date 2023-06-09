@@ -10,9 +10,9 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
                 <div class="neos-pull-right">
                     <Sitegeist.Taxonomy:Views.Fragments.LanguageSelector
                         targetAction='index'
-                        targetProperty='root'
+                        targetProperty='rootNodeAddress'
+                        contextNode={rootNodeAddress}
                         contentDimensionOptions={contentDimensionOptions}
-                        contextNode={taxonomyRoot}
                     />
                 </div>
             </legend>
@@ -27,36 +27,40 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
         <div class="neos-content neos-fluid-container" @if={vocabularies}>
             <div class="neos-row-fluid">
                 <Neos.Fusion:Loop items={vocabularies} itemName="vocabulary" iterationName="iterator">
+                  <!--
+                    <Neos.Fusion:Debug vocabulary={vocabulary.properties} />
+                    <Neos.Fusion:DebugDump />
+                  -->
                     <div class="neos-span3">
                         <div class="widget ">
                             <div class="widget-header">
                                 <i class="fas fa-tags neos-pull-left"></i>
                                 <h3>
-                                    <Neos.Fusion:Link.Action href.action="vocabulary" href.arguments.vocabulary={vocabulary.node.contextPath} title={props.i18n.id('vocabulary.show')}>
-                                        {vocabulary.node.properties.title} <Neos.Fusion:Fragment @if={vocabulary.defaultNode}>({vocabulary.defaultNode.properties.title})</Neos.Fusion:Fragment>
+                                    <Neos.Fusion:Link.Action href.action="vocabulary" href.arguments.vocabularyNodeAddress={Neos.Node.serializedNodeAddress(vocabulary)} title={props.i18n.id('vocabulary.show')}>
+                                        {vocabulary.properties.title}
                                     </Neos.Fusion:Link.Action>
                                 </h3>
                             </div>
 
                             <div class="widget-body">
-                                <p>{vocabulary.node.properties.description}</p>
+                                <p>{vocabulary.properties.description}</p>
                             </div>
 
                             <div class="widget-footer">
 
                                 <Neos.Fusion:Fragment @if={Security.hasAccess("Sitegeist.Taxonomy:Module.ManageVocabularyActions")}>
 
-                                    <Neos.Fusion:Link.Action href.action="vocabulary" class="neos-button" title={props.i18n.id('generic.show')} href.arguments.vocabulary={vocabulary.node.contextPath} >
+                                    <Neos.Fusion:Link.Action href.action="vocabulary" class="neos-button" title={props.i18n.id('generic.show')} href.arguments.vocabularyNodeAddress={Neos.Node.serializedNodeAddress(vocabulary)} >
                                         <i class="fas fa-network-wired"></i>
                                     </Neos.Fusion:Link.Action>
                                     &nbsp;
-                                    <Neos.Fusion:Link.Action href.action="editVocabulary" class="neos-button" title={props.i18n.id('generic.edit')} href.arguments.vocabulary={vocabulary.node.contextPath} >
+                                    <Neos.Fusion:Link.Action href.action="editVocabulary" class="neos-button" title={props.i18n.id('generic.edit')} href.arguments.vocabularyNodeAddress={Neos.Node.serializedNodeAddress(vocabulary)} >
                                         <i class="fas fa-pencil-alt"></i>
                                     </Neos.Fusion:Link.Action>
 
                                     <Neos.Fusion:Fragment @if={!vocabulary.node.autoCreated} >
                                         &nbsp;
-                                        <button class="neos-button neos-button-danger" title={props.i18n.id('generic.delete')} data-toggle="modal" href={'#deleteVocabulary_' + vocabulary.node.identifier} data-neos-toggle="tooltip">
+                                        <button class="neos-button neos-button-danger" title={props.i18n.id('generic.delete')} data-toggle="modal" href={'#deleteVocabulary_' + vocabulary.nodeAggregateId.value} data-neos-toggle="tooltip">
                                             <i class="fas fa-trash-alt icon-white"></i>
                                         </button>
                                     </Neos.Fusion:Fragment>
@@ -66,16 +70,16 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
                             </div>
 
                             <Neos.Fusion:Fragment @if={!vocabulary.node.autoCreated} >
-                                <div class="neos-hide" id={'deleteVocabulary_' + vocabulary.node.identifier}>
+                                <div class="neos-hide" id={'deleteVocabulary_' + vocabulary.nodeAggregateId.value}>
                                     <div class="neos-modal-centered">
                                         <div class="neos-modal-content">
                                             <div class="neos-modal-header">
                                                 <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
-                                                <div class="neos-header">Do you really want to delete the vocabulary "{vocabulary.node.properties.title}"? This action cannot be undone.</div>
+                                                <div class="neos-header">Do you really want to delete the vocabulary "{vocabulary.properties.title}"? This action cannot be undone.</div>
                                             </div>
                                             <div class="neos-modal-footer">
                                                 <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
-                                                <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabulary={vocabulary.node} attributes.class="neos-inline">
+                                                <Neos.Fusion.Form:Form form.target.action="deleteVocabulary" form.target.arguments.vocabularyNodeAddress={Neos.Node.serializedNodeAddress(vocabulary)} attributes.class="neos-inline">
                                                     <button class="neos-button neos-button-danger" title="Delete this vocabulary">
                                                         Yes, delete this vocabulary
                                                     </button>
@@ -96,10 +100,12 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
         <div class="neos-row-fluid" @if={Security.hasAccess('Sitegeist.Taxonomy:Module.ManageVocabularyActions')}>
             <Neos.Fusion:Link.Action
                 href.action="newVocabulary"
-                href.arguments.taxonomyRoot={taxonomyRoot}
+                href.arguments.rootNodeAddress={Neos.Node.serializedNodeAddress(rootNode)}
                 class="neos-button neos-button-primary" title="" >
                 <i class="fas fa-plus icon-white"></i> {props.i18n.id('vocabulary.create')}
             </Neos.Fusion:Link.Action>
         </div>
+
+
     `
 }

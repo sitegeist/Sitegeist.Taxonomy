@@ -5,9 +5,10 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.New) < prototype(Neos.Fusio
 
     renderer = afx`
         <legend>{props.i18nMain.id('vocabulary.create')}</legend>
+
         <Sitegeist.Taxonomy:Form.Vocabulary
             targetAction="createVocabulary"
-            taxonomyRoot={taxonomyRoot}
+            rootNode={rootNode}
         />
     `
 }

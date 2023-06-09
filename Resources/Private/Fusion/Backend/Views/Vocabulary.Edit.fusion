@@ -10,9 +10,8 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.Edit) < prototype(Neos.Fusi
         </div>
         <Sitegeist.Taxonomy:Form.Vocabulary
             targetAction="updateVocabulary"
-            taxonomyRoot={taxonomyRoot}
-            vocabulary={vocabulary}
-            defaultVocabulary={defaultVocabulary}
+            rootNode={rootNode}
+            vocabularyNode={vocabularyNode}
         />
     `
 

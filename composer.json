@@ -4,10 +4,10 @@
     "name": "sitegeist/taxonomy",
     "license": "GPL-3.0+",
     "require": {
-        "neos/neos": "^7.1 || ^8.0 || dev-master",
-        "neos/neos-ui": "^7.1 || ^8.0 || dev-master",
-        "neos/fusion-form": ">=2.1.0",
-        "neos/content-repository": "*"
+        "neos/neos": "^9.0 || dev-master",
+        "neos/neos-ui": "^9.0 || dev-master",
+        "neos/contentrepositoryregistry": "^9.0 || dev-master",
+        "neos/fusion-form": ">=2.1.0"
     },
     "autoload": {
         "psr-4": {

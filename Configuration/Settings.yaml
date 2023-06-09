@@ -9,7 +9,7 @@ Sitegeist:
       additionalTaxonomyFieldPrototypes: []
 
     contentRepository:
-      rootNodeName: 'taxonomies'
+      identifier: 'default'
       rootNodeType: 'Sitegeist.Taxonomy:Root'
       vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
       taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'

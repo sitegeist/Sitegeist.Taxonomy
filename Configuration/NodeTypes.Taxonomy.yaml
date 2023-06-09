@@ -1,5 +1,5 @@
 Sitegeist.Taxonomy:Taxonomy:
-  label: "${String.stripTags(q(node).property('title') + ': ' + q(node).property('_path'))}"
+  label: "${String.stripTags(q(node).property('title'))}"
   ui:
     label: i18n
     icon: 'icon-tag'
