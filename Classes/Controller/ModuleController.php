@@ -39,6 +39,8 @@ use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\FrontendRouting\NodeAddress;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
+use Neos\Neos\Fusion\Helper\DimensionHelper;
+use Neos\Neos\Fusion\Helper\NodeHelper;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
@@ -94,6 +96,18 @@ class ModuleController extends ActionController
      */
     protected $nodeAddressFactory;
 
+    /**
+     * @Flow\Inject
+     * @var DimensionHelper
+     */
+    protected $dimensionHelper;
+
+    /**
+     * @Flow\Inject
+     * @var NodeHelper
+     */
+    protected $nodeHelper;
+
     public function initializeObject()
     {
         $this->contentRepository = $this->taxonomyService->getContentRepository();
@@ -135,52 +149,26 @@ class ModuleController extends ActionController
         $this->view->assign('vocabularies', $vocabularies);
     }
 
-//    /**
-//     * Switch to a modified content context and redirect to the given action
-//     *
-//     * @param string $targetAction the target action to redirect to
-//     * @param string $targetProperty the property in the target action that will accept the node
-//     * @param NodeInterface $contextNode the node to adjust the context for
-//     * @param array $dimensions array with dimensionName, presetName combinations
-//     * @return void
-//     */
-//    public function changeContextAction($targetAction, $targetProperty, NodeInterface $contextNode, $dimensions = [])
-//    {
-//        $contextProperties = $contextNode->getContext()->getProperties();
-//
-//        $newContextProperties = [];
-//        foreach ($dimensions as $dimensionName => $presetName) {
-//            $newContextProperties['dimensions'][$dimensionName] = $this->getContentDimensionValues(
-//                $dimensionName,
-//                $presetName
-//            );
-//            $newContextProperties['targetDimensions'][$dimensionName] = $presetName;
-//        }
-//        $modifiedContext = $this->contextFactory->create(array_merge($contextProperties, $newContextProperties));
-//
-//        $nodeInModifiedContext = $modifiedContext->getNodeByIdentifier($contextNode->getIdentifier());
-//
-//        $this->redirect($targetAction, null, null, [$targetProperty => $nodeInModifiedContext]);
-//    }
-//
-//    /**
-//     * @param NodeInterface $node
-//     * @return NodeInterface|null
-//     */
-//    protected function getNodeInDefaultDimensions(NodeInterface $node) : ?NodeInterface
-//    {
-//        if (!$this->defaultRoot) {
-//            $this->defaultRoot = $this->taxonomyService->getRoot();
-//        }
-//
-//        $flowQuery = new FlowQuery([$this->defaultRoot]);
-//        $defaultNode = $flowQuery->find('#' . $node->getIdentifier())->get(0);
-//        if ($defaultNode && $defaultNode !== $node) {
-//            return $defaultNode;
-//        } else {
-//            return null;
-//        }
-//    }
+    /**
+     * Switch to a modified content context and redirect to the given action
+     *
+     * @param string $targetAction the target action to redirect to
+     * @param string $targetProperty the property in the target action that will accept the node
+     * @param string $contextNodeAddress the node to adjust the context for
+     * @param array $dimensions array with dimensionName, presetName combinations
+     * @return void
+     */
+    public function changeDimensionAction(string $targetAction, string $targetProperty, string $contextNodeAddress, array $dimensions = [])
+    {
+        $contextNode = $this->getNodeByNodeAddress($contextNodeAddress);
+        foreach ($dimensions as $dimensionName => $dimensionValue) {
+            $contextNodeInDimension = $this->dimensionHelper->findVariantInDimension($contextNode, $dimensionName, $dimensionValue);
+            if ($contextNodeInDimension instanceof Node) {
+                $contextNode = $contextNodeInDimension;
+            }
+        }
+        $this->redirect($targetAction, null, null, [$targetProperty => $this->nodeHelper->serializedNodeAddress($contextNode)]);
+    }
 
     /**
      * Show the given vocabulary

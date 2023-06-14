@@ -8,11 +8,10 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
             <legend>
                 {props.i18n.id('vocabularies')}
                 <div class="neos-pull-right">
-                    <Sitegeist.Taxonomy:Views.Fragments.LanguageSelector
+                    <Sitegeist.Taxonomy:Views.Fragments.DimensionSelector
                         targetAction='index'
                         targetProperty='rootNodeAddress'
-                        contextNode={rootNodeAddress}
-                        contentDimensionOptions={contentDimensionOptions}
+                        contextNode={rootNode}
                     />
                 </div>
             </legend>

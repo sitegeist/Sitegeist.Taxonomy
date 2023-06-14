@@ -9,11 +9,10 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
             <legend>
                 {props.i18n.id('vocabulary')} {vocabularyNode.properties.title}
                 <div class="neos-pull-right">
-                    <Sitegeist.Taxonomy:Views.Fragments.LanguageSelector
+                    <Sitegeist.Taxonomy:Views.Fragments.DimensionSelector
                         targetAction='vocabulary'
-                        targetProperty='vocabulary'
-                        contentDimensionOptions={contentDimensionOptions}
-                        contextNode={vocabulary}
+                        targetProperty='vocabularyNodeAddress'
+                        contextNode={vocabularyNode}
                     />
                 </div>
             </legend>

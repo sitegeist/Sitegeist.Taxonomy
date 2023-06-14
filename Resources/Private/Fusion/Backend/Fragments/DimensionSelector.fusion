@@ -1,0 +1,33 @@
+prototype(Sitegeist.Taxonomy:Views.Fragments.DimensionSelector) < prototype(Neos.Fusion:Component) {
+
+    targetAction = null
+    targetProperty = null
+    contextNode = null
+
+    renderer = afx`
+        <Neos.Fusion.Form:Form @if={props.contextNode}
+           form.target.action="changeDimension"
+           attributes.class="neos-inline"
+           form.method="get"
+        >
+            <Neos.Fusion.Form:Hidden field.name="contextNodeAddress" field.value={Neos.Node.serializedNodeAddress(props.contextNode)} />
+            <Neos.Fusion.Form:Hidden field.name="targetAction" field.value={props.targetAction} />
+            <Neos.Fusion.Form:Hidden field.name="targetProperty" field.value={props.targetProperty} />
+
+            <Neos.Fusion:Loop items={Neos.Dimension.all(props.contextNode)} itemName="dimension" itemKey="dimensionKey" iterationName="iterator">
+                {iterator.isFirst ? '' : '&nbsp;'}
+                <Neos.Fusion.Form:Select
+                    field.name={"dimensions[" + dimensionKey + "]"}
+                    field.value={Neos.Dimension.currentValue(props.contextNode, dimensionKey).value}
+                    attributes.onchange="this.form.submit()"
+                >
+                  <Neos.Fusion.Form:Select.Option >{String.firstLetterToUpperCase(dimensionKey)}: {Neos.Dimension.currentValue(props.contextNode, dimensionKey).value}</Neos.Fusion.Form:Select.Option>
+                  <Neos.Fusion:Loop items={dimension.values.rootValues} itemName="dimensionValue" itemKey="presetIdentifier">
+                        <Neos.Fusion.Form:Select.Option option.value={dimensionValue.value}>{String.firstLetterToUpperCase(dimensionKey)}: {dimensionValue.value}</Neos.Fusion.Form:Select.Option>
+                    </Neos.Fusion:Loop>
+                </Neos.Fusion.Form:Select>
+            </Neos.Fusion:Loop>
+
+        </Neos.Fusion.Form:Form>
+    `
+}
