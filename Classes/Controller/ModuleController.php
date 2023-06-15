@@ -142,7 +142,7 @@ class ModuleController extends ActionController
             $subgraph = $this->getSubgraphForNode($rootNode);
        }
 
-        $vocabularies = $this->taxonomyService->getVocabularies($subgraph);
+        $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
 
         $this->view->assign('rootNode', $rootNode);
         $this->view->assign('rootNodeAddress', $rootNode ? $this->nodeAddressFactory->createFromNode($rootNode)->serializeForUri() : null);
@@ -216,15 +216,16 @@ class ModuleController extends ActionController
         $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
         $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
         $nodeAddress = $this->nodeAddressFactory->createFromUriString($rootNodeAddress);
-        $nodeAggregateId = NodeAggregateId::create();
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
         // create node
+        $nodeAggregateId = NodeAggregateId::create();
+        $nodeTypeName = NodeTypeName::fromString($this->taxonomyService->getVocabularyNodeType());
         $commandResult = $contentRepository->handle(
             new CreateNodeAggregateWithNode(
                 $liveWorkspace->currentContentStreamId,
                 $nodeAggregateId,
-                $this->taxonomyService->getVocabularyNodeTypeName(),
+                $nodeTypeName,
                 $originDimensionSpacePoint,
                 $rootNode->nodeAggregateId,
                 null,
@@ -368,15 +369,16 @@ class ModuleController extends ActionController
         $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
         $generalizations = $this->contentRepository->getVariationGraph()->getRootGeneralizations();
         $nodeAddress = $this->nodeAddressFactory->createFromUriString($parentNodeAddress);
-        $nodeAggregateId = NodeAggregateId::create();
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
         // create node
+        $nodeAggregateId = NodeAggregateId::create();
+        $nodeTypeName = NodeTypeName::fromString($this->taxonomyService->getTaxonomyNodeType());
         $commandResult = $this->contentRepository->handle(
             new CreateNodeAggregateWithNode(
                 $liveWorkspace->currentContentStreamId,
                 $nodeAggregateId,
-                $this->taxonomyService->getTaxonomyNodeTypeName(),
+                $nodeTypeName,
                 $originDimensionSpacePoint,
                 $parentNode->nodeAggregateId,
                 null,

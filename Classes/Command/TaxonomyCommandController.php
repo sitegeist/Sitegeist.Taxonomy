@@ -65,7 +65,7 @@ class TaxonomyCommandController extends CommandController
     {
         $subgraph = $this->taxonomyService->findSubgraph();
         $taxonomyRoot = $this->taxonomyService->getRoot($subgraph);
-        $vocabularies = $this->taxonomyService->getVocabularies($subgraph);
+        $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
 
         /**
          * @var Node $vocabularyNode

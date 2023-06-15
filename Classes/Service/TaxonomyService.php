@@ -13,6 +13,7 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\User\UserId;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
@@ -68,43 +69,19 @@ class TaxonomyService
      */
     protected $taxonomyNodeType;
 
-    /**
-     * @return string
-     */
-    public function getRootNodeType()
+    public function getRootNodeType(): string
     {
         return $this->rootNodeType;
     }
 
-    /**
-     * @return string
-     */
-    public function getVocabularyNodeType()
+    public function getVocabularyNodeType(): string
     {
         return $this->vocabularyNodeType;
     }
 
-    /**
-     * @return string
-     */
-    public function getTaxonomyNodeType()
+    public function getTaxonomyNodeType(): string
     {
         return $this->taxonomyNodeType;
-    }
-
-    public function getRootNodeTypeName(): NodeTypeName
-    {
-        return NodeTypeName::fromString($this->rootNodeType);
-    }
-
-    public function getVocabularyNodeTypeName(): NodeTypeName
-    {
-        return NodeTypeName::fromString($this->vocabularyNodeType);
-    }
-
-    public function getTaxonomyNodeTypeName(): NodeTypeName
-    {
-        return NodeTypeName::fromString($this->taxonomyNodeType);
     }
 
     public function getContentRepository(): ContentRepository
@@ -156,7 +133,7 @@ class TaxonomyService
                 NodeTypeName::fromString($this->getRootNodeType())
             );
             return $subgraph->findNodeById($rootNodeAggregate->nodeAggregateId);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // ignore and create a new root
         }
 
@@ -178,10 +155,7 @@ class TaxonomyService
         return $subgraph->findNodeById($rootNodeAggregate->nodeAggregateId);
     }
 
-    /**
-     * @return Nodes
-     */
-    public function getVocabularies(ContentSubgraphInterface $subgraph): Nodes
+    public function findAllVocabularies(ContentSubgraphInterface $subgraph): Nodes
     {
         $root = $this->getRoot($subgraph);
         return $subgraph->findChildNodes(
@@ -190,62 +164,26 @@ class TaxonomyService
         );
     }
 
-    /**
-     * @param string $vocabularyName
-     * @param Context|null $context
-     * @param $vocabulary
-     */
-    public function getVocabulary($vocabularyName, Context $context = null)
-    {
-        if ($context === null) {
-            $context = $this->contextFactory->create();
-        }
-
-        $root = $this->getRoot($context);
-        return $root->getNode($vocabularyName);
-    }
-
-    /**
-     * @param string $vocabularyName
-     * @param string $taxonomyPath
-     * @param Context|null $context
-     * @param $vocabulary
-     */
-    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
-    {
-        $vocabulary = $this->getVocabulary($vocabularyName, $context);
-        if ($vocabulary) {
-            return $vocabulary->getNode($taxonomyPath);
-        }
-    }
-
-    /**
-     * @param NodeInterface $startingPoint
-     * @return array
-     */
-    public function getTaxonomyTreeAsArray(NodeInterface $startingPoint): array
-    {
-        $result = [];
-
-        $result['identifier'] = $startingPoint->getIdentifier();
-        $result['path'] = $startingPoint->getPath();
-        $result['nodeType'] = $startingPoint->getNodeType()->getName();
-        $result['label'] = $startingPoint->getLabel();
-        $result['title'] = $startingPoint->getProperty('title');
-        $result['description'] = $startingPoint->getProperty('description');
-
-        $result['children'] = [];
-
-        foreach ($startingPoint->getChildNodes() as $childNode) {
-            $result['children'][] = $this->getTaxonomyTreeAsArray($childNode);
-        }
-        usort($result['children'], function (array $childA, array $childB) {
-            return strcmp(
-                $childA['title'] ?: '',
-                $childB['title'] ?: ''
-            );
-        });
-
-        return $result;
-    }
+//    public function findVocabulary(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
+//    {
+//        $root = $this->getRoot($subgraph);
+//        return $subgraph->findChildNodeConnectedThroughEdgeName(
+//            $root->nodeAggregateId,
+//            NodeName::fromString($vocabularyName)
+//        );
+//    }
+//
+//    /**
+//     * @param string $vocabularyName
+//     * @param string $taxonomyPath
+//     * @param Context|null $context
+//     * @param $vocabulary
+//     */
+//    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
+//    {
+//        $vocabulary = $this->findVocabulary($vocabularyName, $context);
+//        if ($vocabulary) {
+//            return $vocabulary->getNode($taxonomyPath);
+//        }
+//    }
 }

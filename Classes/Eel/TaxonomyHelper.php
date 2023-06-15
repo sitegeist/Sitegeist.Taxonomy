@@ -33,7 +33,7 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
      */
     public function vocabulary($vocabulary, ContentContext $context = null)
     {
-        return $this->taxonomyService->getVocabulary($vocabulary, $context);
+        return $this->taxonomyService->findVocabulary($vocabulary, $context);
     }
 
     /**
