@@ -19,10 +19,18 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
             <fieldset>
                 <div class="neos-control-group">
                     <label class="neos-control-label" for="title">
+                        {props.i18nTaxonomy.id('properties.name')}
+                        <span @if={props.defaultTaxonomy}>: {props.defaultTaxonomy.properties.name}</span>
+                    </label>
+                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="properties[name]" attributes.required />
+                </div>
+
+                <div class="neos-control-group">
+                    <label class="neos-control-label" for="title">
                         {props.i18nTaxonomy.id('properties.title')}
                         <span @if={props.defaultTaxonomy}>: {props.defaultTaxonomy.properties.title}</span>
                     </label>
-                    <Neos.Fusion.Form:Textarea attributes.class="neos-span6" field.name="properties[title]" />
+                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="properties[title]" attributes.required />
                 </div>
 
                 <div class="neos-control-group">

@@ -164,15 +164,29 @@ class TaxonomyService
         );
     }
 
-//    public function findVocabulary(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
-//    {
-//        $root = $this->getRoot($subgraph);
-//        return $subgraph->findChildNodeConnectedThroughEdgeName(
-//            $root->nodeAggregateId,
-//            NodeName::fromString($vocabularyName)
-//        );
-//    }
-//
+    public function findVocabulary(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
+    {
+        $vocabularies = $this->findAllVocabularies($subgraph);
+        foreach ($vocabularies as $vocabulary) {
+            if ($vocabulary->getProperty('name') === $vocabularyName) {
+                return $vocabulary;
+            }
+        }
+        return null;
+    }
+
+    public function findTaxonomy(ContentSubgraphInterface $subgraph, string|Node $vocabulary, array $taxonomyPath): ?Node
+    {
+        if (is_string($vocabulary)) {
+            $vocabulary =  $this->findVocabulary($subgraph, $vocabulary);
+        }
+
+        if ($vocabulary) {
+            return $vocabulary->getNode($taxonomyPath);
+        }
+    }
+
+
 //    /**
 //     * @param string $vocabularyName
 //     * @param string $taxonomyPath

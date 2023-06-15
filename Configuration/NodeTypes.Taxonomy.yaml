@@ -10,6 +10,9 @@ Sitegeist.Taxonomy:Taxonomy:
       '*': FALSE
       'Sitegeist.Taxonomy:Taxonomy': TRUE
   properties:
+    name:
+      type: string
+      scope: nodeAggregate
     title:
       type: string
     description:

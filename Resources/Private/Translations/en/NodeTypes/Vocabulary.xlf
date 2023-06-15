@@ -5,6 +5,9 @@
             <trans-unit id="ui.label" xml:space="preserve" approved="yes">
                 <source>Vocabulary</source>
             </trans-unit>
+            <trans-unit id="properties.name" xml:space="preserve" approved="yes">
+                <source>Name</source>
+            </trans-unit>
             <trans-unit id="properties.title" xml:space="preserve" approved="yes">
                 <source>Title</source>
             </trans-unit>

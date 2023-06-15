@@ -1,6 +1,8 @@
 <?php
 namespace Sitegeist\Taxonomy\Eel;
 
+use Neos\ContentGraph\DoctrineDbalAdapter\Domain\Repository\ContentSubgraph;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\Flow\Annotations as Flow;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\ContentRepository\Domain\Model\NodeInterface;
@@ -17,34 +19,19 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
      */
     protected $taxonomyService;
 
-    /**
-     * @param ContentContext $context
-     * @return NodeInterface
-     */
-    public function root(ContentContext $context = null)
+    public function root(ContentSubgraph $subgraph = null): Node
     {
-        return $this->taxonomyService->getRoot($context);
+        return $this->taxonomyService->getRoot($subgraph);
     }
 
-    /**
-     * @param string $vocabulary Name of the vocabulary node
-     * @param ContentContext $context
-     * @return NodeInterface
-     */
-    public function vocabulary($vocabulary, ContentContext $context = null)
+    public function vocabulary(ContentSubgraph $subgraph, string $vocabulary): ?Node
     {
-        return $this->taxonomyService->findVocabulary($vocabulary, $context);
+        return $this->taxonomyService->findVocabulary($subgraph, $vocabulary);
     }
 
-    /**
-     * @param string $vocabulary Name of the vocabulary node
-     * @param string $path Path of the taxonomy node
-     * @param ContentContext $context
-     * @return NodeInterface
-     */
-    public function taxonomy($vocabulary, $path, ContentContext $context = null)
+    public function taxonomy(ContentSubgraph $subgraph, string|Node $vocabulary, array $path = null): ?Node
     {
-        return $this->taxonomyService->getTaxonomy($vocabulary, $path, $context);
+        return $this->taxonomyService->findTaxonomy($vocabulary, $path, $context);
     }
 
     /**
