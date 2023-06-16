@@ -11,8 +11,11 @@ prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component)
     additionalFieldPrototypeNames = ${Configuration.setting('Sitegeist.Taxonomy.backendModule.additionalVocabularyFieldPrototypes')}
 
     renderer = afx`
-        <Neos.Fusion.Form:Form form.target.action={props.targetAction} form.data.properties={props.vocabularyNode ? props.vocabularyNode.properties : null}>
-
+        <Neos.Fusion.Form:Form
+          form.target.action={props.targetAction}
+          form.data.name={props.vocabularyNode.nodeName.value}
+          form.data.properties={props.vocabularyNode.properties}
+        >
             <Neos.Fusion.Form:Hidden field.name="vocabularyNodeAddress" field.value={props.vocabularyNode ? Neos.Node.serializedNodeAddress(props.vocabularyNode) : null} @if.has={props.vocabularyNode}/>
             <Neos.Fusion.Form:Hidden field.name="rootNodeAddress" field.value={props.rootNode ? Neos.Node.serializedNodeAddress(props.rootNode) : null} @if.has={props.rootNode}/>
 
@@ -21,7 +24,7 @@ prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component)
                     <label class="neos-control-label" for="name">
                         {props.i18nVocabulary.id('properties.name')}
                     </label>
-                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="properties[name]" attributes.required />
+                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="name" attributes.required attributes.pattern="[a-z0-9]+" />
                 </div>
 
                 <div class="neos-control-group">

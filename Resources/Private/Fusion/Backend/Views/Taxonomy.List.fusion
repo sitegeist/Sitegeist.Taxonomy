@@ -76,7 +76,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                 </Neos.Fusion:Loop>
                 <i class={props.taxon.parents ? 'fas fa-caret-right': props.taxon.node.nodeType.fullConfiguration.ui.icon} ></i>
                 &nbsp;
-                {props.taxon.node.properties.title} ({props.taxon.node.properties.name})
+                {props.taxon.node.properties.title} ({props.taxon.node.nodeName.value})
             </td>
             <td>
                 {props.taxon.node.properties.description}

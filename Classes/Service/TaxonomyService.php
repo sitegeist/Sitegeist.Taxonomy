@@ -5,6 +5,7 @@ use http\Exception\InvalidArgumentException;
 use Neos\ContentGraph\DoctrineDbalAdapter\Domain\Repository\ContentSubgraph;
 use Neos\ContentRepository\Core\ContentRepository;
 use Neos\ContentRepository\Core\Factory\ContentRepositoryId;
+use Neos\ContentRepository\Core\Feature\NodeRenaming\Command\ChangeNodeAggregateName;
 use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeAggregateWithNode;
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
@@ -141,8 +142,7 @@ class TaxonomyService
             new CreateRootNodeAggregateWithNode(
                 $liveWorkspace->currentContentStreamId,
                 NodeAggregateId::create(),
-                NodeTypeName::fromString($this->getRootNodeType()),
-                UserId::forSystemUser()
+                NodeTypeName::fromString($this->getRootNodeType())
             )
         );
         $commandResult->block();
