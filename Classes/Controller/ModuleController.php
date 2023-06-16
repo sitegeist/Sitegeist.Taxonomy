@@ -84,11 +84,6 @@ class ModuleController extends ActionController
     protected $taxonomyService;
 
     /**
-     * @var NodeInterface
-     */
-    protected $defaultRoot;
-
-    /**
      * @var ContentRepository
      */
     protected $contentRepository;
@@ -138,7 +133,7 @@ class ModuleController extends ActionController
     {
         if (is_null($rootNodeAddress)) {
             $subgraph = $this->taxonomyService->findSubgraph();
-            $rootNode = $this->taxonomyService->getRoot($subgraph);
+            $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         } else {
             $rootNode = $this->getNodeByNodeAddress($rootNodeAddress);
             $subgraph = $this->getSubgraphForNode($rootNode);
@@ -179,18 +174,11 @@ class ModuleController extends ActionController
     {
         $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
         $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
+        $vocabularySubtree = $this->taxonomyService->findTaxonomySubtree($vocabularyNode);
 
-        $rootNode = $this->taxonomyService->getRoot($subgraph);
         $this->view->assign('rootNode', $rootNode);
         $this->view->assign('vocabularyNode', $vocabularyNode);
-
-        $vocabularySubtree = $subgraph->findSubtree(
-            $vocabularyNode->nodeAggregateId,
-            FindSubtreeFilter::create(
-                $this->taxonomyService->getTaxonomyNodeType()
-            )
-        );
-
         $this->view->assign('vocabularySubtree', $vocabularySubtree);
     }
 
@@ -279,7 +267,7 @@ class ModuleController extends ActionController
             $vocabularyNode->subgraphIdentity->visibilityConstraints,
         );
 
-        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
         $this->view->assign('rootNode', $rootNode);
         $this->view->assign('vocabularyNode', $vocabularyNode);
@@ -292,7 +280,7 @@ class ModuleController extends ActionController
     {
         $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
         $subgraph = $this->getSubgraphForNode($vocabularyNode);
-        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
         $commandResult = $this->contentRepository->handle(
             new SetNodeProperties(
@@ -328,7 +316,7 @@ class ModuleController extends ActionController
     {
         $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
         $subgraph = $this->getSubgraphForNode($vocabularyNode);
-        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(\Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName::forLive());
 
         $commandResult = $this->contentRepository->handle(
@@ -356,7 +344,7 @@ class ModuleController extends ActionController
     {
         $parentNode = $this->getNodeByNodeAddress($parentNodeAddress);
         $subgraph = $this->getSubgraphForNode($parentNode);
-        $rootNode = $this->taxonomyService->getRoot($subgraph);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $vocabularyNode = null;
 
         if ($parentNode->nodeType->isOfType($this->taxonomyService->getTaxonomyNodeType())) {

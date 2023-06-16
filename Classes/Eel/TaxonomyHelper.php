@@ -21,17 +21,17 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
 
     public function root(ContentSubgraph $subgraph = null): Node
     {
-        return $this->taxonomyService->getRoot($subgraph);
+        return $this->taxonomyService->findOrCreateRoot($subgraph);
     }
 
     public function vocabulary(ContentSubgraph $subgraph, string $vocabulary): ?Node
     {
-        return $this->taxonomyService->findVocabulary($subgraph, $vocabulary);
+        return $this->taxonomyService->findVocabularyByName($subgraph, $vocabulary);
     }
 
-    public function taxonomy(ContentSubgraph $subgraph, string|Node $vocabulary, array $path = null): ?Node
+    public function taxonomy(ContentSubgraph $subgraph, array $path = []): ?Node
     {
-        return $this->taxonomyService->findTaxonomy($vocabulary, $path, $context);
+        return $this->taxonomyService->findVocabularyOrTaxonomyByPath($subgraph, $path);
     }
 
     /**

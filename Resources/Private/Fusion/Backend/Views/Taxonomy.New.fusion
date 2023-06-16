@@ -4,7 +4,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.New) < prototype(Neos.Fusion:
     i18nTaxonomy = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Taxonomy')}
 
     renderer = afx`
-        <legend>{props.i18nMain.id('taxon.createBelow')} "{parent.properties.title}"</legend>
+        <legend>{props.i18nMain.id('taxon.createBelow')}: "{parentNode.properties.title}" [{parentNode.nodeName.value}]</legend>
         <Sitegeist.Taxonomy:Form.Taxonomy
             targetAction="createTaxonomy"
             parentNode={parentNode}

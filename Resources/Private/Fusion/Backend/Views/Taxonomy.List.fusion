@@ -7,7 +7,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
     renderer = afx`
         <div class="neos-row-fluid">
             <legend>
-                {props.i18n.id('vocabulary')} {vocabularyNode.properties.title}
+                {props.i18n.id('vocabulary')} "{vocabularyNode.properties.title}" [{vocabularyNode.nodeName.value}]
                 <div class="neos-pull-right">
                     <Sitegeist.Taxonomy:Views.Fragments.DimensionSelector
                         targetAction='vocabulary'
@@ -32,12 +32,14 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
                 <th>
                     {props.i18nTaxonomy.id('properties.title')}
                 </th>
-                <th></th>
+                <th>
+                    {props.i18nTaxonomy.id('properties.description')}
+                </th>
             </tr>
             </thead>
             <tbody>
-            <Neos.Fusion:Loop items={vocabularySubtree.children} itemName="taxon">
-                <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={taxon}/>
+            <Neos.Fusion:Loop items={vocabularySubtree.children} itemName="taxonomySubtree">
+                <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxonomySubtree={taxonomySubtree}/>
             </Neos.Fusion:Loop>
             </tbody>
         </table>
@@ -66,20 +68,21 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
 
 
 prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.Fusion:Component) {
-    taxon = null
+
+    taxonomySubtree = null
 
     renderer = afx`
         <tr>
             <td>
-                <Neos.Fusion:Loop items={Array.range(0, props.taxon.level)}>
+                <Neos.Fusion:Loop items={Array.range(0, props.taxonomySubtree.level - 2)} @if={props.taxonomySubtree.level > 1}>
                     &nbsp; &nbsp; &nbsp;
                 </Neos.Fusion:Loop>
-                <i class={props.taxon.parents ? 'fas fa-caret-right': props.taxon.node.nodeType.fullConfiguration.ui.icon} ></i>
-                &nbsp;
-                {props.taxon.node.properties.title} ({props.taxon.node.nodeName.value})
+                <i class={props.taxonomySubtree.node.nodeType.fullConfiguration.ui.icon}></i>
+                &nbsp; &nbsp;
+                {props.taxonomySubtree.node.properties.title} [{props.taxonomySubtree.node.nodeName.value}]
             </td>
             <td>
-                {props.taxon.node.properties.description}
+                {props.taxonomySubtree.node.properties.description}
             </td>
             <td>
                 <div class="neos-pull-right">
@@ -88,7 +91,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
 
                         <Neos.Fusion:Link.Action
                             href.action="newTaxonomy"
-                            href.arguments.parentNodeAddress={Neos.Node.serializedNodeAddress(props.taxon.node)}
+                            href.arguments.parentNodeAddress={Neos.Node.serializedNodeAddress(props.taxonomySubtree.node)}
                             title={props.i8n.id('taxon.createBelow')}
                             class="neos-button neos-button-primary"
                         >
@@ -97,33 +100,33 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                         &nbsp;
                         <Neos.Fusion:Link.Action
                             href.action="editTaxonomy"
-                            href.arguments.taxonomyNodeAddress={Neos.Node.serializedNodeAddress(props.taxon.node)}
+                            href.arguments.taxonomyNodeAddress={Neos.Node.serializedNodeAddress(props.taxonomySubtree.node)}
                             title={props.i8n.id('generic.edit')}
                             class="neos-button neos-button-primary"
                         >
                             <i class="fas fa-pencil-alt"></i>
                         </Neos.Fusion:Link.Action>
 
-                        <Neos.Fusion:Fragment @if={!props.taxon.autoCreated}>
+                        <Neos.Fusion:Fragment @if={!props.taxonomySubtree.autoCreated}>
                             &nbsp;
                             <button class="neos-button neos-button-danger"
                                 title={props.i8n.id('generic.delete')}
                                 data-toggle="modal"
-                                href={"#deleteTaxonomy_" + props.taxon.node.nodeAggregateId.value}
+                                href={"#deleteTaxonomy_" + props.taxonomySubtree.node.nodeAggregateId.value}
                                 data-neos-toggle="tooltip"
                             >
                                 <i class="fas fa-trash-alt icon-white"></i>
                             </button>
-                            <div class="neos-hide" id={"deleteTaxonomy_" + props.taxon.node.nodeAggregateId.value}>
+                            <div class="neos-hide" id={"deleteTaxonomy_" + props.taxonomySubtree.node.nodeAggregateId.value}>
                                 <div class="neos-modal-centered">
                                     <div class="neos-modal-content">
                                         <div class="neos-modal-header">
                                             <button type="button" class="neos-close neos-button" data-dismiss="modal"></button>
-                                            <div class="neos-header">Do you really want to delete the taxonomy "{ props.taxon.node.properties.title}"? This action cannot be undone.</div>
+                                            <div class="neos-header">Do you really want to delete the taxonomySubtreeomy "{ props.taxonomySubtree.node.properties.title}"? This action cannot be undone.</div>
                                         </div>
                                         <div class="neos-modal-footer">
                                             <a href="#" class="neos-button" data-dismiss="modal">Cancel</a>
-                                            <Neos.Fusion.Form:Form form.target.action="deleteTaxonomy" form.target.arguments.taxonomyNodeAddress={Neos.Node.serializedNodeAddress(props.taxon.node)} attributes.class="neos-inline">
+                                            <Neos.Fusion.Form:Form form.target.action="deleteTaxonomy" form.target.arguments.taxonomyNodeAddress={Neos.Node.serializedNodeAddress(props.taxonomySubtree.node)} attributes.class="neos-inline">
                                                 <button class="neos-button neos-button-danger" title="Delete this taxonomy">Yes, delete this taxonomy</button>
                                             </Neos.Fusion.Form:Form>
                                         </div>
@@ -140,8 +143,8 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
             </td>
         </tr>
 
-        <Neos.Fusion:Loop items={props.taxon.children} itemName="child">
-            <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={child}/>
+        <Neos.Fusion:Loop items={props.taxonomySubtree.children} itemName="child">
+            <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxonomySubtree={child}/>
         </Neos.Fusion:Loop>
 
     `

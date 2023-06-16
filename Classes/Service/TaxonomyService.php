@@ -10,8 +10,10 @@ use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeA
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
@@ -122,7 +124,7 @@ class TaxonomyService
         throw new \InvalidArgumentException('Node seems to be outside of vocabulary');
     }
 
-    public function getRoot(ContentSubgraphInterface $subgraph): Node
+    public function findOrCreateRoot(ContentSubgraphInterface $subgraph): Node
     {
         $contentRepository = $this->getContentRepository();
         $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
@@ -157,47 +159,79 @@ class TaxonomyService
 
     public function findAllVocabularies(ContentSubgraphInterface $subgraph): Nodes
     {
-        $root = $this->getRoot($subgraph);
+        $root = $this->findOrCreateRoot($subgraph);
         return $subgraph->findChildNodes(
             $root->nodeAggregateId,
             FindChildNodesFilter::create($this->vocabularyNodeType)
         );
     }
 
-    public function findVocabulary(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
+    public function findVocabularyByName(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
     {
         $vocabularies = $this->findAllVocabularies($subgraph);
         foreach ($vocabularies as $vocabulary) {
-            if ($vocabulary->getProperty('name') === $vocabularyName) {
+            if ($vocabulary->nodeName->value == $vocabularyName) {
                 return $vocabulary;
             }
         }
         return null;
     }
 
-    public function findTaxonomy(ContentSubgraphInterface $subgraph, string|Node $vocabulary, array $taxonomyPath): ?Node
+    public function findVocabularyOrTaxonomyByPath(ContentSubgraphInterface $subgraph, array $taxonomyPath = []): ?Node
     {
-        if (is_string($vocabulary)) {
-            $vocabulary =  $this->findVocabulary($subgraph, $vocabulary);
+        if (count($taxonomyPath) < 1) {
+            return null;
         }
-
-        if ($vocabulary) {
-            return $vocabulary->getNode($taxonomyPath);
+        $vocabularyName = array_shift($taxonomyPath);
+        $vocabularyNode = $this->findVocabularyByName($subgraph, $vocabularyName);
+        if (!$vocabularyNode) {
+            return null;
         }
+        $taxonomyNode = $vocabularyNode;
+        while (count($taxonomyPath)) {
+            $taxonomyName = array_shift($taxonomyPath);
+            $taxonomyNode = $subgraph->findChildNodeConnectedThroughEdgeName($taxonomyNode->nodeAggregateId, NodeName::fromString($taxonomyName));
+            if (!$taxonomyNode) {
+                return null;
+            }
+        }
+        return $taxonomyNode;
     }
 
+    public function findTaxonomySubtree(Node $node): Subtree
+    {
+        $contentRepository = $this->getContentRepository();
+        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
+            $node->subgraphIdentity->contentStreamId,
+            $node->subgraphIdentity->dimensionSpacePoint,
+            $node->subgraphIdentity->visibilityConstraints,
+        );
 
-//    /**
-//     * @param string $vocabularyName
-//     * @param string $taxonomyPath
-//     * @param Context|null $context
-//     * @param $vocabulary
-//     */
-//    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
-//    {
-//        $vocabulary = $this->findVocabulary($vocabularyName, $context);
-//        if ($vocabulary) {
-//            return $vocabulary->getNode($taxonomyPath);
-//        }
-//    }
+        $vocabularySubtree = $subgraph->findSubtree(
+            $node->nodeAggregateId,
+            FindSubtreeFilter::create(
+                $this->getTaxonomyNodeType()
+            )
+        );
+
+        return $this->orderSubtreeByNameRecursive($vocabularySubtree);
+    }
+
+    private function orderSubtreeByNameRecursive(Subtree $subtree): Subtree
+    {
+        $children = $subtree->children;
+        $children = array_map(
+            fn(Subtree $item) => $this->orderSubtreeByNameRecursive($item),
+            $children
+        );
+        usort(
+            $children,
+            fn(Subtree $a, Subtree $b) => $a->node->nodeName->value <=> $b->node->nodeName->value
+        );
+        return new Subtree(
+            $subtree->level,
+            $subtree->node,
+            $children
+        );
+    }
 }

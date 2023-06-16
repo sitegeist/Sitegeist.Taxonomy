@@ -1,10 +1,10 @@
 <?php
 namespace Sitegeist\Taxonomy\Command;
 
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
-use Neos\Eel\FlowQuery\FlowQuery;
-use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -13,264 +13,52 @@ use Sitegeist\Taxonomy\Service\TaxonomyService;
 class TaxonomyCommandController extends CommandController
 {
 
-//    /**
-//     * @var array
-//     * @Flow\InjectConfiguration
-//     */
-//    protected $configuration;
-//
-//    /**
-//     * @Flow\Inject
-//     * @var NodeImportService
-//     */
-//    protected $nodeImportService;
-//
-//    /**
-//     * @var NodeExportService
-//     * @Flow\Inject
-//     */
-//    protected $nodeExportService;
-//
-//    /**
-//     * @var NodeDataRepository
-//     * @Flow\Inject
-//     */
-//    protected $nodeDataRepository;
-//
     /**
      * @var TaxonomyService
      * @Flow\Inject
      */
     protected $taxonomyService;
-//
-//    /**
-//     * @var DimensionService
-//     * @Flow\Inject
-//     */
-//    protected $dimensionService;
-//
-//    /**
-//     * @var PersistenceManagerInterface
-//     * @Flow\Inject
-//     */
-//    protected $persistenceManager;
-//
+
     /**
-     * List taxonomy vocabularies
-     *
-     * @param string $vocabularyNode vocabularay nodename(path) to prune (globbing is supported)
-     * @return void
+     * List all vocabularies
      */
-    public function listCommand()
+    public function listVocabulariesCommand(): void
     {
         $subgraph = $this->taxonomyService->findSubgraph();
-        $taxonomyRoot = $this->taxonomyService->getRoot($subgraph);
         $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
-
-        /**
-         * @var Node $vocabularyNode
-         */
-        foreach ($vocabularies->getIterator() as $vocabulary) {
-            $this->outputLine($vocabulary->getLabel());
-        }
+        $this->output->outputTable(
+            array_map(
+                fn(Node $node) => [$node->nodeName->value, $node->getProperty('title'), $node->getProperty('description')],
+                iterator_to_array($vocabularies->getIterator())
+            ),
+            ['name', 'title', 'description']
+        );
     }
 
-//
-//    /**
-//     * Import taxonomy content
-//     *
-//     * @param string $filename relative path and filename to the XML file to read.
-//     * @param string $vocabularyNode vocabularay nodename(path) to import (globbing is supported)
-//     * @return void
-//     */
-//    public function importCommand($filename, $vocabulary = null)
-//    {
-//        $xmlReader = new \XMLReader();
-//        $xmlReader->open($filename, null, LIBXML_PARSEHUGE);
-//
-//        $taxonomyRoot = $this->taxonomyService->getRoot();
-//
-//        while ($xmlReader->read()) {
-//            if ($xmlReader->nodeType != \XMLReader::ELEMENT || $xmlReader->name !== 'vocabulary') {
-//                continue;
-//            }
-//
-//            $vocabularyName = (string) $xmlReader->getAttribute('name');
-//            if (is_string($vocabulary) && fnmatch($vocabulary, $vocabularyName) == false) {
-//                continue;
-//            }
-//
-//            $this->nodeImportService->import($xmlReader, $taxonomyRoot->getPath());
-//            $this->outputLine('Imported vocabulary %s from file %s', [$vocabularyName, $filename]);
-//        }
-//    }
-//
-//    /**
-//     * Export taxonomy content
-//     *
-//     * @param string $filename filename for the xml that is written.
-//     * @param string $vocabularyNode vocabularay nodename(path) to export (globbing is supported)
-//     * @return void
-//     */
-//    public function exportCommand($filename, $vocabulary = null)
-//    {
-//        $xmlWriter = new \XMLWriter();
-//        $xmlWriter->openUri($filename);
-//        $xmlWriter->setIndent(true);
-//
-//        $xmlWriter->startDocument('1.0', 'UTF-8');
-//        $xmlWriter->startElement('root');
-//
-//        $taxonomyRoot = $this->taxonomyService->getRoot();
-//
-//        /**
-//         * @var NodeInterface[] $vocabularyNodes
-//         */
-//        $vocabularyNodes = (new FlowQuery([$taxonomyRoot]))
-//            ->children('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ' ]')
-//            ->get();
-//
-//        /**
-//         * @var NodeInterface $vocabularyNode
-//         */
-//        foreach ($vocabularyNodes as $vocabularyNode) {
-//            $vocabularyName = $vocabularyNode->getName();
-//            if (is_string($vocabulary) && fnmatch($vocabulary, $vocabularyName) == false) {
-//                continue;
-//            }
-//            $xmlWriter->startElement('vocabulary');
-//            $xmlWriter->writeAttribute('name', $vocabularyName);
-//            $this->nodeExportService->export($vocabularyNode->getPath(), 'live', $xmlWriter,  false, false);
-//            $this->outputLine('Exported vocabulary %s to file %s', [$vocabularyName, $filename]);
-//            $xmlWriter->endElement();
-//        }
-//
-//        $xmlWriter->endElement();
-//        $xmlWriter->endDocument();
-//
-//        $xmlWriter->flush();
-//    }
-//
-//    /**
-//     * Prune taxonomy content
-//     *
-//     * @param string $vocabularyNode vocabularay nodename(path) to prune (globbing is supported)
-//     * @return void
-//     */
-//    public function pruneCommand($vocabulary)
-//    {
-//        $taxonomyRoot = $this->taxonomyService->getRoot();
-//
-//        /**
-//         * @var NodeInterface[] $vocabularyNodes
-//         */
-//        $vocabularyNodes = (new FlowQuery([$taxonomyRoot]))
-//            ->children('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ' ]')
-//            ->get();
-//
-//        /**
-//         * @var NodeInterface $vocabularyNode
-//         */
-//        foreach ($vocabularyNodes as $vocabularyNode) {
-//            $vocabularyName = $vocabularyNode->getName();
-//            if (is_string($vocabulary) && fnmatch($vocabulary, $vocabularyName) == false) {
-//                continue;
-//            }
-//            $this->nodeDataRepository->removeAllInPath($vocabularyNode->getPath());
-//            $dimensionNodes = $this->nodeDataRepository->findByPath($vocabularyNode->getPath());
-//            foreach ($dimensionNodes as $node) {
-//                $this->nodeDataRepository->remove($node);
-//            }
-//
-//            $this->outputLine('Pruned vocabulary %s', [$vocabularyName]);
-//        }
-//    }
-//
-//    /**
-//     * Reset a taxonimy dimension and create fresh variants from the base dimension
-//     *
-//     * @param string $dimensionName
-//     * @param string $dimensionValue
-//     * @return void
-//     */
-//    public function pruneDimensionCommand($dimensionName, $dimensionValue)
-//    {
-//        $taxonomyRoot = $this->taxonomyService->getRoot();
-//        $targetSubgraph = $this->dimensionService->getDimensionSubgraphByTargetValues([$dimensionName => $dimensionValue]);
-//
-//        if (!$targetSubgraph) {
-//            $this->outputLine('Target subgraph not found');
-//            $this->quit(1);
-//        }
-//
-//        $targetContextValues = $this->dimensionService->getDimensionValuesForSubgraph($targetSubgraph);
-//        $flowQuery = new FlowQuery([$taxonomyRoot]);
-//        $taxonomyRootInTargetContest = $flowQuery->context($targetContextValues)->get(0);
-//
-//        if (!$taxonomyRootInTargetContest) {
-//            $this->outputLine('Not root in target context found');
-//            $this->quit(1);
-//        }
-//
-//        if ($taxonomyRootInTargetContest == $taxonomyRoot) {
-//            $this->outputLine('The root is the default context and cannot be pruned');
-//            $this->quit(1);
-//        }
-//
-//        $this->outputLine('Removing content all below ' . $taxonomyRootInTargetContest->getContextPath());
-//        $flowQuery = new FlowQuery([$taxonomyRootInTargetContest]);
-//        $allNodes = $flowQuery->find('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . '],[instanceof ' . $this->taxonomyService->getTaxonomyNodeType() . ']')->get();
-//        foreach ($allNodes as $node) {
-//            $this->outputLine(' - remove: ' . $node->getContextPath());
-//            $node->remove();
-//        }
-//        $this->outputLine('Done');
-//    }
-//
-//    /**
-//     * Make sure all values from default are present in the target dimension aswell
-//     *
-//     * @param string $dimensionName
-//     * @param string $dimensionValue
-//     * @return void
-//     */
-//    public function populateDimensionCommand($dimensionName, $dimensionValue)
-//    {
-//        $taxonomyRoot = $this->taxonomyService->getRoot();
-//        $targetSubgraph = $this->dimensionService->getDimensionSubgraphByTargetValues([$dimensionName => $dimensionValue]);
-//
-//        if (!$targetSubgraph) {
-//            $this->outputLine('Target subgraph not found');
-//            $this->quit(1);
-//        }
-//
-//        $targetContextValues = $this->dimensionService->getDimensionValuesForSubgraph($targetSubgraph);
-//        $flowQuery = new FlowQuery([$taxonomyRoot]);
-//        $taxonomyRootInTargetContest = $flowQuery->context($targetContextValues)->get(0);
-//
-//        if (!$taxonomyRootInTargetContest) {
-//            $this->outputLine('Not root in target context found');
-//            $this->quit(1);
-//        }
-//
-//        if ($taxonomyRootInTargetContest == $taxonomyRoot) {
-//            $this->outputLine('The root is the default context and cannot be recreated');
-//            $this->quit(1);
-//        }
-//
-//        if ($taxonomyRootInTargetContest == $taxonomyRoot) {
-//            $this->outputLine('The root is the default context and cannot be recreated');
-//            $this->quit(1);
-//        }
-//
-//        $this->outputLine('Populating taxonomy content from default below' . $taxonomyRootInTargetContest->getContextPath());
-//        $targetContext = $taxonomyRootInTargetContest->getContext();
-//        $flowQuery = new FlowQuery([$taxonomyRoot]);
-//        $allNodes = $flowQuery->find('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . '],[instanceof ' . $this->taxonomyService->getTaxonomyNodeType() . ']')->get();
-//        foreach ($allNodes as $node) {
-//            $this->outputLine(' - adopt: ' . $node->getContextPath());
-//            $targetContext->adoptNode($node);
-//        }
-//        $this->outputLine('Done');
-//    }
+    /**
+     * List all taxonomies of a vocabulary
+     *
+     * @param string $path path to the taxonomy starting with the vocabulary name (separated with dots)
+     */
+    public function listTaxonomiesCommand(string $path): void
+    {
+        $subgraph = $this->taxonomyService->findSubgraph();
+        $node = $this->taxonomyService->findVocabularyOrTaxonomyByPath($subgraph, explode('.', $path));
+        if (!$node) {
+            $this->outputLine('nothing found');
+            $this->quit(1);
+        }
+        $subtree = $this->taxonomyService->findTaxonomySubtree($node);
+        $this->output->outputTable(
+            $this->subtreeToTableRowsRecursively($subtree),
+            ['name', 'title', 'description']
+        );
+    }
+
+    private function subtreeToTableRowsRecursively(Subtree $subtree): array
+    {
+        $childRows = array_map(fn(Subtree $subtree)=>$this->subtreeToTableRowsRecursively($subtree), $subtree->children);
+        $row = [str_repeat('  ', $subtree->level) . $subtree->node->nodeName->value, $subtree->node->getProperty('title'), $subtree->node->getProperty('description')];
+        return [$row, ...array_merge(...$childRows)];
+    }
 }

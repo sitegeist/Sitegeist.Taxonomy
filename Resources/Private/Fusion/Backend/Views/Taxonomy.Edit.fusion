@@ -5,7 +5,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.Edit) < prototype(Neos.Fusion
     i18nTaxonomy = ${Translation.value('').package("Sitegeist.Taxonomy").source('NodeTypes/Taxonomy')}
 
     renderer = afx`
-        <legend>{props.i18nMain.id('taxon')}: {taxonomyNode.properties.title}</legend>
+        <legend>{props.i18nMain.id('taxon')}: {taxonomyNode.properties.title} [{taxonomyNode.nodeName.value}]</legend>
         <Sitegeist.Taxonomy:Form.Taxonomy
             targetAction="updateTaxonomy"
             taxonomyNode={taxonomyNode}
