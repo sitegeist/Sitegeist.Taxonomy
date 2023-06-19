@@ -1,22 +1,5 @@
+# @deprecated use Sitegeist.Taxonomy:Mixin.TaxonomyReferences instead
 Sitegeist.Taxonomy:Mixin.Referencable:
   abstract: true
-  ui:
-    inspector:
-      groups:
-        taxonomy:
-          label: i18n
-          icon: icon-tags
-          tab: meta
-          position: '80'
-
-  properties:
-    taxonomyReferences:
-      type: references
-      ui:
-        label: i18n
-        inspector:
-          group: taxonomy
-          editor: 'Sitegeist.Taxonomy:TaxonomyEditor'
-          editorOptions:
-            startingPoint: '/taxonomies'
-            placeholder: 'assign Taxonomies'
+  superTypes:
+    'Sitegeist.Taxonomy:Mixin.TaxonomyReferences': true

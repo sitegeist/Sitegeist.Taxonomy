@@ -36,7 +36,7 @@ We use semantic-versioning, so every breaking change will increase the major ver
 
 Sitegeist.Taxonomy defines three basic node types:
 
-- `Sitegeist.Taxonomy:Root` - The root node at the path `/taxonomies`, allows only vocabulary nodes as children
+- `Sitegeist.Taxonomy:Root` - The root node at the path `/<Sitegeist.Taxonomy:Root>`, allows only vocabulary nodes as children
 - `Sitegeist.Taxonomy:Vocabulary` - The root of a hierarchy of meaning, allows only taxonomies nodes as children   
 - `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy
   nodes as children
