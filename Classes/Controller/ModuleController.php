@@ -164,7 +164,7 @@ class ModuleController extends ActionController
         $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
         $subgraph = $this->taxonomyService->getSubgraphForNode($vocabularyNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
-        $vocabularySubtree = $this->taxonomyService->findTaxonomySubtree($vocabularyNode);
+        $vocabularySubtree = $this->taxonomyService->findSubtree($vocabularyNode);
 
         $this->view->assign('rootNode', $rootNode);
         $this->view->assign('vocabularyNode', $vocabularyNode);

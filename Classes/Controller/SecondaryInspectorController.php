@@ -49,7 +49,7 @@ class SecondaryInspectorController extends ActionController
         $path = AbsoluteNodePath::fromString($startingPoint);
         $startingPoint = $subgraph->findNodeByAbsolutePath($path);
 
-        $taxonomySubtree = $this->taxonomyService->findTaxonomySubtree($startingPoint);
+        $taxonomySubtree = $this->taxonomyService->findSubtree($startingPoint);
 
         $this->view->assign('value', $this->toJson($taxonomySubtree));
     }

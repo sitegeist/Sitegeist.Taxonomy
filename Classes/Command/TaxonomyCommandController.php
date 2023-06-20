@@ -48,7 +48,7 @@ class TaxonomyCommandController extends CommandController
             $this->outputLine('nothing found');
             $this->quit(1);
         }
-        $subtree = $this->taxonomyService->findTaxonomySubtree($node);
+        $subtree = $this->taxonomyService->findSubtree($node);
         $this->output->outputTable(
             $this->subtreeToTableRowsRecursively($subtree),
             ['name', 'title', 'description']

@@ -5,6 +5,7 @@ use Neos\ContentRepository\Core\ContentRepository;
 use Neos\ContentRepository\Core\Factory\ContentRepositoryId;
 use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeAggregateWithNode;
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
@@ -192,19 +193,22 @@ class TaxonomyService
         return $taxonomyNode;
     }
 
-    public function findTaxonomySubtree(Node $node): Subtree
+    public function findSubtree(Node $StartNode): Subtree
     {
         $contentRepository = $this->getContentRepository();
         $subgraph = $contentRepository->getContentGraph()->getSubgraph(
-            $node->subgraphIdentity->contentStreamId,
-            $node->subgraphIdentity->dimensionSpacePoint,
-            $node->subgraphIdentity->visibilityConstraints,
+            $StartNode->subgraphIdentity->contentStreamId,
+            $StartNode->subgraphIdentity->dimensionSpacePoint,
+            $StartNode->subgraphIdentity->visibilityConstraints,
         );
 
         $vocabularySubtree = $subgraph->findSubtree(
-            $node->nodeAggregateId,
+            $StartNode->nodeAggregateId,
             FindSubtreeFilter::create(
-                NodeTypeConstraints::fromFilterString($this->getTaxonomyNodeType() . ',' .$this->getVocabularyNodeType())
+                NodeTypeConstraints::create(
+                    NodeTypeNames::fromStringArray([$this->getTaxonomyNodeType(), $this->getVocabularyNodeType()]),
+                    NodeTypeNames::createEmpty()
+                )
             )
         );
 
