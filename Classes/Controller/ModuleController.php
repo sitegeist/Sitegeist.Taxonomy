@@ -20,31 +20,20 @@ use Neos\ContentRepository\Core\Feature\NodeModification\Dto\PropertyValuesToWri
 use Neos\ContentRepository\Core\Feature\NodeRemoval\Command\RemoveNodeAggregate;
 use Neos\ContentRepository\Core\Feature\NodeRenaming\Command\ChangeNodeAggregateName;
 use Neos\ContentRepository\Core\Feature\NodeVariation\Command\CreateNodeVariant;
-use Neos\ContentRepository\Core\NodeType\NodeTypeManager;
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
-use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
-use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
-use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
-use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
-use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeVariantSelectionStrategy;
-use Neos\ContentRepository\Core\SharedModel\User\UserId;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
-use Neos\Error\Messages\Error;
-use Neos\Error\Messages\Message;
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Annotations as Flow;
 use Neos\Fusion\View\FusionView;
-use Neos\Neos\FrontendRouting\NodeAddress;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
 use Neos\Neos\Fusion\Helper\DimensionHelper;
 use Neos\Neos\Fusion\Helper\NodeHelper;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
-use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Utility\Arrays;
 
@@ -135,8 +124,8 @@ class ModuleController extends ActionController
             $subgraph = $this->taxonomyService->findSubgraph();
             $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         } else {
-            $rootNode = $this->getNodeByNodeAddress($rootNodeAddress);
-            $subgraph = $this->getSubgraphForNode($rootNode);
+            $rootNode = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
+            $subgraph = $this->taxonomyService->getSubgraphForNode($rootNode);
        }
 
         $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
@@ -157,7 +146,7 @@ class ModuleController extends ActionController
      */
     public function changeDimensionAction(string $targetAction, string $targetProperty, string $contextNodeAddress, array $dimensions = [])
     {
-        $contextNode = $this->getNodeByNodeAddress($contextNodeAddress);
+        $contextNode = $this->taxonomyService->getNodeByNodeAddress($contextNodeAddress);
         foreach ($dimensions as $dimensionName => $dimensionValue) {
             $contextNodeInDimension = $this->dimensionHelper->findVariantInDimension($contextNode, $dimensionName, $dimensionValue);
             if ($contextNodeInDimension instanceof Node) {
@@ -172,8 +161,8 @@ class ModuleController extends ActionController
      */
     public function vocabularyAction(string $vocabularyNodeAddress)
     {
-        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
-        $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($vocabularyNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $vocabularySubtree = $this->taxonomyService->findTaxonomySubtree($vocabularyNode);
 
@@ -187,7 +176,7 @@ class ModuleController extends ActionController
      */
     public function newVocabularyAction(string $rootNodeAddress = null): void
     {
-        $node = $this->getNodeByNodeAddress($rootNodeAddress);
+        $node = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
         $this->view->assign('rootNode', $node);
     }
 
@@ -201,8 +190,8 @@ class ModuleController extends ActionController
     {
         $contentRepository = $this->taxonomyService->getContentRepository();
 
-        $rootNode = $this->getNodeByNodeAddress($rootNodeAddress);
-        $subgraph = $this->getSubgraphForNode($rootNode);
+        $rootNode = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($rootNode);
         $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
         $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
         $nodeAddress = $this->nodeAddressFactory->createFromUriString($rootNodeAddress);
@@ -259,7 +248,7 @@ class ModuleController extends ActionController
     public function editVocabularyAction(string $vocabularyNodeAddress)
     {
         $contentRepository = $this->taxonomyService->getContentRepository();
-        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
+        $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
 
         $subgraph = $contentRepository->getContentGraph()->getSubgraph(
             $vocabularyNode->subgraphIdentity->contentStreamId,
@@ -278,8 +267,8 @@ class ModuleController extends ActionController
      */
     public function updateVocabularyAction(string $vocabularyNodeAddress, string $name, array $properties)
     {
-        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
-        $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($vocabularyNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
         $commandResult = $this->contentRepository->handle(
@@ -314,8 +303,8 @@ class ModuleController extends ActionController
      */
     public function deleteVocabularyAction(string $vocabularyNodeAddress)
     {
-        $vocabularyNode = $this->getNodeByNodeAddress($vocabularyNodeAddress);
-        $subgraph = $this->getSubgraphForNode($vocabularyNode);
+        $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($vocabularyNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(\Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName::forLive());
 
@@ -342,8 +331,8 @@ class ModuleController extends ActionController
      */
     public function newTaxonomyAction(string $parentNodeAddress)
     {
-        $parentNode = $this->getNodeByNodeAddress($parentNodeAddress);
-        $subgraph = $this->getSubgraphForNode($parentNode);
+        $parentNode = $this->taxonomyService->getNodeByNodeAddress($parentNodeAddress);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $vocabularyNode = null;
 
@@ -363,9 +352,9 @@ class ModuleController extends ActionController
      */
     public function createTaxonomyAction(string $parentNodeAddress, string $name, array $properties): void
     {
-        $parentNode = $this->getNodeByNodeAddress($parentNodeAddress);
+        $parentNode = $this->taxonomyService->getNodeByNodeAddress($parentNodeAddress);
         $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
-        $subgraph = $this->getSubgraphForNode($parentNode);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
         $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
         $generalizations = $this->contentRepository->getVariationGraph()->getRootGeneralizations();
         $nodeAddress = $this->nodeAddressFactory->createFromUriString($parentNodeAddress);
@@ -426,7 +415,7 @@ class ModuleController extends ActionController
      */
     public function editTaxonomyAction(string $taxonomyNodeAddress)
     {
-        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $taxonomyNode = $this->taxonomyService->getNodeByNodeAddress($taxonomyNodeAddress);
         $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
 
         $this->view->assign('vocabularyNode', $vocabularyNode);
@@ -438,9 +427,9 @@ class ModuleController extends ActionController
      */
     public function updateTaxonomyAction(string $taxonomyNodeAddress, string $name, array $properties)
     {
-        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $taxonomyNode = $this->taxonomyService->getNodeByNodeAddress($taxonomyNodeAddress);
         $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
-        $subgraph = $this->getSubgraphForNode($taxonomyNode);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($taxonomyNode);
 
         $commandResult = $this->contentRepository->handle(
             new SetNodeProperties(
@@ -476,7 +465,7 @@ class ModuleController extends ActionController
      */
     public function deleteTaxonomyAction(string $taxonomyNodeAddress)
     {
-        $taxonomyNode = $this->getNodeByNodeAddress($taxonomyNodeAddress);
+        $taxonomyNode = $this->taxonomyService->getNodeByNodeAddress($taxonomyNodeAddress);
         $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
         $liveWorkspace = $this->contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
 
@@ -495,27 +484,5 @@ class ModuleController extends ActionController
         );
 
         $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
-    }
-
-    protected function getNodeByNodeAddress(?string $serializedNodeAddress): ?Node
-    {
-        $contentRepository = $this->taxonomyService->getContentRepository();
-        $nodeAddress = NodeAddressFactory::create($contentRepository)->createFromUriString($serializedNodeAddress);
-        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
-            $nodeAddress->contentStreamId,
-            $nodeAddress->dimensionSpacePoint,
-            VisibilityConstraints::withoutRestrictions()
-        );
-        return $subgraph->findNodeById($nodeAddress->nodeAggregateId);
-    }
-
-    protected function getSubgraphForNode(Node $node): ContentSubgraphInterface
-    {
-        $contentRepository = $this->taxonomyService->getContentRepository();
-        return $contentRepository->getContentGraph()->getSubgraph(
-            $node->subgraphIdentity->contentStreamId,
-            $node->subgraphIdentity->dimensionSpacePoint,
-            $node->subgraphIdentity->visibilityConstraints,
-        );
     }
 }

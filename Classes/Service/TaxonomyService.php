@@ -1,11 +1,8 @@
 <?php
 namespace Sitegeist\Taxonomy\Service;
 
-use http\Exception\InvalidArgumentException;
-use Neos\ContentGraph\DoctrineDbalAdapter\Domain\Repository\ContentSubgraph;
 use Neos\ContentRepository\Core\ContentRepository;
 use Neos\ContentRepository\Core\Factory\ContentRepositoryId;
-use Neos\ContentRepository\Core\Feature\NodeRenaming\Command\ChangeNodeAggregateName;
 use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeAggregateWithNode;
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
@@ -13,26 +10,15 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFil
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
-use Neos\ContentRepository\Core\SharedModel\User\UserId;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
-use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
-
-use Neos\ContentRepository\Domain\Factory\NodeFactory;
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Model\NodeTemplate;
-use Neos\ContentRepository\Domain\Service\Context;
-use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
-use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
-use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Neos\Fusion\Exception\RuntimeException;
-use Neos\Neos\Service\UserService;
+use Neos\Neos\FrontendRouting\NodeAddressFactory;
 
 /**
  * Class TaxonomyService
@@ -47,6 +33,11 @@ class TaxonomyService
      * @var ContentRepositoryRegistry
      */
     protected $crRegistry;
+
+    /**
+     * @var ContentRepository
+     */
+    protected $contentRepository;
 
     /**
      * @var string
@@ -89,7 +80,10 @@ class TaxonomyService
 
     public function getContentRepository(): ContentRepository
     {
-        return $this->crRegistry->get(ContentRepositoryId::fromString($this->crIdentifier));
+        if (is_null($this->contentRepository)) {
+            $this->contentRepository = $this->crRegistry->get(ContentRepositoryId::fromString($this->crIdentifier));
+        }
+        return $this->contentRepository;
     }
 
     public function findSubgraph(): ContentSubgraphInterface
@@ -210,7 +204,7 @@ class TaxonomyService
         $vocabularySubtree = $subgraph->findSubtree(
             $node->nodeAggregateId,
             FindSubtreeFilter::create(
-                $this->getTaxonomyNodeType()
+                NodeTypeConstraints::fromFilterString($this->getTaxonomyNodeType() . ',' .$this->getVocabularyNodeType())
             )
         );
 
@@ -233,5 +227,22 @@ class TaxonomyService
             $subtree->node,
             $children
         );
+    }
+
+    public function getNodeByNodeAddress(?string $serializedNodeAddress): ?Node
+    {
+        $contentRepository = $this->getContentRepository();
+        $nodeAddress = NodeAddressFactory::create($contentRepository)->createFromUriString($serializedNodeAddress);
+        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
+            $nodeAddress->contentStreamId,
+            $nodeAddress->dimensionSpacePoint,
+            VisibilityConstraints::withoutRestrictions()
+        );
+        return $subgraph->findNodeById($nodeAddress->nodeAggregateId);
+    }
+
+    public function getSubgraphForNode(Node $node): ContentSubgraphInterface
+    {
+        return $this->crRegistry->subgraphForNode($node);
     }
 }

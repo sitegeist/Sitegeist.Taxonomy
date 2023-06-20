@@ -16,7 +16,7 @@ Sitegeist.Taxonomy:Mixin.TaxonomyReferences:
         label: i18n
         inspector:
           group: taxonomy
-          #editor: 'Sitegeist.Taxonomy:TaxonomyEditor'
+          editor: 'Sitegeist.Taxonomy:TaxonomyEditor'
           editorOptions:
             nodeTypes: [ 'Sitegeist.Taxonomy:Taxonomy' ]
             startingPoint: '/<Sitegeist.Taxonomy:Root>'

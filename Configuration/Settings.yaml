@@ -80,7 +80,7 @@ Neos:
         providers:
           Neos.Neos:Backend:
             requestPatterns:
-              'Sitegeist.Taxonomy:secondaryInspector':
+              'Sitegeist.Taxonomy:SecondaryInspector':
                 pattern: ControllerObjectName
                 patternOptions:
                   controllerObjectNamePattern: 'Sitegeist\Taxonomy\Controller\SecondaryInspectorController'

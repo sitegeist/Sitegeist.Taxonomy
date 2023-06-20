@@ -4,10 +4,7 @@ namespace Sitegeist\Taxonomy\Eel;
 use Neos\ContentGraph\DoctrineDbalAdapter\Domain\Repository\ContentSubgraph;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\Flow\Annotations as Flow;
-use Neos\Eel\FlowQuery\FlowQuery;
-use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
-use Neos\Neos\Domain\Service\ContentContext;
 use Neos\Eel\ProtectedContextAwareInterface;
 
 class TaxonomyHelper implements ProtectedContextAwareInterface

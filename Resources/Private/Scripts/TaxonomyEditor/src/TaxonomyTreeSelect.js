@@ -56,11 +56,9 @@ export default class TaxonomyTreeSelect extends PureComponent {
 
 	get tree() {
 		const {contextForNodeLinking, options} = this.props;
-		const [, contextString] = contextForNodeLinking.contextNode.split('@');
-		const startingPointWithContext = `${options.startingPoint}@${contextString}`;
 
 		return fetchWithErrorHandling.withCsrfToken(csrfToken => ({
-			url: `/taxonomy/secondary-inspector/tree?contextNode=${startingPointWithContext}`,
+			url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${options.startingPoint}&contextNode=${contextForNodeLinking.contextNode}`,
 			method: 'GET',
 			credentials: 'include',
 			headers: {

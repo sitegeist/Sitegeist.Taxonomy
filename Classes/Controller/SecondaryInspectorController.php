@@ -12,12 +12,11 @@ namespace Sitegeist\Taxonomy\Controller;
  * source code.
  */
 
+use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
-
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -42,15 +41,38 @@ class SecondaryInspectorController extends ActionController
      */
     protected $defaultViewObjectName = JsonView::class;
 
-    /**
-     * @param NodeInterface $contextNode
-     * @return void
-     */
-    public function treeAction(NodeInterface $contextNode): void
+    public function treeAction(string $contextNode, string $startingPoint): void
     {
-        $taxonomyTreeAsArray = $this->taxonomyService
-            ->getTaxonomyTreeAsArray($contextNode);
+        $contextNode = $this->taxonomyService->getNodeByNodeAddress($contextNode);
+        $subgraph =  $this->taxonomyService->getSubgraphForNode($contextNode);
 
-        $this->view->assign('value', $taxonomyTreeAsArray);
+        $path = AbsoluteNodePath::fromString($startingPoint);
+        $startingPoint = $subgraph->findNodeByAbsolutePath($path);
+
+        $taxonomySubtree = $this->taxonomyService->findTaxonomySubtree($startingPoint);
+
+        $this->view->assign('value', $this->toJson($taxonomySubtree));
+    }
+
+    protected function toJson(Subtree $subtree, array $pathSoFar = []): array
+    {
+        $result = [];
+
+        $result['identifier'] = $subtree->node->nodeAggregateId->value;
+        $result['path'] = implode('/', $pathSoFar);
+        $result['nodeType'] = $subtree->node->nodeType->name->value;
+        $result['label'] = $subtree->node->getLabel();
+        $result['title'] = $subtree->node->getProperty('title');
+        $result['description'] = $subtree->node->getProperty('description');
+
+        $result['children'] = [];
+
+        $name = $subtree->node->nodeName ? $subtree->node->nodeName->value : $subtree->node->getProperty('title');
+
+        foreach ($subtree->children as $childSubtree) {
+            $result['children'][] = $this->toJson($childSubtree, [...$pathSoFar, $name]);
+        }
+
+        return $result;
     }
 }
