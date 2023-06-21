@@ -1,5 +1,4 @@
 <?php
-namespace Sitegeist\Taxonomy\Controller;
 
 /**
  * This file is part of the Sitegeist.Taxonomies package
@@ -11,6 +10,10 @@ namespace Sitegeist\Taxonomy\Controller;
  * information, please view the LICENSE file which was distributed with this
  * source code.
  */
+
+declare(strict_types=1);
+
+namespace Sitegeist\Taxonomy\Controller;
 
 use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;

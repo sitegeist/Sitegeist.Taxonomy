@@ -9,14 +9,30 @@
         "neos/contentrepositoryregistry": "^9.0 || dev-master",
         "neos/fusion-form": ">=2.1.0"
     },
+    "require-dev": {
+        "phpstan/phpstan": "~1.10.16",
+        "squizlabs/php_codesniffer": "~3.7.2"
+    },
     "autoload": {
         "psr-4": {
             "Sitegeist\\Taxonomy\\": "Classes/"
         }
     },
+    "minimum-stability": "dev",
     "extra": {
         "neos": {
             "package-key": "Sitegeist.Taxonomy"
+        }
+    },
+    "scripts": {
+        "test:lint-fix": ["phpcbf --standard=PSR12 -n Classes"],
+        "test:lint": ["phpcs --standard=PSR12 -n Classes"],
+        "test:stan": ["vendor/bin/phpstan analyse Classes"],
+        "test": ["composer install", "composer  test:lint", "composer  test:stan"]
+    },
+    "config": {
+        "allow-plugins": {
+            "neos/composer-plugin": true
         }
     }
 }
