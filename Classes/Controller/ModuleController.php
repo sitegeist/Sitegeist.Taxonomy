@@ -124,7 +124,7 @@ class ModuleController extends ActionController
     public function indexAction(string $rootNodeAddress = null): void
     {
         if (is_null($rootNodeAddress)) {
-            $subgraph = $this->taxonomyService->findSubgraph();
+            $subgraph = $this->taxonomyService->getDefaultSubgraph();
             $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         } else {
             $rootNode = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
@@ -202,7 +202,7 @@ class ModuleController extends ActionController
 
         // create node
         $nodeAggregateId = NodeAggregateId::create();
-        $nodeTypeName = NodeTypeName::fromString($this->taxonomyService->getVocabularyNodeType());
+        $nodeTypeName = $this->taxonomyService->getVocabularyNodeTypeName();
         $commandResult = $contentRepository->handle(
             new CreateNodeAggregateWithNode(
                 $liveWorkspace->currentContentStreamId,
@@ -338,9 +338,9 @@ class ModuleController extends ActionController
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $vocabularyNode = null;
 
-        if ($parentNode->nodeType->isOfType($this->taxonomyService->getTaxonomyNodeType())) {
+        if ($parentNode->nodeType->isOfType($this->taxonomyService->getTaxonomyNodeTypeName()->value)) {
             $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
-        } elseif ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeType())) {
+        } elseif ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeTypeName()->value)) {
             $vocabularyNode = $parentNode;
         }
 
@@ -364,7 +364,7 @@ class ModuleController extends ActionController
 
         // create node
         $nodeAggregateId = NodeAggregateId::create();
-        $nodeTypeName = NodeTypeName::fromString($this->taxonomyService->getTaxonomyNodeType());
+        $nodeTypeName = $this->taxonomyService->getTaxonomyNodeTypeName();
         $commandResult = $this->contentRepository->handle(
             new CreateNodeAggregateWithNode(
                 $liveWorkspace->currentContentStreamId,

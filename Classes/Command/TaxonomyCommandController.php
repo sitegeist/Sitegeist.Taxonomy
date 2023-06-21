@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Sitegeist\Taxonomy\Command;
 
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
@@ -35,9 +36,9 @@ class TaxonomyCommandController extends CommandController
     /**
      * List all vocabularies
      */
-    public function listVocabulariesCommand(): void
+    public function vocabulariesCommand(): void
     {
-        $subgraph = $this->taxonomyService->findSubgraph();
+        $subgraph = $this->taxonomyService->getDefaultSubgraph();
         $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
         $this->output->outputTable(
             array_map(
@@ -49,19 +50,28 @@ class TaxonomyCommandController extends CommandController
     }
 
     /**
-     * List all taxonomies of a vocabulary
+     * List taxonomies inside a vocabulary
      *
-     * @param string $path path to the taxonomy starting with the vocabulary name (separated with dots)
+     * @param string $vocabulary name of the vocabulary to access
+     * @param string $path path to the taxonomy starting at the vocabulary
      */
-    public function listTaxonomiesCommand(string $path): void
+    public function taxonomiesCommand(string $vocabulary, string $path = ''): void
     {
-        $subgraph = $this->taxonomyService->findSubgraph();
-        $node = $this->taxonomyService->findVocabularyOrTaxonomyByPath($subgraph, explode('.', $path));
-        if (!$node) {
+        $subgraph = $this->taxonomyService->getDefaultSubgraph();
+
+        if ($path) {
+            $startPoint = $this->taxonomyService->findTaxonomyByVocabularyNameAndPath($subgraph, $vocabulary, $path);
+        } else {
+            $startPoint = $this->taxonomyService->findVocabularyByName($subgraph, $vocabulary);
+            ;
+        }
+
+        if (!$startPoint) {
             $this->outputLine('nothing found');
             $this->quit(1);
         }
-        $subtree = $this->taxonomyService->findSubtree($node);
+
+        $subtree = $this->taxonomyService->findSubtree($startPoint);
         $this->output->outputTable(
             $this->subtreeToTableRowsRecursively($subtree),
             ['name', 'title', 'description']

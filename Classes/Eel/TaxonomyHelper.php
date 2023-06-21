@@ -39,9 +39,9 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
         return $this->taxonomyService->findVocabularyByName($subgraph, $vocabulary);
     }
 
-    public function taxonomy(ContentSubgraphInterface $subgraph, array $path = []): ?Node
+    public function taxonomy(ContentSubgraphInterface $subgraph, string $vocabulary, string $path): ?Node
     {
-        return $this->taxonomyService->findVocabularyOrTaxonomyByPath($subgraph, $path);
+        return $this->taxonomyService->findTaxonomyByVocabularyNameAndPath($subgraph, $vocabulary, $path);
     }
 
     /**
