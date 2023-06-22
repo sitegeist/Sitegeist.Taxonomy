@@ -17,6 +17,7 @@ namespace Sitegeist\Taxonomy\Eel;
 
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\Eel\ProtectedContextAwareInterface;
@@ -29,7 +30,7 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
      */
     protected $taxonomyService;
 
-    public function root(ContentSubgraphInterface $subgraph = null): Node
+    public function root(ContentSubgraphInterface $subgraph): Node
     {
         return $this->taxonomyService->findOrCreateRoot($subgraph);
     }

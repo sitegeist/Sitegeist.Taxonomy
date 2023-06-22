@@ -20,6 +20,8 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
+use Neos\Flow\Cli\Exception\StopCommandException;
+use Neos\Flow\Mvc\Exception\StopActionException;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -42,7 +44,11 @@ class TaxonomyCommandController extends CommandController
         $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
         $this->output->outputTable(
             array_map(
-                fn(Node $node) => [$node->nodeName->value, $node->getProperty('title'), $node->getProperty('description')],
+                fn(Node $node) => [
+                    $node->nodeName?->value ?? $node->nodeAggregateId->value,
+                    $node->getProperty('title'),
+                    $node->getProperty('description')
+                ],
                 iterator_to_array($vocabularies->getIterator())
             ),
             ['name', 'title', 'description']
@@ -63,25 +69,36 @@ class TaxonomyCommandController extends CommandController
             $startPoint = $this->taxonomyService->findTaxonomyByVocabularyNameAndPath($subgraph, $vocabulary, $path);
         } else {
             $startPoint = $this->taxonomyService->findVocabularyByName($subgraph, $vocabulary);
-            ;
         }
 
         if (!$startPoint) {
             $this->outputLine('nothing found');
             $this->quit(1);
+            throw new StopCommandException();
         }
 
         $subtree = $this->taxonomyService->findSubtree($startPoint);
-        $this->output->outputTable(
-            $this->subtreeToTableRowsRecursively($subtree),
-            ['name', 'title', 'description']
-        );
+
+        if ($subtree) {
+            $this->output->outputTable(
+                $this->subtreeToTableRowsRecursively($subtree),
+                ['name', 'title', 'description']
+            );
+        }
     }
 
+    /**
+     * @return array<int, array<int, string>>
+     */
     private function subtreeToTableRowsRecursively(Subtree $subtree): array
     {
-        $childRows = array_map(fn(Subtree $subtree)=>$this->subtreeToTableRowsRecursively($subtree), $subtree->children);
-        $row = [str_repeat('  ', $subtree->level) . $subtree->node->nodeName->value, $subtree->node->getProperty('title'), $subtree->node->getProperty('description')];
-        return [$row, ...array_merge(...$childRows)];
+        $rows = array_map(fn(Subtree $subtree)=>$this->subtreeToTableRowsRecursively($subtree), $subtree->children);
+        $row = [
+            str_repeat('  ', $subtree->level) . ($subtree->node->nodeName?->value ?? $subtree->node->nodeAggregateId->value),
+            (string) $subtree->node->getProperty('title'),
+            (string) $subtree->node->getProperty('description')
+        ];
+
+        return array_merge([$row], ...$rows);
     }
 }

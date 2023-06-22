@@ -35,7 +35,7 @@ class SecondaryInspectorController extends ActionController
     protected $taxonomyService;
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $supportedMediaTypes = ['application/json'];
 
@@ -46,36 +46,43 @@ class SecondaryInspectorController extends ActionController
 
     public function treeAction(string $contextNode, string $startingPoint): void
     {
-        $contextNode = $this->taxonomyService->getNodeByNodeAddress($contextNode);
-        $subgraph =  $this->taxonomyService->getSubgraphForNode($contextNode);
+        $node = $this->taxonomyService->getNodeByNodeAddress($contextNode);
+        $subgraph =  $this->taxonomyService->getSubgraphForNode($node);
 
         $path = AbsoluteNodePath::fromString($startingPoint);
-        $startingPoint = $subgraph->findNodeByAbsolutePath($path);
-
-        $taxonomySubtree = $this->taxonomyService->findSubtree($startingPoint);
-
+        $startNode = $subgraph->findNodeByAbsolutePath($path);
+        if (!$startNode) {
+            return;
+        }
+        $taxonomySubtree = $this->taxonomyService->findSubtree($startNode);
+        if (!$taxonomySubtree) {
+            return;
+        }
         $this->view->assign('value', $this->toJson($taxonomySubtree));
     }
 
-    protected function toJson(Subtree $subtree, array $pathSoFar = []): array
+    /**
+     * @return mixed[]
+     */
+    protected function toJson(Subtree $subtree, string $pathSoFar = null): array
     {
-        $result = [];
+        $label = $subtree->node->getLabel();
+        $pathSegment = $subtree->node->nodeName?->value ?? $label;
+        $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
+        $identifier = $subtree->node->nodeAggregateId->value;
+        $nodeType =  $subtree->node->nodeType->name->value;
+        $title = $subtree->node->getProperty('title');
+        $description = $subtree->node->getProperty('description');
+        $children = array_map(fn(Subtree $child)=>$this->toJson($child), $subtree->children);
 
-        $result['identifier'] = $subtree->node->nodeAggregateId->value;
-        $result['path'] = implode('/', $pathSoFar);
-        $result['nodeType'] = $subtree->node->nodeType->name->value;
-        $result['label'] = $subtree->node->getLabel();
-        $result['title'] = $subtree->node->getProperty('title');
-        $result['description'] = $subtree->node->getProperty('description');
-
-        $result['children'] = [];
-
-        $name = $subtree->node->nodeName ? $subtree->node->nodeName->value : $subtree->node->getProperty('title');
-
-        foreach ($subtree->children as $childSubtree) {
-            $result['children'][] = $this->toJson($childSubtree, [...$pathSoFar, $name]);
-        }
-
-        return $result;
+        return [
+            'identifier' => $identifier,
+            'path' => $path,
+            'nodeType' => $nodeType,
+            'label' => $label,
+            'title' => is_string($title) ? $title : $label,
+            'description' => is_string($description) ? $description : '',
+            'children' => $children
+        ];
     }
 }

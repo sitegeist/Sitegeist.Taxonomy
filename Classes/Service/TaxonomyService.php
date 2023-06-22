@@ -29,64 +29,63 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
 use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\Projection\Workspace\Workspace;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
+use Neos\Neos\Domain\Exception\LiveWorkspaceIsMissing;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
 
-/**
- * Class TaxonomyService
- * @package Sitegeist\Taxonomy\Service
- * @Flow\Scope("singleton")
- */
 class TaxonomyService
 {
-    /**
-     * @Flow\Inject
-     * @var ContentRepositoryRegistry
-     */
-    protected $crRegistry;
+    #[Flow\Inject(lazy:false)]
+    protected ContentRepositoryRegistry $crRegistry;
+
+    protected ContentRepository|null $contentRepository = null;
 
     /**
-     * @var ContentRepository
+     * @var mixed[]
      */
-    protected $contentRepository;
-
-    /**
-     * @var array
-     * @Flow\InjectConfiguration()
-     */
+    #[Flow\InjectConfiguration]
     protected array $configuration = [];
 
     public function getRootNodeTypeName(): NodeTypeName
     {
-        return NodeTypeName::fromString(
-            $this->configuration['contentRepository']['rootNodeType'] ?? 'Sitegeist.Taxonomy:Root'
-        );
+        $rootNodeConfig = $this->configuration['contentRepository']['rootNodeType'] ?? null;
+        if (!is_string($rootNodeConfig)) {
+            throw new \InvalidArgumentException();
+        }
+        return NodeTypeName::fromString($rootNodeConfig);
     }
 
     public function getVocabularyNodeTypeName(): NodeTypeName
     {
-        return NodeTypeName::fromString(
-            $this->configuration['contentRepository']['vocabularyNodeType'] ?? 'Sitegeist.Taxonomy:Vocabulary'
-        );
+        $vocabularyNodeType = $this->configuration['contentRepository']['vocabularyNodeType'] ?? null;
+        if (!is_string($vocabularyNodeType)) {
+            throw new \InvalidArgumentException();
+        }
+        return NodeTypeName::fromString($vocabularyNodeType);
     }
 
     public function getTaxonomyNodeTypeName(): NodeTypeName
     {
-        return NodeTypeName::fromString(
-            $this->configuration['contentRepository']['taxonomyNodeType'] ?? 'Sitegeist.Taxonomy:Taxonomy'
-        );
+        $taxonomyNodeType = $this->configuration['contentRepository']['taxonomyNodeType'] ?? null;
+        if (!is_string($taxonomyNodeType)) {
+            throw new \InvalidArgumentException();
+        }
+        return NodeTypeName::fromString($taxonomyNodeType);
     }
 
     public function getContentRepository(): ContentRepository
     {
         if (is_null($this->contentRepository)) {
-            $this->contentRepository = $this->crRegistry->get(
-                ContentRepositoryId::fromString($this->configuration['contentRepository']['identifier'] ?? 'default')
-            );
+            $crid = $this->configuration['contentRepository']['identifier'] ?? null;
+            if (!is_string($crid)) {
+                throw new \InvalidArgumentException();
+            }
+            $this->contentRepository = $this->crRegistry->get(ContentRepositoryId::fromString($crid));
         }
         return $this->contentRepository;
     }
@@ -106,7 +105,7 @@ class TaxonomyService
             }
             $parentNode = $subgraph->findParentNode($parentNode->nodeAggregateId);
         }
-        throw new \InvalidArgumentException('Node seems to be outside of vocabulary');
+        throw new \InvalidArgumentException('node seems to be outside of vocabulary');
     }
 
     public function findOrCreateRoot(ContentSubgraphInterface $subgraph): Node
@@ -117,7 +116,7 @@ class TaxonomyService
         }
 
         $contentRepository = $this->getContentRepository();
-        $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $liveWorkspace = $this->getLiveWorkspace();
 
         $commandResult = $contentRepository->handle(
             new CreateRootNodeAggregateWithNode(
@@ -147,9 +146,10 @@ class TaxonomyService
 
     public function findVocabularyByName(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
     {
+        // @todo find root -> find named child
         $vocabularies = $this->findAllVocabularies($subgraph);
         foreach ($vocabularies as $vocabulary) {
-            if ($vocabulary->nodeName->value == $vocabularyName) {
+            if ($vocabulary->nodeName?->value == $vocabularyName) {
                 return $vocabulary;
             }
         }
@@ -169,7 +169,7 @@ class TaxonomyService
         return $taxonomy;
     }
 
-    public function findSubtree(Node $StartNode): Subtree
+    public function findSubtree(Node $StartNode): ?Subtree
     {
         $contentRepository = $this->getContentRepository();
         $subgraph = $contentRepository->getContentGraph()->getSubgraph(
@@ -188,7 +188,7 @@ class TaxonomyService
             )
         );
 
-        return $this->orderSubtreeByNameRecursive($vocabularySubtree);
+        return $vocabularySubtree ? $this->orderSubtreeByNameRecursive($vocabularySubtree) : null;
     }
 
     private function orderSubtreeByNameRecursive(Subtree $subtree): Subtree
@@ -200,7 +200,7 @@ class TaxonomyService
         );
         usort(
             $children,
-            fn(Subtree $a, Subtree $b) => $a->node->nodeName->value <=> $b->node->nodeName->value
+            fn(Subtree $a, Subtree $b) => $a->node->nodeName?->value <=> $b->node->nodeName?->value
         );
         return new Subtree(
             $subtree->level,
@@ -209,7 +209,7 @@ class TaxonomyService
         );
     }
 
-    public function getNodeByNodeAddress(?string $serializedNodeAddress): ?Node
+    public function getNodeByNodeAddress(string $serializedNodeAddress): Node
     {
         $contentRepository = $this->getContentRepository();
         $nodeAddress = NodeAddressFactory::create($contentRepository)->createFromUriString($serializedNodeAddress);
@@ -218,18 +218,26 @@ class TaxonomyService
             $nodeAddress->dimensionSpacePoint,
             VisibilityConstraints::withoutRestrictions()
         );
-        return $subgraph->findNodeById($nodeAddress->nodeAggregateId);
+        $node = $subgraph->findNodeById($nodeAddress->nodeAggregateId);
+        if (is_null($node)) {
+            throw new \InvalidArgumentException('nodeAddress does not resolve to a node');
+        }
+        return $node;
     }
 
     public function getDefaultSubgraph(): ContentSubgraphInterface
     {
         $contentRepository = $this->getContentRepository();
-        $liveWorkspace = $contentRepository->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        $liveWorkspace = $this->getLiveWorkspace();
         $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
+        $dimensionSpacePoint = reset($generalizations);
+        if (!$dimensionSpacePoint) {
+            throw new \Exception('default dimensionSpacePoint could not be found');
+        }
         $contentGraph = $contentRepository->getContentGraph();
         $subgraph = $contentGraph->getSubgraph(
             $liveWorkspace->currentContentStreamId,
-            reset($generalizations),
+            $dimensionSpacePoint,
             VisibilityConstraints::withoutRestrictions()
         );
         return $subgraph;
@@ -238,5 +246,14 @@ class TaxonomyService
     public function getSubgraphForNode(Node $node): ContentSubgraphInterface
     {
         return $this->crRegistry->subgraphForNode($node);
+    }
+
+    public function getLiveWorkspace(): Workspace
+    {
+        $liveWorkspace = $this->getContentRepository()->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        if (!$liveWorkspace) {
+            throw LiveWorkspaceIsMissing::butWasRequested();
+        }
+        return $liveWorkspace;
     }
 }
