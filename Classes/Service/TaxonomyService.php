@@ -98,6 +98,8 @@ class TaxonomyService
             $node->subgraphIdentity->visibilityConstraints,
         );
 
+        // @todo use ancestor operations via content graph instead of looping
+
         $parentNode = $node;
         while ($parentNode instanceof Node) {
             if ($parentNode->nodeType->isOfType($this->getVocabularyNodeTypeName()->value)) {
