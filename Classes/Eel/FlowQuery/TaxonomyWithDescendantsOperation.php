@@ -15,19 +15,19 @@ declare(strict_types=1);
 
 namespace Sitegeist\Taxonomy\Eel\FlowQuery;
 
-use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindBackReferencesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindReferencesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
-use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Eel\FlowQuery\OperationInterface;
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
-final class TaxonomyReferencingNodesOperation implements OperationInterface
+final class TaxonomyWithDescendantsOperation implements OperationInterface
 {
+    use FlattenSubtreeTrait;
+
     /**
      * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
      */
@@ -47,28 +47,20 @@ final class TaxonomyReferencingNodesOperation implements OperationInterface
     public function evaluate(FlowQuery $flowQuery, array $arguments): void
     {
         $taxonomyService = new TaxonomyService();
-        $filter = FindBackReferencesFilter::create();
-        if (isset($arguments[0])) {
-            $filter = $filter->with(nodeTypeConstraints: NodeTypeConstraints::fromFilterString($arguments[0]));
-        }
-        if (isset($arguments[1])) {
-            $filter = $filter->with(referenceName: $arguments[0]);
-        }
-        $referencingNodesArray = [];
-        /** @var Node $contextNode */
-        foreach ($flowQuery->getContext() as $contextNode) {
-            $subgraph = $taxonomyService->getSubgraphForNode($contextNode);
-            $backReferences = $subgraph->findBackReferences($contextNode->nodeAggregateId, $filter);
-            foreach ($backReferences as $backReference) {
-                $referencingNodesArray[] = $backReference->node;
+        $contextNodes = $flowQuery->getContext();
+        $nodes = Nodes::createEmpty();
+        foreach ($contextNodes as $contextNode) {
+            $subtree = $taxonomyService->findSubtree($contextNode);
+            if ($subtree) {
+                $nodes = $nodes->merge($this->flattenSubtree($subtree));
             }
         }
-        $flowQuery->setContext($referencingNodesArray);
+        $flowQuery->setContext(iterator_to_array($nodes->getIterator()));
     }
 
     public static function getShortName(): string
     {
-        return 'taxonomyReferencingNodes';
+        return 'taxonomyWithDescendants';
     }
 
     public static function getPriority(): int

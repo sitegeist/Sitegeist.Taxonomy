@@ -21,6 +21,7 @@ use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeA
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
@@ -98,15 +99,20 @@ class TaxonomyService
             $node->subgraphIdentity->visibilityConstraints,
         );
 
-        // @todo use ancestor operations via content graph instead of looping
+        $ancestors = $subgraph->findAncestorNodes(
+            $node->nodeAggregateId,
+            FindAncestorNodesFilter::create(
+                NodeTypeConstraints::create(
+                    NodeTypeNames::fromArray([ $this->getVocabularyNodeTypeName()]),
+                    NodeTypeNames::createEmpty()
+                )
+            )
+        );
 
-        $parentNode = $node;
-        while ($parentNode instanceof Node) {
-            if ($parentNode->nodeType->isOfType($this->getVocabularyNodeTypeName()->value)) {
-                return $parentNode;
-            }
-            $parentNode = $subgraph->findParentNode($parentNode->nodeAggregateId);
+        if ($result = $ancestors->first()) {
+            return $result;
         }
+
         throw new \InvalidArgumentException('node seems to be outside of vocabulary');
     }
 

@@ -52,7 +52,9 @@ final class TaxonomyDescendantsOperation implements OperationInterface
         foreach ($contextNodes as $contextNode) {
             $subtree = $taxonomyService->findSubtree($contextNode);
             if ($subtree) {
-                $nodes = $nodes->merge($this->flattenSubtree($subtree));
+                foreach ($subtree->children as $child) {
+                    $nodes = $nodes->merge($this->flattenSubtree($child));
+                }
             }
         }
         $flowQuery->setContext(iterator_to_array($nodes->getIterator()));

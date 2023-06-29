@@ -15,19 +15,20 @@ declare(strict_types=1);
 
 namespace Sitegeist\Taxonomy\Eel\FlowQuery;
 
+use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindReferencesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Eel\FlowQuery\OperationInterface;
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
-final class TaxonomyChildrenOperation implements OperationInterface
+final class TaxonomyWithAncestorsOperation implements OperationInterface
 {
-    use FlattenSubtreeTrait;
-
     /**
      * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
      */
@@ -48,21 +49,27 @@ final class TaxonomyChildrenOperation implements OperationInterface
     {
         $taxonomyService = new TaxonomyService();
         $contextNodes = $flowQuery->getContext();
-        $nodes = Nodes::createEmpty();
+
+        $ancestorNodesArray = [];
         foreach ($contextNodes as $contextNode) {
-            $subtree = $taxonomyService->findSubtree($contextNode);
-            if ($subtree) {
-                foreach ($subtree->children as $child) {
-                    $nodes = $nodes->merge($this->flattenSubtree($child));
-                }
-            }
+            $subgraph = $taxonomyService->getSubgraphForNode($contextNode);
+            $ancestors = $subgraph->findAncestorNodes(
+                $contextNode->nodeAggregateId,
+                FindAncestorNodesFilter::create(
+                    NodeTypeConstraints::create(
+                        NodeTypeNames::fromArray([$taxonomyService->getTaxonomyNodeTypeName()]),
+                        NodeTypeNames::createEmpty()
+                    )
+                )
+            );
+            $ancestorNodesArray[] = [$contextNode, ...iterator_to_array($ancestors)];
         }
-        $flowQuery->setContext(iterator_to_array($nodes->getIterator()));
+        $flowQuery->setContext(array_merge(...$ancestorNodesArray));
     }
 
     public static function getShortName(): string
     {
-        return 'taxonomyChildren';
+        return 'taxonomyWithAncestors';
     }
 
     public static function getPriority(): int
