@@ -10,6 +10,7 @@
         "neos/fusion-form": ">=2.1.0"
     },
     "require-dev": {
+        "neos/neos-development-collection": "9.0.x-dev",
         "phpstan/phpstan": "~1.10.16",
         "squizlabs/php_codesniffer": "~3.7.2"
     },

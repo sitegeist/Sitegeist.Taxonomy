@@ -135,7 +135,12 @@ class TaxonomyService
         );
         $commandResult->block();
 
-        return $subgraph->findRootNodeByType($this->getRootNodeTypeName());
+        $rootNode = $subgraph->findRootNodeByType($this->getRootNodeTypeName());
+        if ($rootNode instanceof Node) {
+            return $rootNode;
+        }
+
+        throw new \Exception('taxonomy root could neither be found nor created');
     }
 
     public function findAllVocabularies(ContentSubgraphInterface $subgraph): Nodes
