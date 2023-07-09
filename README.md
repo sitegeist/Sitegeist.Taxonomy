@@ -41,26 +41,13 @@ Sitegeist.Taxonomy defines three basic node types:
 - `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy
   nodes as children
 
-If you have to enforce the existence of a specific vocabulary or taxonomy, you can use a derived node type:
+If you have to enforce the existence of a specific vocabulary or taxonomy, you can define them as children of the taxonomy root.
 
 ```YAML
-    Vendor.Site:Taxonomy.Root:
-      superTypes:
-        Sitegeist.Taxonomy:Root: TRUE
+    Sitegeist.Taxonomy:Root:
       childNodes:
         animals:
           type: 'Sitegeist.Taxonomy:Vocabulary'
-```
-
-And configure the taxonomy package to use this root node type instead of the default:
-
-```YAML
-    Sitegeist:
-      Taxonomy:
-        contentRepository:
-          rootNodeType: 'Vendor.Site:Taxonomy.Root'
-          vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
-          taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 ```
 
 ## Referencing taxonomies
@@ -76,7 +63,7 @@ Since taxonomies are nodes, they are simply referenced via `reference` or `refer
           group: taxonomy
           editorOptions:
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
-            startingPoint: '/taxonomies'
+            startingPoint: '/<Sitegeist.Taxonomy:Root>'
             placeholder: 'assign Taxonomies'
 ```
 
@@ -88,7 +75,7 @@ startingPoint:
       ui:
         inspector:
           editorOptions:
-            startingPoint: '/taxonomies/animals/mammals'
+            startingPoint: '/<Sitegeist.Taxonomy:Root>/animals/mammals'
 ```
 
 ## Content-Dimensions
@@ -97,14 +84,23 @@ Vocabularies and Taxonomies will always be created in all base dimensions. This 
 always be referenced. The title and description of a taxons and vocabularies can be translated as is required for
 the project.
 
+## FlowQuery Operations
+
+The package contains some special flowQuery operations that work on taxomomy-nodes
+and allow for easy traversal and collecting of ancestors and descendants.
+
+- `taxonomyAncestors()` - find the taxon-nodes above the given taxon-nodes
+- `taxonomyWithAncestors()` - find the taxon-nodes above the given taxon-nodes but include those
+- `taxonomyDescendants()` - find the taxon-nodes below the given taxon-nodes
+- `taxonomyWithDescendants()` - find the taxon-nodes below the given taxon-nodes but include those
+- `taxonomyVocabularies()` - find the vocabulary-nodes for the given taxon-nodes
+
 ## CLI Commands
 
 The taxonomy package includes some CLI commands for managing the taxonomies.
 
-- `taxonomy:list` List all taxonomy vocabularies
-- `taxonomy:import` Import taxonomy content, expects filename + vocabulary-name (with globbing)
-- `taxonomy:export` Export taxonomy content, expects filename + vocabulary-name (with globbing)
-- `taxonomy:prune` Prune taxonomy content, expects vocabulary-name (with globbing)
+- `taxonomy:vocabularies` List all vocabularies
+- `taxonomy:taxonomies` List taxonomies inside a vocabulary
 
 ## Privileges
 

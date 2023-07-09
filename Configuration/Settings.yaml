@@ -66,10 +66,6 @@ Neos:
                   startingPoint: '/taxonomies'
                   placeholder: 'assign Taxonomies'
 
-  Fusion:
-    defaultContext:
-      Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper
-
   Flow:
     mvc:
       routes:
