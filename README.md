@@ -84,16 +84,22 @@ Vocabularies and Taxonomies will always be created in all base dimensions. This 
 always be referenced. The title and description of a taxons and vocabularies can be translated as is required for
 the project.
 
-## FlowQuery Operations
+## Querying Taxonomies
 
-The package contains some special flowQuery operations that work on taxomomy-nodes
-and allow for easy traversal and collecting of ancestors and descendants.
+The flow Query operations `referenceNodes()` and `backReferenceNodes` in combination to search for documents that have 
+similar taxons assigned. 
 
-- `taxonomyAncestors()` - find the taxon-nodes above the given taxon-nodes
-- `taxonomyWithAncestors()` - find the taxon-nodes above the given taxon-nodes but include those
-- `taxonomyDescendants()` - find the taxon-nodes below the given taxon-nodes
-- `taxonomyWithDescendants()` - find the taxon-nodes below the given taxon-nodes but include those
-- `taxonomyVocabularies()` - find the vocabulary-nodes for the given taxon-nodes
+```neosfusion
+similarDocuments = ${
+    q(documentNode)
+        .referenceNodes('taxonomyReferences')                  // the taxons the current document references
+        .backReferenceNodes('taxonomyReferences')              // all nodes that reference one of the same taxons
+        .filter('[instanceof Neos.Neos:Document]')             // only documents
+        .remove(documentNode)                                  // but nut the current one
+        .unique()                                              // every document only once
+        .get()
+    }   
+```
 
 ## CLI Commands
 
