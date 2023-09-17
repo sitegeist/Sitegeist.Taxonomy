@@ -173,7 +173,7 @@ class ModuleController extends ActionController
         $nodeAggregateId = NodeAggregateId::create();
         $nodeTypeName = $this->taxonomyService->getVocabularyNodeTypeName();
         $commandResult = $contentRepository->handle(
-            new CreateNodeAggregateWithNode(
+            CreateNodeAggregateWithNode::create(
                 $liveWorkspace->currentContentStreamId,
                 $nodeAggregateId,
                 $nodeTypeName,
@@ -194,7 +194,7 @@ class ModuleController extends ActionController
             }
 
             $contentRepository->handle(
-                new CreateNodeVariant(
+                CreateNodeVariant::create(
                     $liveWorkspace->currentContentStreamId,
                     $nodeAggregateId,
                     $originDimensionSpacePoint,
@@ -247,7 +247,7 @@ class ModuleController extends ActionController
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
         $commandResult = $this->contentRepository->handle(
-            new SetNodeProperties(
+            SetNodeProperties::create(
                 $vocabularyNode->subgraphIdentity->contentStreamId,
                 $vocabularyNode->nodeAggregateId,
                 $vocabularyNode->originDimensionSpacePoint,
@@ -257,7 +257,7 @@ class ModuleController extends ActionController
 
         if ($name != $vocabularyNode->nodeName?->value) {
             $commandResult = $this->contentRepository->handle(
-                new ChangeNodeAggregateName(
+                ChangeNodeAggregateName::create(
                     $vocabularyNode->subgraphIdentity->contentStreamId,
                     $vocabularyNode->nodeAggregateId,
                     NodeName::transliterateFromString($name)
@@ -289,7 +289,7 @@ class ModuleController extends ActionController
         $liveWorkspace = $this->taxonomyService->getLiveWorkspace();
 
         $commandResult = $this->contentRepository->handle(
-            new RemoveNodeAggregate(
+            RemoveNodeAggregate::create(
                 $liveWorkspace->currentContentStreamId,
                 $vocabularyNode->nodeAggregateId,
                 $vocabularyNode->originDimensionSpacePoint->toDimensionSpacePoint(),
@@ -345,7 +345,7 @@ class ModuleController extends ActionController
         $nodeAggregateId = NodeAggregateId::create();
         $nodeTypeName = $this->taxonomyService->getTaxonomyNodeTypeName();
         $commandResult = $this->contentRepository->handle(
-            new CreateNodeAggregateWithNode(
+            CreateNodeAggregateWithNode::create(
                 $liveWorkspace->currentContentStreamId,
                 $nodeAggregateId,
                 $nodeTypeName,
@@ -366,7 +366,7 @@ class ModuleController extends ActionController
             }
 
             $commandResult = $this->contentRepository->handle(
-                new CreateNodeVariant(
+                CreateNodeVariant::create(
                     $liveWorkspace->currentContentStreamId,
                     $nodeAggregateId,
                     $originDimensionSpacePoint,
@@ -416,7 +416,7 @@ class ModuleController extends ActionController
         $subgraph = $this->taxonomyService->getSubgraphForNode($taxonomyNode);
 
         $commandResult = $this->contentRepository->handle(
-            new SetNodeProperties(
+            SetNodeProperties::create(
                 $taxonomyNode->subgraphIdentity->contentStreamId,
                 $taxonomyNode->nodeAggregateId,
                 $taxonomyNode->originDimensionSpacePoint,
@@ -425,7 +425,7 @@ class ModuleController extends ActionController
         );
         if ($name != $taxonomyNode->nodeName?->value) {
             $commandResult = $this->contentRepository->handle(
-                new ChangeNodeAggregateName(
+                ChangeNodeAggregateName::create(
                     $taxonomyNode->subgraphIdentity->contentStreamId,
                     $taxonomyNode->nodeAggregateId,
                     NodeName::transliterateFromString($name)
@@ -455,7 +455,7 @@ class ModuleController extends ActionController
         $liveWorkspace = $this->taxonomyService->getLiveWorkspace();
 
         $commandResult = $this->contentRepository->handle(
-            new RemoveNodeAggregate(
+            RemoveNodeAggregate::create(
                 $liveWorkspace->currentContentStreamId,
                 $taxonomyNode->nodeAggregateId,
                 $taxonomyNode->originDimensionSpacePoint->toDimensionSpacePoint(),
