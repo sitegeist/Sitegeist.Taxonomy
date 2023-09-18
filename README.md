@@ -96,9 +96,26 @@ similarDocuments = ${
         .backReferenceNodes('taxonomyReferences')              // all nodes that reference one of the same taxons
         .filter('[instanceof Neos.Neos:Document]')             // only documents
         .remove(documentNode)                                  // but nut the current one
-        .unique()                                              // every document only once
         .get()
     }   
+```
+
+The package includes the following flowQuery operations:
+
+- `referencedTaxonomies()`:  the taxons referenced by the documents in flowQuery context
+- `referencingTaxonomies()`:  the documents referencing by the taxons in flowQuery context
+- `subTaxonomies()` :  sub-taxons of taxons in the context
+- `withSubTaxonomies()`:  current taxons in the context plus sub-taxons 
+
+```neosfusion
+similarDocuments = ${
+  q(documentNode)
+    .referencedTaxonomies()                                // the taxons the current document references
+    .withSubTaxonomies()                                   // including all sub taxons
+    .referencingTaxonomies()                               // the documents that reference the same taxons
+    .remove(documentNode)                                  // but nut the current one
+    .get()
+  }   
 ```
 
 ## CLI Commands
