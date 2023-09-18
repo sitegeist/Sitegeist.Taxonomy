@@ -127,7 +127,7 @@ class TaxonomyService
         $liveWorkspace = $this->getLiveWorkspace();
 
         $commandResult = $contentRepository->handle(
-            new CreateRootNodeAggregateWithNode(
+            CreateRootNodeAggregateWithNode::create(
                 $liveWorkspace->currentContentStreamId,
                 NodeAggregateId::create(),
                 $this->getRootNodeTypeName()
