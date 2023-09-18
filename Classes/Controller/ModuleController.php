@@ -333,7 +333,11 @@ class ModuleController extends ActionController
     public function createTaxonomyAction(string $parentNodeAddress, string $name, array $properties): void
     {
         $parentNode = $this->taxonomyService->getNodeByNodeAddress($parentNodeAddress);
-        $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
+        if ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeTypeName()->value)) {
+            $vocabularyNode = $parentNode;
+        } else {
+            $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
+        }
         $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
         $liveWorkspace = $this->taxonomyService->getLiveWorkspace();
 

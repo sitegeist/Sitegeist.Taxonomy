@@ -93,11 +93,7 @@ class TaxonomyService
 
     public function findVocabularyForNode(Node $node): Node
     {
-        $subgraph = $this->getContentRepository()->getContentGraph()->getSubgraph(
-            $node->subgraphIdentity->contentStreamId,
-            $node->subgraphIdentity->dimensionSpacePoint,
-            $node->subgraphIdentity->visibilityConstraints,
-        );
+        $subgraph = $this->crRegistry->subgraphForNode($node);
 
         $ancestors = $subgraph->findAncestorNodes(
             $node->nodeAggregateId,
@@ -184,12 +180,7 @@ class TaxonomyService
 
     public function findSubtree(Node $StartNode): ?Subtree
     {
-        $contentRepository = $this->getContentRepository();
-        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
-            $StartNode->subgraphIdentity->contentStreamId,
-            $StartNode->subgraphIdentity->dimensionSpacePoint,
-            $StartNode->subgraphIdentity->visibilityConstraints,
-        );
+        $subgraph = $this->crRegistry->subgraphForNode($StartNode);
 
         $vocabularySubtree = $subgraph->findSubtree(
             $StartNode->nodeAggregateId,
