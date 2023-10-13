@@ -38,6 +38,7 @@ use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Exception\LiveWorkspaceIsMissing;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
+use Sitegeist\Taxonomy\Constants;
 
 class TaxonomyService
 {
@@ -54,29 +55,17 @@ class TaxonomyService
 
     public function getRootNodeTypeName(): NodeTypeName
     {
-        $rootNodeConfig = $this->configuration['contentRepository']['rootNodeType'] ?? null;
-        if (!is_string($rootNodeConfig)) {
-            throw new \InvalidArgumentException();
-        }
-        return NodeTypeName::fromString($rootNodeConfig);
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Root');
     }
 
     public function getVocabularyNodeTypeName(): NodeTypeName
     {
-        $vocabularyNodeType = $this->configuration['contentRepository']['vocabularyNodeType'] ?? null;
-        if (!is_string($vocabularyNodeType)) {
-            throw new \InvalidArgumentException();
-        }
-        return NodeTypeName::fromString($vocabularyNodeType);
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Vocabulary');
     }
 
     public function getTaxonomyNodeTypeName(): NodeTypeName
     {
-        $taxonomyNodeType = $this->configuration['contentRepository']['taxonomyNodeType'] ?? null;
-        if (!is_string($taxonomyNodeType)) {
-            throw new \InvalidArgumentException();
-        }
-        return NodeTypeName::fromString($taxonomyNodeType);
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Taxonomy');
     }
 
     public function getContentRepository(): ContentRepository

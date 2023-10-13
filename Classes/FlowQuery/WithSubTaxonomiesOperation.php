@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Sitegeist\Taxonomy\FlowQuery;
 
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Eel\FlowQuery\Operations\AbstractOperation;
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 class WithSubTaxonomiesOperation extends AbstractOperation
 {
@@ -35,8 +38,8 @@ class WithSubTaxonomiesOperation extends AbstractOperation
     #[Flow\Inject]
     protected ContentRepositoryRegistry $contentRepositoryRegistry;
 
-    #[Flow\InjectConfiguration(path: "contentRepository.taxonomyNodeType")]
-    protected string $taxonomyNodeType;
+    #[Flow\Inject]
+    protected TaxonomyService $taxonomyService;
 
     /**
      * {@inheritdoc}
@@ -46,7 +49,7 @@ class WithSubTaxonomiesOperation extends AbstractOperation
      */
     public function canEvaluate($context)
     {
-        return isset($context[0]) && ($context[0] instanceof Node && $context[0]->nodeTypeName->equals(NodeTypeName::fromString($this->taxonomyNodeType)));
+        return isset($context[0]) && ($context[0] instanceof Node && $context[0]->nodeTypeName->equals($this->taxonomyService->getTaxonomyNodeTypeName()));
     }
 
     /**
@@ -59,7 +62,10 @@ class WithSubTaxonomiesOperation extends AbstractOperation
     public function evaluate(FlowQuery $flowQuery, array $arguments)
     {
         $filter = FindSubtreeFilter::create(
-            $this->taxonomyNodeType
+            NodeTypeConstraints::create(
+                NodeTypeNames::fromArray([$this->taxonomyService->getTaxonomyNodeTypeName()]),
+                NodeTypeNames::createEmpty()
+            )
         );
 
         $nodes = Nodes::createEmpty();

@@ -10,9 +10,6 @@ Sitegeist:
 
     contentRepository:
       identifier: 'default'
-      rootNodeType: 'Sitegeist.Taxonomy:Root'
-      vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
-      taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 
 Neos:
   Neos:

@@ -38,10 +38,7 @@ Sitegeist.Taxonomy defines three basic node types:
 
 - `Sitegeist.Taxonomy:Root` - The root node at the path `/<Sitegeist.Taxonomy:Root>`, allows only vocabulary nodes as children
 - `Sitegeist.Taxonomy:Vocabulary` - The root of a hierarchy of meaning, allows only taxonomies nodes as children   
-- `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy
-  nodes as children
-
-If you have to enforce the existence of a specific vocabulary or taxonomy, you can define them as children of the taxonomy root.
+- `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy nodes as children
 
 ```YAML
     Sitegeist.Taxonomy:Root:
