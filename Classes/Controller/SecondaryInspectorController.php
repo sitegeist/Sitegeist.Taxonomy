@@ -70,7 +70,7 @@ class SecondaryInspectorController extends ActionController
         $pathSegment = $subtree->node->nodeName?->value ?? $label;
         $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
         $identifier = $subtree->node->nodeAggregateId->value;
-        $nodeType =  $subtree->node->nodeType->name->value;
+        $nodeType =  $subtree->node->nodeTypeName->value;
         $title = $subtree->node->getProperty('title');
         $description = $subtree->node->getProperty('description');
         $children = array_map(fn(Subtree $child)=>$this->toJson($child), $subtree->children);

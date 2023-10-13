@@ -315,10 +315,11 @@ class ModuleController extends ActionController
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
         $vocabularyNode = null;
 
-        if ($parentNode->nodeType->isOfType($this->taxonomyService->getTaxonomyNodeTypeName()->value)) {
+        if ($parentNode->nodeTypeName->equals($this->taxonomyService->getTaxonomyNodeTypeName())) {
             $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
-        } elseif ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeTypeName()->value)) {
+        } elseif ($parentNode->nodeTypeName->equals($this->taxonomyService->getVocabularyNodeTypeName())) {
             $vocabularyNode = $parentNode;
+        } else {
         }
 
         $this->view->assign('rootNode', $rootNode);
@@ -333,7 +334,7 @@ class ModuleController extends ActionController
     public function createTaxonomyAction(string $parentNodeAddress, string $name, array $properties): void
     {
         $parentNode = $this->taxonomyService->getNodeByNodeAddress($parentNodeAddress);
-        if ($parentNode->nodeType->isOfType($this->taxonomyService->getVocabularyNodeTypeName()->value)) {
+        if ($parentNode->nodeTypeName->equals($this->taxonomyService->getVocabularyNodeTypeName())) {
             $vocabularyNode = $parentNode;
         } else {
             $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);

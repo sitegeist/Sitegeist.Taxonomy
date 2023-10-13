@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Sitegeist\Taxonomy\FlowQuery;
 
+use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
@@ -45,7 +46,7 @@ class WithSubTaxonomiesOperation extends AbstractOperation
      */
     public function canEvaluate($context)
     {
-        return isset($context[0]) && ($context[0] instanceof Node && $context[0]->nodeType->isOfType($this->taxonomyNodeType));
+        return isset($context[0]) && ($context[0] instanceof Node && $context[0]->nodeTypeName->equals(NodeTypeName::fromString($this->taxonomyNodeType)));
     }
 
     /**
