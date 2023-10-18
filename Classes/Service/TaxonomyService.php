@@ -36,9 +36,7 @@ use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Flow\Annotations as Flow;
-use Neos\Neos\Domain\Exception\LiveWorkspaceIsMissing;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
-use Sitegeist\Taxonomy\Constants;
 
 class TaxonomyService
 {
@@ -245,7 +243,7 @@ class TaxonomyService
     {
         $liveWorkspace = $this->getContentRepository()->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
         if (!$liveWorkspace) {
-            throw LiveWorkspaceIsMissing::butWasRequested();
+            throw new \Exception('live workspace could not be found');
         }
         return $liveWorkspace;
     }
