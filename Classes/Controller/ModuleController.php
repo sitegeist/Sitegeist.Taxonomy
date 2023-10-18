@@ -23,17 +23,18 @@ use Neos\ContentRepository\Core\Feature\NodeModification\Dto\PropertyValuesToWri
 use Neos\ContentRepository\Core\Feature\NodeRemoval\Command\RemoveNodeAggregate;
 use Neos\ContentRepository\Core\Feature\NodeRenaming\Command\ChangeNodeAggregateName;
 use Neos\ContentRepository\Core\Feature\NodeVariation\Command\CreateNodeVariant;
-use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\Feature\WorkspaceRebase\Command\RebaseWorkspace;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\Workspace\Workspace;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeVariantSelectionStrategy;
-use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\Flow\Mvc\View\ViewInterface;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Security\Context as SecurityContext;
 use Neos\Fusion\View\FusionView;
-use Neos\Neos\Domain\Exception\LiveWorkspaceIsMissing;
+use Neos\Neos\Domain\Service\WorkspaceNameBuilder;
 use Neos\Neos\FrontendRouting\NodeAddressFactory;
 use Neos\Neos\Fusion\Helper\DimensionHelper;
 use Neos\Neos\Fusion\Helper\NodeHelper;
@@ -67,6 +68,9 @@ class ModuleController extends ActionController
 
     #[Flow\Inject(lazy: false)]
     protected NodeHelper $nodeHelper;
+
+    #[Flow\Inject(lazy: false)]
+    protected SecurityContext $securityContext;
 
     protected ContentRepository $contentRepository;
 
@@ -203,6 +207,8 @@ class ModuleController extends ActionController
             );
         }
 
+        $this->rebaseCurrentUserWorkspace();
+
         $newVocabularyNode = $subgraph->findNodeById($nodeAggregateId);
 
         if ($newVocabularyNode) {
@@ -266,6 +272,7 @@ class ModuleController extends ActionController
         }
 
         $commandResult->block();
+        $this->rebaseCurrentUserWorkspace();
 
         $updatedVocabularyNode = $subgraph->findNodeById($vocabularyNode->nodeAggregateId);
 
@@ -297,6 +304,7 @@ class ModuleController extends ActionController
             )
         );
         $commandResult->block();
+        $this->rebaseCurrentUserWorkspace();
 
         $this->addFlashMessage(
             sprintf('Deleted vocabulary %s', $vocabularyNode->getLabel())
@@ -380,6 +388,7 @@ class ModuleController extends ActionController
             );
         }
 
+        $this->rebaseCurrentUserWorkspace();
         $newTaxonomyNode = $subgraph->findNodeById($nodeAggregateId);
 
         if ($newTaxonomyNode) {
@@ -438,6 +447,7 @@ class ModuleController extends ActionController
             );
         }
         $commandResult->block();
+        $this->rebaseCurrentUserWorkspace();
 
         $updatedTaxonomyNode = $subgraph->findNodeById($vocabularyNode->nodeAggregateId);
 
@@ -468,11 +478,28 @@ class ModuleController extends ActionController
             )
         );
         $commandResult->block();
+        $this->rebaseCurrentUserWorkspace();
 
         $this->addFlashMessage(
             sprintf('Deleted taxonomy %s', $taxonomyNode->getLabel())
         );
 
         $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
+    }
+
+    protected function rebaseCurrentUserWorkspace(): void
+    {
+        $account = $this->securityContext->getAccount();
+        if (is_null($account)) {
+            throw new \Exception('no account found');
+        }
+        $workspaceName = WorkspaceNameBuilder::fromAccountIdentifier(
+            $account->getAccountIdentifier()
+        );
+        $workspace = $this->contentRepository->getWorkspaceFinder()->findOneByName($workspaceName);
+        if (is_null($workspace)) {
+            throw new \Exception('no workspace found');
+        }
+        $this->contentRepository->handle(RebaseWorkspace::create($workspaceName));
     }
 }

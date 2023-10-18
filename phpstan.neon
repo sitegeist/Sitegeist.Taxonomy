@@ -3,3 +3,4 @@ parameters:
 	paths:
 		- Classes
 	reportUnmatchedIgnoredErrors: false
+	treatPhpDocTypesAsCertain: false
