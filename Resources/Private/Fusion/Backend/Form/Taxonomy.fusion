@@ -26,7 +26,12 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
                         {props.i18nTaxonomy.id('properties.name')}
                         <span @if={props.defaultTaxonomy}>: {props.defaultTaxonomy.properties.name}</span>
                     </label>
-                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="name" attributes.required attributes.pattern="[a-z0-9]+" />
+                    <Neos.Fusion.Form:Input
+                        attributes.class="neos-span6"
+                        field.name="name"
+                        attributes.required attributes.pattern="[a-z0-9]+"
+                        attributes.disabled="1" attributes.disabled.@if={props.taxonomyNode.classification.value == 'tethered'}
+                    />
                 </div>
 
                 <div class="neos-control-group">

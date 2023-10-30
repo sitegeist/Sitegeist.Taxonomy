@@ -24,7 +24,13 @@ prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component)
                     <label class="neos-control-label" for="name">
                         {props.i18nVocabulary.id('properties.name')}
                     </label>
-                    <Neos.Fusion.Form:Input attributes.class="neos-span6" field.name="name" attributes.required attributes.pattern="[a-z0-9]+" />
+                    <Neos.Fusion.Form:Input
+                        attributes.class="neos-span6"
+                        field.name="name"
+                        attributes.required attributes.pattern="[a-z0-9]+"
+                        attributes.readonly="1" attributes.readonly.@if={props.vocabularyNode.classification.value == 'tethered'}
+
+                    />
                 </div>
 
                 <div class="neos-control-group">

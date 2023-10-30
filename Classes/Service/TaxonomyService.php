@@ -21,8 +21,8 @@ use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeA
 use Neos\ContentRepository\Core\NodeType\NodeTypeName;
 use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
 use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
-use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindClosestNodeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
@@ -81,9 +81,9 @@ class TaxonomyService
     {
         $subgraph = $this->crRegistry->subgraphForNode($node);
 
-        $ancestors = $subgraph->findAncestorNodes(
+        $vocabularyNode = $subgraph->findClosestNode(
             $node->nodeAggregateId,
-            FindAncestorNodesFilter::create(
+            FindClosestNodeFilter::create(
                 NodeTypeConstraints::create(
                     NodeTypeNames::fromArray([ $this->getVocabularyNodeTypeName()]),
                     NodeTypeNames::createEmpty()
@@ -91,8 +91,8 @@ class TaxonomyService
             )
         );
 
-        if ($result = $ancestors->first()) {
-            return $result;
+        if ($vocabularyNode) {
+            return $vocabularyNode;
         }
 
         throw new \InvalidArgumentException('node seems to be outside of vocabulary');
