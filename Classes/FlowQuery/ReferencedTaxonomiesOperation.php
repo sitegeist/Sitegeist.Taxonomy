@@ -6,8 +6,8 @@ namespace Sitegeist\Taxonomy\FlowQuery;
 
 use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindReferencesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
-use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
 use Neos\Eel\FlowQuery\FlowQuery;
 use Neos\Eel\FlowQuery\Operations\AbstractOperation;
@@ -57,7 +57,7 @@ class ReferencedTaxonomiesOperation extends AbstractOperation
     {
         $nodes = [];
         $findReferencesFilter = FindReferencesFilter::create(
-            nodeTypeConstraints: NodeTypeConstraints::create(
+            nodeTypes: NodeTypeCriteria::create(
                 NodeTypeNames::fromArray([$this->taxonomyService->getTaxonomyNodeTypeName()]),
                 NodeTypeNames::createEmpty()
             ),
