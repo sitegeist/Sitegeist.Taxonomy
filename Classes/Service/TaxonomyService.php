@@ -24,10 +24,10 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindAncestorNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
-use Neos\ContentRepository\Core\Projection\ContentGraph\NodeTypeConstraints;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\Projection\Workspace\Workspace;
@@ -84,7 +84,7 @@ class TaxonomyService
         $ancestors = $subgraph->findAncestorNodes(
             $node->nodeAggregateId,
             FindAncestorNodesFilter::create(
-                NodeTypeConstraints::create(
+                nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([ $this->getVocabularyNodeTypeName()]),
                     NodeTypeNames::createEmpty()
                 )
@@ -131,7 +131,7 @@ class TaxonomyService
         return $subgraph->findChildNodes(
             $root->nodeAggregateId,
             FindChildNodesFilter::create(
-                NodeTypeConstraints::create(
+                nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([$this->getVocabularyNodeTypeName()]),
                     NodeTypeNames::createEmpty()
                 )
@@ -171,7 +171,7 @@ class TaxonomyService
         $vocabularySubtree = $subgraph->findSubtree(
             $StartNode->nodeAggregateId,
             FindSubtreeFilter::create(
-                NodeTypeConstraints::create(
+                nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([$this->getTaxonomyNodeTypeName(), $this->getVocabularyNodeTypeName()]),
                     NodeTypeNames::createEmpty()
                 )
