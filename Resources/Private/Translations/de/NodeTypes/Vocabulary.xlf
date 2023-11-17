@@ -6,6 +6,10 @@
                 <source>Vocabulary</source>
                 <target xml:lang="de">Vocabular</target>
             </trans-unit>
+            <trans-unit id="properties.name" xml:space="preserve" approved="yes">
+                <source>Name</source>
+                <target xml:lang="de">Name</target>
+            </trans-unit>
             <trans-unit id="properties.title" xml:space="preserve" approved="yes">
                 <source>Title</source>
                 <target xml:lang="de">Titel</target>

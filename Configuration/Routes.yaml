@@ -1,6 +1,6 @@
 -
   name:  'Sitegeist.Taxonomy: Secondary Inspector'
-  uriPattern: 'taxonomy/secondary-inspector/{@action}'
+  uriPattern: 'neos/taxonomy/secondary-inspector/{@action}'
   defaults:
     '@package': 'Sitegeist.Taxonomy'
     '@subpackage': ''

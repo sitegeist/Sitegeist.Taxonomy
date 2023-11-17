@@ -1,0 +1,5 @@
+# @deprecated use Sitegeist.Taxonomy:Mixin.TaxonomyReferences instead
+Sitegeist.Taxonomy:Mixin.Referencable:
+  abstract: true
+  superTypes:
+    'Sitegeist.Taxonomy:Mixin.TaxonomyReferences': true

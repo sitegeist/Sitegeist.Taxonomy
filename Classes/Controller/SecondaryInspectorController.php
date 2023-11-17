@@ -1,5 +1,4 @@
 <?php
-namespace Sitegeist\Taxonomy\Controller;
 
 /**
  * This file is part of the Sitegeist.Taxonomies package
@@ -12,12 +11,15 @@ namespace Sitegeist\Taxonomy\Controller;
  * source code.
  */
 
+declare(strict_types=1);
+
+namespace Sitegeist\Taxonomy\Controller;
+
+use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
-
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -33,7 +35,7 @@ class SecondaryInspectorController extends ActionController
     protected $taxonomyService;
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $supportedMediaTypes = ['application/json'];
 
@@ -42,15 +44,45 @@ class SecondaryInspectorController extends ActionController
      */
     protected $defaultViewObjectName = JsonView::class;
 
-    /**
-     * @param NodeInterface $contextNode
-     * @return void
-     */
-    public function treeAction(NodeInterface $contextNode): void
+    public function treeAction(string $contextNode, string $startingPoint): void
     {
-        $taxonomyTreeAsArray = $this->taxonomyService
-            ->getTaxonomyTreeAsArray($contextNode);
+        $node = $this->taxonomyService->getNodeByNodeAddress($contextNode);
+        $subgraph =  $this->taxonomyService->getSubgraphForNode($node);
 
-        $this->view->assign('value', $taxonomyTreeAsArray);
+        $path = AbsoluteNodePath::fromString($startingPoint);
+        $startNode = $subgraph->findNodeByAbsolutePath($path);
+        if (!$startNode) {
+            return;
+        }
+        $taxonomySubtree = $this->taxonomyService->findSubtree($startNode);
+        if (!$taxonomySubtree) {
+            return;
+        }
+        $this->view->assign('value', $this->toJson($taxonomySubtree));
+    }
+
+    /**
+     * @return mixed[]
+     */
+    protected function toJson(Subtree $subtree, string $pathSoFar = null): array
+    {
+        $label = $subtree->node->getLabel();
+        $pathSegment = $subtree->node->nodeName?->value ?? $label;
+        $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
+        $identifier = $subtree->node->nodeAggregateId->value;
+        $nodeType =  $subtree->node->nodeTypeName->value;
+        $title = $subtree->node->getProperty('title');
+        $description = $subtree->node->getProperty('description');
+        $children = array_map(fn(Subtree $child)=>$this->toJson($child), $subtree->children);
+
+        return [
+            'identifier' => $identifier,
+            'path' => $path,
+            'nodeType' => $nodeType,
+            'label' => $label,
+            'title' => is_string($title) ? $title : $label,
+            'description' => is_string($description) ? $description : '',
+            'children' => $children
+        ];
     }
 }
