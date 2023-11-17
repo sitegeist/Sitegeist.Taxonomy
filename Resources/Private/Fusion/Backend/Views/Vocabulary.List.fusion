@@ -57,7 +57,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
                                         <i class="fas fa-pencil-alt"></i>
                                     </Neos.Fusion:Link.Action>
 
-                                    <Neos.Fusion:Fragment @if={!vocabulary.node.autoCreated} >
+                                    <Neos.Fusion:Fragment @if={vocabulary.classification.value != 'tethered'} >
                                         &nbsp;
                                         <button class="neos-button neos-button-danger" title={props.i18n.id('generic.delete')} data-toggle="modal" href={'#deleteVocabulary_' + vocabulary.nodeAggregateId.value} data-neos-toggle="tooltip">
                                             <i class="fas fa-trash-alt icon-white"></i>
@@ -68,7 +68,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.List) < prototype(Neos.Fusi
 
                             </div>
 
-                            <Neos.Fusion:Fragment @if={!vocabulary.node.autoCreated} >
+                            <Neos.Fusion:Fragment @if={vocabulary.classification.value != 'tethered'} >
                                 <div class="neos-hide" id={'deleteVocabulary_' + vocabulary.nodeAggregateId.value}>
                                     <div class="neos-modal-centered">
                                         <div class="neos-modal-content">

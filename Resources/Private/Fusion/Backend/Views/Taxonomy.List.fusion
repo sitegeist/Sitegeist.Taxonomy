@@ -107,7 +107,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                             <i class="fas fa-pencil-alt"></i>
                         </Neos.Fusion:Link.Action>
 
-                        <Neos.Fusion:Fragment @if={!props.taxonomySubtree.autoCreated}>
+                        <Neos.Fusion:Fragment @if={props.taxonomySubtree.node.classification.value != 'tethered'}>
                             &nbsp;
                             <button class="neos-button neos-button-danger"
                                 title={props.i8n.id('generic.delete')}

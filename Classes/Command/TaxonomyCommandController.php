@@ -74,7 +74,6 @@ class TaxonomyCommandController extends CommandController
         if (!$startPoint) {
             $this->outputLine('nothing found');
             $this->quit(1);
-            throw new StopCommandException();
         }
 
         $subtree = $this->taxonomyService->findSubtree($startPoint);
