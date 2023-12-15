@@ -123,10 +123,56 @@ Packages can add additional fields to the forms of taxonomies and vocabularies. 
 the following steps are required.
 
 1. Extend the NodeTypes `Sitegeist.Taxonomy:Taxonomy` or `Sitegeist.Taxonomy:Vocabulary` in your package.
-2. Add tha path to your additional `Root.fusion` to the Setting in path `Sitegeist.Taxonomy.backendModule.additionalFusionIncludePathes`.
-3. In the fusion code define each field as prototype that accepts the props `name` plus `taxon` & `defaultTaxon` resp. `vocabulary` & `defaultVocabulary`. 
-4. Register addtional prototypesNames by adding them to the Settings `Sitegeist.Taxonomy.backendModule.additionalVocabularyFieldPrototypes` or
+
+```yaml
+'Sitegeist.Taxonomy:Taxonomy':
+  properties:
+    uriPathSegment:
+      type: string
+```
+
+2. Add the path to your additional `Root.fusion` to the Setting in path `Sitegeist.Taxonomy.backendModule.additionalFusionIncludePathes`.
+
+```yaml
+Sitegeist:
+  Taxonomy:
+    backendModule:
+      additionalFusionIncludePathes:
+        # Use anything but 0 as key
+        uriPathSegment: 'resource://FoobarCom.Site/Private/Fusion/Taxonomy/Property/UriPathSegment.fusion'
+```
+
+3. In the Fusion code, define each field as prototype that accepts the props `name` plus `taxonomy` & `defaultTaxonomy` resp. `vocabulary` & `defaultVocabulary`.
+
+```
+prototype(FoobarCom.Site:Taxonomy.Property.UriPathSegment) < prototype(Neos.Fusion:Component) {
+  name = ''
+  taxonomy = ''
+  defaultTaxonomy = null
+
+  renderer = afx`
+    <div class="neos-control-group">
+      <label class="neos-control-label" for="uriPathSegment">
+        URI path
+        <span @if={props.defaultTaxonomy}>: {props.defaultTaxonomy.properties.description}</span>
+      </label>
+      <Neos.Fusion.Form:Textfield attributes.required="required" attributes.class="neos-span6 form-inline" field.name="properties[uriPathSegment]"/>
+    </div>
+  `
+}
+```
+
+4. Register additional prototype names by adding them to the Settings `Sitegeist.Taxonomy.backendModule.additionalVocabularyFieldPrototypes` or
    `Sitegeist.Taxonomy.backendModule.additionalTaxonomyFieldPrototypes`
+
+```yaml
+Sitegeist:
+  Taxonomy:
+    backendModule:
+      additionalTaxonomyFieldPrototypes:
+        # Use the property name as key
+        uriPathSegment: 'FoobarCom.Site:Taxonomy.Property.UriPathSegment'
+```
 
 ## Contribution
 
