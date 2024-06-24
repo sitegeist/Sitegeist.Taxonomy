@@ -42,7 +42,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
             </thead>
             <tbody>
             <Neos.Fusion:Loop items={taxonomies} itemName="taxon">
-                <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={taxon}/>
+                <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={taxon} isFirst={iterator.isFirst} isLast={iterator.isLast}/>
             </Neos.Fusion:Loop>
             </tbody>
         </table>
@@ -72,6 +72,8 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
 
 prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.Fusion:Component) {
     taxon = null
+    isFirst = false
+    isLast = false
 
     renderer = afx`
         <tr>
@@ -94,6 +96,26 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
 
                     <Neos.Fusion:Fragment @if={Security.hasAccess("Sitegeist.Taxonomy:Module.ManageTaxonomyActions")}>
 
+                        <Neos.Fusion:Link.Action
+                            @if={!props.isFirst}
+                            href.action="moveUpTaxonomy"
+                            href.arguments.taxonomy={props.taxon.node.contextPath}
+                            title={props.i8n.id('taxon.moveUp')}
+                            class="neos-button neos-button-primary"
+                        >
+                            <i class="fas fa-arrow-up"></i>
+                        </Neos.Fusion:Link.Action>
+                        <span @if={props.isFirst} class="neos-button neos-disabled" style="width: 46px;"></span>
+                        <Neos.Fusion:Link.Action
+                            @if={!props.isLast}
+                            href.action="moveDownTaxonomy"
+                            href.arguments.taxonomy={props.taxon.node.contextPath}
+                            title={props.i8n.id('taxon.moveDown')}
+                            class="neos-button neos-button-primary"
+                        >
+                            <i class="fas fa-arrow-down"></i>
+                        </Neos.Fusion:Link.Action>
+                        <span @if={props.isLast} class="neos-button neos-disabled" style="width: 46px;"></span>
                         <Neos.Fusion:Link.Action
                             href.action="newTaxonomy"
                             href.arguments.parent={props.taxon.node.contextPath}
@@ -149,7 +171,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
         </tr>
 
         <Neos.Fusion:Loop items={props.taxon.children} itemName="child">
-            <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={child}/>
+            <Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item taxon={child} isFirst={iterator.isFirst} isLast={iterator.isLast}/>
         </Neos.Fusion:Loop>
 
     `

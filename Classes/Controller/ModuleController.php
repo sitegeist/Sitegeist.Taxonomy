@@ -274,12 +274,6 @@ class ModuleController extends ActionController
         $this->view->assign('vocabulary', $vocabulary);
         $this->view->assign('defaultVocabulary', $this->getNodeInDefaultDimensions($vocabulary));
         $taxonomies = $this->fetchChildTaxonomies($vocabulary);
-        usort($taxonomies, function (array $taxonomyA, array $taxonomyB) {
-            return strcmp(
-                $taxonomyA['node']->getProperty('title') ?: '',
-                $taxonomyB['node']->getProperty('title') ?: ''
-            );
-        });
         $this->view->assign('taxonomies', $taxonomies);
     }
 
@@ -501,7 +495,7 @@ class ModuleController extends ActionController
     public function deleteTaxonomyAction(NodeInterface $taxonomy)
     {
         if ($taxonomy->isAutoCreated()) {
-            throw new \Exception('cannot delete autocrated taxonomies');
+            throw new \Exception('cannot delete autocreated taxonomies');
         }
 
         $flowQuery = new FlowQuery([$taxonomy]);
@@ -518,5 +512,66 @@ class ModuleController extends ActionController
         $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
     }
 
+    /**
+     * Move taxonomy up
+     *
+     * @param NodeInterface $taxonomy
+     * @return void
+     */
+    public function moveUpTaxonomyAction(NodeInterface $taxonomy)
+    {
+        $this->persistenceManager->allowObject($taxonomy);
+
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $nextSiblingNode = $flowQuery->prev()->get(0);
+        $taxonomy->moveBefore($nextSiblingNode);
+        $this->persistenceManager->persistAll();
+
+        foreach ($taxonomy->getOtherNodeVariants() as $otherNodeVariant) {
+            $otherNodeVariant->setIndex($taxonomy->getIndex());
+        }
+        $this->persistenceManager->persistAll();
+
+        $this->addFlashMessage(
+            sprintf('Moved up taxonomy %s', $taxonomy->getPath())
+        );
+
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
+
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+    }
+
+    /**
+     * Move taxonomy down
+     *
+     * @param NodeInterface $taxonomy
+     * @return void
+     */
+    public function moveDownTaxonomyAction(NodeInterface $taxonomy)
+    {
+        $this->persistenceManager->allowObject($taxonomy);
+
+        $flowQuery = new FlowQuery([$taxonomy]);
+        $nextSiblingNode = $flowQuery->next()->get(0);
+        $taxonomy->moveAfter($nextSiblingNode);
+        $this->persistenceManager->persistAll();
+
+        foreach ($taxonomy->getOtherNodeVariants() as $otherNodeVariant) {
+            $otherNodeVariant->setIndex($taxonomy->getIndex());
+        }
+        $this->persistenceManager->persistAll();
+
+        $this->addFlashMessage(
+            sprintf('Moved down taxonomy %s', $taxonomy->getPath())
+        );
+
+        $vocabulary = $flowQuery
+            ->closest('[instanceof ' . $this->taxonomyService->getVocabularyNodeType() . ']')
+            ->get(0);
+
+        $this->redirect('vocabulary', null, null, ['vocabulary' => $vocabulary]);
+    }
 
 }

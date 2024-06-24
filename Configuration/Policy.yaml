@@ -5,7 +5,7 @@ privilegeTargets:
     'Sitegeist.Taxonomy:Module.ManageVocabularyActions':
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newVocabulary|createVocabulary|editVocabulary|updateVocabulary|deleteVocabulary)Action())'
     'Sitegeist.Taxonomy:Module.ManageTaxonomyActions':
-      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newTaxonomy|createTaxonomy|editTaxonomy|updateTaxonomy|deleteTaxonomy)Action())'
+      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newTaxonomy|createTaxonomy|editTaxonomy|updateTaxonomy|deleteTaxonomy|moveUpTaxonomy|moveDownTaxonomy)Action())'
     'Sitegeist.Taxonomy:SecondaryInspector.Tree':
       matcher: 'method(Sitegeist\Taxonomy\Controller\SecondaryInspectorController->treeAction())'
 
