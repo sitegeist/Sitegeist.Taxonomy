@@ -5,14 +5,13 @@ prototype(Sitegeist.Taxonomy:Views.Module.Vocabulary.Edit) < prototype(Neos.Fusi
 
     renderer = afx`
         <div class="neos-row-fluid">
-            <legend>{props.i18nMain.id('vocabulary')}: {vocabulary.properties.title}</legend>
+            <legend>{props.i18nMain.id('vocabulary')}: "{vocabularyNode.properties.title}" [{vocabularyNode.nodeName.value}]</legend>
             <legend @if={defaultVocabulary}>{props.i18nMain.id('generic.default')}: {defaultVocabulary.properties.title}</legend>
         </div>
         <Sitegeist.Taxonomy:Form.Vocabulary
             targetAction="updateVocabulary"
-            taxonomyRoot={taxonomyRoot}
-            vocabulary={vocabulary}
-            defaultVocabulary={defaultVocabulary}
+            rootNode={rootNode}
+            vocabularyNode={vocabularyNode}
         />
     `
 

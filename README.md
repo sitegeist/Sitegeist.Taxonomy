@@ -36,31 +36,15 @@ We use semantic-versioning, so every breaking change will increase the major ver
 
 Sitegeist.Taxonomy defines three basic node types:
 
-- `Sitegeist.Taxonomy:Root` - The root node at the path `/taxonomies`, allows only vocabulary nodes as children
+- `Sitegeist.Taxonomy:Root` - The root node at the path `/<Sitegeist.Taxonomy:Root>`, allows only vocabulary nodes as children
 - `Sitegeist.Taxonomy:Vocabulary` - The root of a hierarchy of meaning, allows only taxonomies nodes as children   
-- `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy
-  nodes as children
-
-If you have to enforce the existence of a specific vocabulary or taxonomy, you can use a derived node type:
+- `Sitegeist.Taxonomy:Taxonomy` - An item in the hierarchy that represents a specific meaning allows only taxonomy nodes as children
 
 ```YAML
-    Vendor.Site:Taxonomy.Root:
-      superTypes:
-        Sitegeist.Taxonomy:Root: TRUE
+    Sitegeist.Taxonomy:Root:
       childNodes:
         animals:
           type: 'Sitegeist.Taxonomy:Vocabulary'
-```
-
-And configure the taxonomy package to use this root node type instead of the default:
-
-```YAML
-    Sitegeist:
-      Taxonomy:
-        contentRepository:
-          rootNodeType: 'Vendor.Site:Taxonomy.Root'
-          vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
-          taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
 ```
 
 ## Referencing taxonomies
@@ -76,7 +60,7 @@ Since taxonomies are nodes, they are simply referenced via `reference` or `refer
           group: taxonomy
           editorOptions:
             nodeTypes: ['Sitegeist.Taxonomy:Taxonomy']
-            startingPoint: '/taxonomies'
+            startingPoint: '/<Sitegeist.Taxonomy:Root>'
             placeholder: 'assign Taxonomies'
 ```
 
@@ -88,7 +72,7 @@ startingPoint:
       ui:
         inspector:
           editorOptions:
-            startingPoint: '/taxonomies/animals/mammals'
+            startingPoint: '/<Sitegeist.Taxonomy:Root>/animals/mammals'
 ```
 
 ## Content-Dimensions
@@ -97,14 +81,46 @@ Vocabularies and Taxonomies will always be created in all base dimensions. This 
 always be referenced. The title and description of a taxons and vocabularies can be translated as is required for
 the project.
 
+## Querying Taxonomies
+
+The flow Query operations `referenceNodes()` and `backReferenceNodes` in combination to search for documents that have 
+similar taxons assigned. 
+
+```neosfusion
+similarDocuments = ${
+    q(documentNode)
+        .referenceNodes('taxonomyReferences')                  // the taxons the current document references
+        .backReferenceNodes('taxonomyReferences')              // all nodes that reference one of the same taxons
+        .filter('[instanceof Neos.Neos:Document]')             // only documents
+        .remove(documentNode)                                  // but nut the current one
+        .get()
+    }   
+```
+
+The package includes the following flowQuery operations:
+
+- `referencedTaxonomies()`:  the taxons referenced by the documents in flowQuery context
+- `referencingTaxonomies()`:  the documents referencing by the taxons in flowQuery context
+- `subTaxonomies()` :  sub-taxons of taxons in the context
+- `withSubTaxonomies()`:  current taxons in the context plus sub-taxons 
+
+```neosfusion
+similarDocuments = ${
+  q(documentNode)
+    .referencedTaxonomies()                                // the taxons the current document references
+    .withSubTaxonomies()                                   // including all sub taxons
+    .referencingTaxonomies()                               // the documents that reference the same taxons
+    .remove(documentNode)                                  // but nut the current one
+    .get()
+  }   
+```
+
 ## CLI Commands
 
 The taxonomy package includes some CLI commands for managing the taxonomies.
 
-- `taxonomy:list` List all taxonomy vocabularies
-- `taxonomy:import` Import taxonomy content, expects filename + vocabulary-name (with globbing)
-- `taxonomy:export` Export taxonomy content, expects filename + vocabulary-name (with globbing)
-- `taxonomy:prune` Prune taxonomy content, expects vocabulary-name (with globbing)
+- `taxonomy:vocabularies` List all vocabularies
+- `taxonomy:taxonomies` List taxonomies inside a vocabulary
 
 ## Privileges
 

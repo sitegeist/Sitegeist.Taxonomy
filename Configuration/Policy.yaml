@@ -1,7 +1,7 @@
 privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Sitegeist.Taxonomy:Module.Show':
-      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(index|vocabulary|taxonomy|changeContext)Action())'
+      matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(index|vocabulary|taxonomy|changeDimension)Action())'
     'Sitegeist.Taxonomy:Module.ManageVocabularyActions':
       matcher: 'method(Sitegeist\Taxonomy\Controller\ModuleController->(newVocabulary|createVocabulary|editVocabulary|updateVocabulary|deleteVocabulary)Action())'
     'Sitegeist.Taxonomy:Module.ManageTaxonomyActions':

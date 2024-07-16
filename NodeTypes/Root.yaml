@@ -1,7 +1,7 @@
 Sitegeist.Taxonomy:Root:
   label: ${'Taxonomy:Root'}
   superTypes:
-    'Neos.Neos:Node': TRUE
+    'Neos.ContentRepository:Root': TRUE
   constraints:
     nodeTypes:
       '*': FALSE

@@ -1,225 +1,249 @@
 <?php
-namespace Sitegeist\Taxonomy\Service;
-
-use Neos\Error\Messages\Message;
-use Neos\Flow\Annotations as Flow;
-
-use Neos\ContentRepository\Domain\Factory\NodeFactory;
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-use Neos\ContentRepository\Domain\Model\NodeTemplate;
-use Neos\ContentRepository\Domain\Service\Context;
-use Neos\ContentRepository\Domain\Service\ContextFactoryInterface;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
-use Neos\ContentRepository\Domain\Repository\NodeDataRepository;
-use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**
- * Class TaxonomyService
- * @package Sitegeist\Taxonomy\Service
- * @Flow\Scope("singleton")
+ * This file is part of the Sitegeist.Taxonomies package
+ *
+ * (c) 2017
+ * Martin Ficzel <ficzel@sitegeist.de>
+ *
+ * This package is Open Source Software. For the full copyright and license
+ * information, please view the LICENSE file which was distributed with this
+ * source code.
  */
+
+declare(strict_types=1);
+
+namespace Sitegeist\Taxonomy\Service;
+
+use Neos\ContentRepository\Core\ContentRepository;
+use Neos\ContentRepository\Core\Factory\ContentRepositoryId;
+use Neos\ContentRepository\Core\Feature\RootNodeCreation\Command\CreateRootNodeAggregateWithNode;
+use Neos\ContentRepository\Core\NodeType\NodeTypeName;
+use Neos\ContentRepository\Core\NodeType\NodeTypeNames;
+use Neos\ContentRepository\Core\Projection\ContentGraph\ContentSubgraphInterface;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindChildNodesFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindClosestNodeFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\FindSubtreeFilter;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Filter\NodeType\NodeTypeCriteria;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\Projection\Workspace\Workspace;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
+use Neos\ContentRepositoryRegistry\ContentRepositoryRegistry;
+use Neos\Flow\Annotations as Flow;
+use Neos\Neos\FrontendRouting\NodeAddressFactory;
+
 class TaxonomyService
 {
+    #[Flow\Inject(lazy:false)]
+    protected ContentRepositoryRegistry $crRegistry;
+
+    protected ContentRepository|null $contentRepository = null;
 
     /**
-     * @Flow\Inject
-     * @var NodeDataRepository
+     * @var mixed[]
      */
-    protected $nodeDataRepository;
+    #[Flow\InjectConfiguration]
+    protected array $configuration = [];
 
-    /**
-     * @Flow\Inject
-     * @var NodeFactory
-     */
-    protected $nodeFactory;
-
-    /**
-     * @Flow\Inject
-     * @var ContextFactoryInterface
-     */
-    protected $contextFactory;
-
-    /**
-     * @Flow\Inject
-     * @var NodeTypeManager
-     */
-    protected $nodeTypeManager;
-
-    /**
-     * @Flow\Inject
-     * @var PersistenceManagerInterface
-     */
-    protected $persistenceManager;
-
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeName")
-     */
-    protected $rootNodeName;
-
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.rootNodeType")
-     */
-    protected $rootNodeType;
-
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.vocabularyNodeType")
-     */
-    protected $vocabularyNodeType;
-
-    /**
-     * @var string
-     * @Flow\InjectConfiguration(path="contentRepository.taxonomyNodeType")
-     */
-    protected $taxonomyNodeType;
-
-    /**
-     * @var NodeInterface[]
-     */
-    protected $taxonomyDataRootNodes = [];
-
-    /**
-     * @return string
-     */
-    public function getRootNodeName()
+    public function getRootNodeTypeName(): NodeTypeName
     {
-        return $this->rootNodeName;
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Root');
     }
 
-    /**
-     * @return string
-     */
-    public function getRootNodeType()
+    public function getVocabularyNodeTypeName(): NodeTypeName
     {
-        return $this->rootNodeType;
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Vocabulary');
     }
 
-    /**
-     * @return string
-     */
-    public function getVocabularyNodeType()
+    public function getTaxonomyNodeTypeName(): NodeTypeName
     {
-        return $this->vocabularyNodeType;
+        return NodeTypeName::fromString('Sitegeist.Taxonomy:Taxonomy');
     }
 
-    /**
-     * @return string
-     */
-    public function getTaxonomyNodeType()
+    public function getContentRepository(): ContentRepository
     {
-        return $this->taxonomyNodeType;
-    }
-
-    /**
-     * @param Context $context
-     * @return NodeInterface
-     */
-    public function getRoot(Context $context = null)
-    {
-        if ($context === null) {
-            $context = $this->contextFactory->create();
+        if (is_null($this->contentRepository)) {
+            $crid = $this->configuration['contentRepository']['identifier'] ?? null;
+            if (!is_string($crid)) {
+                throw new \InvalidArgumentException();
+            }
+            $this->contentRepository = $this->crRegistry->get(ContentRepositoryId::fromString($crid));
         }
+        return $this->contentRepository;
+    }
 
-        $contextHash = md5(json_encode($context->getProperties()));
+    public function findVocabularyForNode(Node $node): Node
+    {
+        $subgraph = $this->crRegistry->subgraphForNode($node);
 
-        // return memoized root-node
-        if (array_key_exists($contextHash, $this->taxonomyDataRootNodes)
-            && $this->taxonomyDataRootNodes[$contextHash] instanceof NodeInterface
-        ) {
-            return $this->taxonomyDataRootNodes[$contextHash];
-        }
-
-        // return existing root-node
-        //
-        // TODO: Find a better way to determine the root node
-        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath(
-            '/' . $this->getRootNodeName(),
-            $context->getWorkspace()
+        $vocabularyNode = $subgraph->findClosestNode(
+            $node->nodeAggregateId,
+            FindClosestNodeFilter::create(
+                nodeTypes: NodeTypeCriteria::create(
+                    NodeTypeNames::fromArray([ $this->getVocabularyNodeTypeName()]),
+                    NodeTypeNames::createEmpty()
+                )
+            )
         );
 
-        if ($taxonomyDataRootNodeData !== null) {
-            $this->taxonomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
-                $taxonomyDataRootNodeData,
-                $context
-            );
-
-            return $this->taxonomyDataRootNodes[$contextHash];
+        if ($vocabularyNode) {
+            return $vocabularyNode;
         }
 
-        // create root-node
-        $nodeTemplate = new NodeTemplate();
-        $nodeTemplate->setNodeType($this->nodeTypeManager->getNodeType($this->rootNodeType));
-        $nodeTemplate->setName($this->getRootNodeName());
-
-        $rootNode = $context->getRootNode();
-        $this->taxonomyDataRootNodes[$contextHash] = $rootNode->createNodeFromTemplate($nodeTemplate);
-
-        // We fetch the workspace to be sure it's known to the persistence manager and persist all
-        // so the workspace and site node are persisted before we import any nodes to it.
-        $this->taxonomyDataRootNodes[$contextHash]->getContext()->getWorkspace();
-        $this->persistenceManager->persistAll();
-
-        return $this->taxonomyDataRootNodes[$contextHash];
+        throw new \InvalidArgumentException('node seems to be outside of vocabulary');
     }
 
-    /**
-     * @param string $vocabularyName
-     * @param Context|null $context
-     * @param $vocabulary
-     */
-    public function getVocabulary($vocabularyName, Context $context = null)
+    public function findOrCreateRoot(ContentSubgraphInterface $subgraph): Node
     {
-        if ($context === null) {
-            $context = $this->contextFactory->create();
+        $rootNode = $subgraph->findRootNodeByType($this->getRootNodeTypeName());
+        if ($rootNode instanceof Node) {
+            return $rootNode;
         }
 
-        $root = $this->getRoot($context);
-        return $root->getNode($vocabularyName);
+        $contentRepository = $this->getContentRepository();
+        $liveWorkspace = $this->getLiveWorkspace();
+
+        $commandResult = $contentRepository->handle(
+            CreateRootNodeAggregateWithNode::create(
+                $liveWorkspace->currentContentStreamId,
+                NodeAggregateId::create(),
+                $this->getRootNodeTypeName()
+            )
+        );
+        $commandResult->block();
+
+        $rootNode = $subgraph->findRootNodeByType($this->getRootNodeTypeName());
+        if ($rootNode instanceof Node) {
+            return $rootNode;
+        }
+
+        throw new \Exception('taxonomy root could neither be found nor created');
     }
 
-    /**
-     * @param string $vocabularyName
-     * @param string $taxonomyPath
-     * @param Context|null $context
-     * @param $vocabulary
-     */
-    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
+    public function findAllVocabularies(ContentSubgraphInterface $subgraph): Nodes
     {
-        $vocabulary = $this->getVocabulary($vocabularyName, $context);
-        if ($vocabulary) {
-            return $vocabulary->getNode($taxonomyPath);
-        }
+        $root = $this->findOrCreateRoot($subgraph);
+        return $subgraph->findChildNodes(
+            $root->nodeAggregateId,
+            FindChildNodesFilter::create(
+                nodeTypes: NodeTypeCriteria::create(
+                    NodeTypeNames::fromArray([$this->getVocabularyNodeTypeName()]),
+                    NodeTypeNames::createEmpty()
+                )
+            )
+        );
     }
 
-    /**
-     * @param NodeInterface $startingPoint
-     * @return array
-     */
-    public function getTaxonomyTreeAsArray(NodeInterface $startingPoint): array
+    public function findVocabularyByName(ContentSubgraphInterface $subgraph, string $vocabularyName): ?Node
     {
-        $result = [];
-
-        $result['identifier'] = $startingPoint->getIdentifier();
-        $result['path'] = $startingPoint->getPath();
-        $result['nodeType'] = $startingPoint->getNodeType()->getName();
-        $result['label'] = $startingPoint->getLabel();
-        $result['title'] = $startingPoint->getProperty('title');
-        $result['description'] = $startingPoint->getProperty('description');
-
-        $result['children'] = [];
-
-        foreach ($startingPoint->getChildNodes() as $childNode) {
-            $result['children'][] = $this->getTaxonomyTreeAsArray($childNode);
+        // @todo find root -> find named child
+        $vocabularies = $this->findAllVocabularies($subgraph);
+        foreach ($vocabularies as $vocabulary) {
+            if ($vocabulary->nodeName?->value == $vocabularyName) {
+                return $vocabulary;
+            }
         }
-        usort($result['children'], function (array $childA, array $childB) {
-            return strcmp(
-                $childA['title'] ?: '',
-                $childB['title'] ?: ''
-            );
-        });
+        return null;
+    }
 
-        return $result;
+    public function findTaxonomyByVocabularyNameAndPath(ContentSubgraphInterface $subgraph, string $vocabularyName, string $taxonomyPath): ?Node
+    {
+        $vocabulary = $this->findVocabularyByName($subgraph, $vocabularyName);
+        if (!$vocabulary instanceof Node) {
+            return null;
+        }
+        $taxonomy = $subgraph->findNodeByPath(
+            NodePath::fromString($taxonomyPath),
+            $vocabulary->nodeAggregateId
+        );
+        return $taxonomy;
+    }
+
+    public function findSubtree(Node $StartNode): ?Subtree
+    {
+        $subgraph = $this->crRegistry->subgraphForNode($StartNode);
+
+        $vocabularySubtree = $subgraph->findSubtree(
+            $StartNode->nodeAggregateId,
+            FindSubtreeFilter::create(
+                nodeTypes: NodeTypeCriteria::create(
+                    NodeTypeNames::fromArray([$this->getTaxonomyNodeTypeName(), $this->getVocabularyNodeTypeName()]),
+                    NodeTypeNames::createEmpty()
+                )
+            )
+        );
+
+        return $vocabularySubtree ? $this->orderSubtreeByNameRecursive($vocabularySubtree) : null;
+    }
+
+    private function orderSubtreeByNameRecursive(Subtree $subtree): Subtree
+    {
+        $children = $subtree->children;
+        $children = array_map(
+            fn(Subtree $item) => $this->orderSubtreeByNameRecursive($item),
+            $children
+        );
+        usort(
+            $children,
+            fn(Subtree $a, Subtree $b) => $a->node->nodeName?->value <=> $b->node->nodeName?->value
+        );
+        return new Subtree(
+            $subtree->level,
+            $subtree->node,
+            $children
+        );
+    }
+
+    public function getNodeByNodeAddress(string $serializedNodeAddress): Node
+    {
+        $contentRepository = $this->getContentRepository();
+        $nodeAddress = NodeAddressFactory::create($contentRepository)->createFromUriString($serializedNodeAddress);
+        $subgraph = $contentRepository->getContentGraph()->getSubgraph(
+            $nodeAddress->contentStreamId,
+            $nodeAddress->dimensionSpacePoint,
+            VisibilityConstraints::withoutRestrictions()
+        );
+        $node = $subgraph->findNodeById($nodeAddress->nodeAggregateId);
+        if (is_null($node)) {
+            throw new \InvalidArgumentException('nodeAddress does not resolve to a node');
+        }
+        return $node;
+    }
+
+    public function getDefaultSubgraph(): ContentSubgraphInterface
+    {
+        $contentRepository = $this->getContentRepository();
+        $liveWorkspace = $this->getLiveWorkspace();
+        $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
+        $dimensionSpacePoint = reset($generalizations);
+        if (!$dimensionSpacePoint) {
+            throw new \Exception('default dimensionSpacePoint could not be found');
+        }
+        $contentGraph = $contentRepository->getContentGraph();
+        $subgraph = $contentGraph->getSubgraph(
+            $liveWorkspace->currentContentStreamId,
+            $dimensionSpacePoint,
+            VisibilityConstraints::withoutRestrictions()
+        );
+        return $subgraph;
+    }
+
+    public function getSubgraphForNode(Node $node): ContentSubgraphInterface
+    {
+        return $this->crRegistry->subgraphForNode($node);
+    }
+
+    public function getLiveWorkspace(): Workspace
+    {
+        $liveWorkspace = $this->getContentRepository()->getWorkspaceFinder()->findOneByName(WorkspaceName::forLive());
+        if (!$liveWorkspace) {
+            throw new \Exception('live workspace could not be found');
+        }
+        return $liveWorkspace;
     }
 }

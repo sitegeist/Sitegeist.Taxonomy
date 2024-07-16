@@ -5,9 +5,9 @@ import {neos} from '@neos-project/neos-ui-decorators';
 
 import {Button, Icon} from '@neos-project/react-ui-components';
 
-import styles from './TaxonomyEditor.css';
+import styles from './TaxonomyEditor.module.css';
 
-@neos(globalRegistry => {
+const withNeosGlobals = neos(globalRegistry => {
 	const secondaryEditorsRegistry = globalRegistry.get('inspector').get('secondaryEditors');
 	const editorsRegistry = globalRegistry.get('inspector').get('editors');
 
@@ -19,8 +19,9 @@ import styles from './TaxonomyEditor.css';
 		ReferencesEditor,
 		TaxonomyTreeSelect
 	};
-})
-export default class TaxonomyEditor extends PureComponent {
+});
+
+class TaxonomyEditor extends PureComponent {
 
     static propTypes = {
 		value: PropTypes.string,
@@ -133,3 +134,5 @@ export default class TaxonomyEditor extends PureComponent {
 			);
 		}
 }
+
+export default withNeosGlobals(TaxonomyEditor);
