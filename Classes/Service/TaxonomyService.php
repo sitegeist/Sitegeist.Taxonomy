@@ -82,7 +82,7 @@ class TaxonomyService
         $subgraph = $this->crRegistry->subgraphForNode($node);
 
         $vocabularyNode = $subgraph->findClosestNode(
-            $node->nodeAggregateId,
+            $node->aggregateId,
             FindClosestNodeFilter::create(
                 nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([ $this->getVocabularyNodeTypeName()]),
@@ -129,7 +129,7 @@ class TaxonomyService
     {
         $root = $this->findOrCreateRoot($subgraph);
         return $subgraph->findChildNodes(
-            $root->nodeAggregateId,
+            $root->aggregateId,
             FindChildNodesFilter::create(
                 nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([$this->getVocabularyNodeTypeName()]),
@@ -159,7 +159,7 @@ class TaxonomyService
         }
         $taxonomy = $subgraph->findNodeByPath(
             NodePath::fromString($taxonomyPath),
-            $vocabulary->nodeAggregateId
+            $vocabulary->aggregateId
         );
         return $taxonomy;
     }
@@ -169,7 +169,7 @@ class TaxonomyService
         $subgraph = $this->crRegistry->subgraphForNode($StartNode);
 
         $vocabularySubtree = $subgraph->findSubtree(
-            $StartNode->nodeAggregateId,
+            $StartNode->aggregateId,
             FindSubtreeFilter::create(
                 nodeTypes: NodeTypeCriteria::create(
                     NodeTypeNames::fromArray([$this->getTaxonomyNodeTypeName(), $this->getVocabularyNodeTypeName()]),

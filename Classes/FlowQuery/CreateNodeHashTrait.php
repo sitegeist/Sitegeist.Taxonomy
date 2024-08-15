@@ -20,11 +20,11 @@ trait CreateNodeHashTrait
             implode(
                 ':',
                 [
-                    $node->nodeAggregateId->value,
-                    $node->subgraphIdentity->contentRepositoryId->value,
-                    $node->subgraphIdentity->contentStreamId->value,
-                    $node->subgraphIdentity->dimensionSpacePoint->hash,
-                    $node->subgraphIdentity->visibilityConstraints->getHash()
+                    $node->aggregateId->value,
+                    $node->contentRepositoryId->value,
+                    $node->workspaceName->value,
+                    $node->dimensionSpacePoint->hash,
+                    $node->visibilityConstraints->getHash()
                 ]
             )
         );
