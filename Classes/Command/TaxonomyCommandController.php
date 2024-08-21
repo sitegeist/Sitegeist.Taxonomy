@@ -45,7 +45,7 @@ class TaxonomyCommandController extends CommandController
         $this->output->outputTable(
             array_map(
                 fn(Node $node) => [
-                    $node->nodeName?->value ?? $node->aggregateId->value,
+                    $node->name?->value ?? $node->aggregateId->value,
                     $node->getProperty('title'),
                     $node->getProperty('description')
                 ],
@@ -93,7 +93,7 @@ class TaxonomyCommandController extends CommandController
     {
         $rows = array_map(fn(Subtree $subtree)=>$this->subtreeToTableRowsRecursively($subtree), $subtree->children);
         $row = [
-            str_repeat('  ', $subtree->level) . ($subtree->node->nodeName?->value ?? $subtree->node->aggregateId->value),
+            str_repeat('  ', $subtree->level) . ($subtree->node->name?->value ?? $subtree->node->aggregateId->value),
             (string) $subtree->node->getProperty('title'),
             (string) $subtree->node->getProperty('description')
         ];

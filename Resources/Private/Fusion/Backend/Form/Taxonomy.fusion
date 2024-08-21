@@ -7,13 +7,14 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
     targetAction = null
     taxonomyNode = null
     parentNode = null
+    vocabularyNode = null
 
     additionalFieldPrototypeNames = ${Configuration.setting('Sitegeist.Taxonomy.backendModule.additionalTaxonomyFieldPrototypes')}
 
     renderer = afx`
         <Neos.Fusion.Form:Form
           form.target.action={props.targetAction}
-          form.data.name={props.taxonomyNode.nodeName.value}
+          form.data.name={props.taxonomyNode.name.value}
           form.data.properties={props.taxonomyNode.properties}
         >
 
@@ -68,7 +69,7 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
                     <Neos.Fusion:Link.Action
                         class="neos-button"
                         href.action="vocabulary"
-                        href.arguments.vocabulary={props.vocabulary}
+                        href.arguments.vocabularyNodeAddress={Neos.Node.serializedNodeAddress(props.vocabularyNode)}
                     >
                         {props.i18nMain.id('generic.cancel')}
                     </Neos.Fusion:Link.Action>

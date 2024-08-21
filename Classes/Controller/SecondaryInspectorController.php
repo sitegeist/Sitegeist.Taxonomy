@@ -15,8 +15,11 @@ declare(strict_types=1);
 
 namespace Sitegeist\Taxonomy\Controller;
 
+use Neos\ContentRepository\Core\DimensionSpace\DimensionSpacePoint;
 use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
@@ -50,8 +53,13 @@ class SecondaryInspectorController extends ActionController
 
     public function treeAction(string $contextNode, string $startingPoint): void
     {
-        $node = $this->taxonomyService->getNodeByNodeAddress($contextNode);
-        $subgraph =  $this->taxonomyService->getSubgraphForNode($node);
+        list($workspaceNameSerialized, $dimensionSpacePointSerialized, $nodeAggregateIdSerialized)
+            = explode('__', $contextNode);
+        $workspaceName = WorkspaceName::fromString($workspaceNameSerialized);
+        $dimensionSpacePoint = DimensionSpacePoint::fromArray(json_decode(base64_decode($dimensionSpacePointSerialized), true));
+
+        $contentRepository = $this->taxonomyService->getContentRepository();
+        $subgraph = $contentRepository->getContentGraph($workspaceName)->getSubgraph($dimensionSpacePoint, VisibilityConstraints::withoutRestrictions());
 
         $path = AbsoluteNodePath::fromString($startingPoint);
         $startNode = $subgraph->findNodeByAbsolutePath($path);
@@ -71,7 +79,7 @@ class SecondaryInspectorController extends ActionController
     protected function toJson(Subtree $subtree, string $pathSoFar = null): array
     {
         $label = $this->nodeLabelGenerator->getLabel($subtree->node);
-        $pathSegment = $subtree->node->nodeName?->value ?? $label;
+        $pathSegment = $subtree->node->name?->value ?? $label;
         $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
         $identifier = $subtree->node->aggregateId->value;
         $nodeType =  $subtree->node->nodeTypeName->value;

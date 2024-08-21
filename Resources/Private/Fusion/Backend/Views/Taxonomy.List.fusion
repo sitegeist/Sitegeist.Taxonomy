@@ -7,7 +7,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List) < prototype(Neos.Fusion
     renderer = afx`
         <div class="neos-row-fluid">
             <legend>
-                {props.i18n.id('vocabulary')} "{vocabularyNode.properties.title}" [{vocabularyNode.nodeName.value}]
+                {props.i18n.id('vocabulary')} "{vocabularyNode.properties.title}" [{vocabularyNode.name.value}]
                 <div class="neos-pull-right">
                     <Sitegeist.Taxonomy:Views.Fragments.DimensionSelector
                         targetAction='vocabulary'
@@ -77,9 +77,9 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                 <Neos.Fusion:Loop items={Array.range(0, props.taxonomySubtree.level - 2)} @if={props.taxonomySubtree.level > 1}>
                     &nbsp; &nbsp; &nbsp;
                 </Neos.Fusion:Loop>
-                <i class={props.taxonomySubtree.node.nodeType.fullConfiguration.ui.icon}></i>
+                <i class={Neos.Node.getNodeType(props.taxonomySubtree.node).fullConfiguration.ui.icon}></i>
                 &nbsp; &nbsp;
-                {props.taxonomySubtree.node.properties.title} [{props.taxonomySubtree.node.nodeName.value}]
+                {props.taxonomySubtree.node.properties.title} [{props.taxonomySubtree.node.name.value}]
             </td>
             <td>
                 {props.taxonomySubtree.node.properties.description}
@@ -112,12 +112,12 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                             <button class="neos-button neos-button-danger"
                                 title={props.i8n.id('generic.delete')}
                                 data-toggle="modal"
-                                href={"#deleteTaxonomy_" + props.taxonomySubtree.node.nodeAggregateId.value}
+                                href={"#deleteTaxonomy_" + props.taxonomySubtree.node.aggregateId.value}
                                 data-neos-toggle="tooltip"
                             >
                                 <i class="fas fa-trash-alt icon-white"></i>
                             </button>
-                            <div class="neos-hide" id={"deleteTaxonomy_" + props.taxonomySubtree.node.nodeAggregateId.value}>
+                            <div class="neos-hide" id={"deleteTaxonomy_" + props.taxonomySubtree.node.aggregateId.value}>
                                 <div class="neos-modal-centered">
                                     <div class="neos-modal-content">
                                         <div class="neos-modal-header">

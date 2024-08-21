@@ -25,6 +25,7 @@ use Neos\ContentRepository\Core\Feature\NodeRenaming\Command\ChangeNodeAggregate
 use Neos\ContentRepository\Core\Feature\NodeVariation\Command\CreateNodeVariant;
 use Neos\ContentRepository\Core\Feature\WorkspaceRebase\Command\RebaseWorkspace;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeAddress;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAggregateId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeName;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeVariantSelectionStrategy;
@@ -37,7 +38,6 @@ use Neos\Flow\Security\Context as SecurityContext;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\Domain\NodeLabel\NodeLabelGeneratorInterface;
 use Neos\Neos\Domain\Service\WorkspaceNameBuilder;
-use Neos\Neos\FrontendRouting\NodeAddressFactory;
 use Neos\Neos\Fusion\Helper\DimensionHelper;
 use Neos\Neos\Fusion\Helper\NodeHelper;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
@@ -82,12 +82,9 @@ class ModuleController extends ActionController
 
     protected ContentRepository $contentRepository;
 
-    protected NodeAddressFactory $nodeAddressFactory;
-
     public function initializeObject(): void
     {
         $this->contentRepository = $this->taxonomyService->getContentRepository();
-        $this->nodeAddressFactory = NodeAddressFactory::create($this->contentRepository);
     }
 
     public function initializeView(ViewInterface $view): void
@@ -115,7 +112,7 @@ class ModuleController extends ActionController
         $vocabularies = $this->taxonomyService->findAllVocabularies($subgraph);
 
         $this->view->assign('rootNode', $rootNode);
-        $this->view->assign('rootNodeAddress', $this->nodeAddressFactory->createFromNode($rootNode)->serializeForUri());
+        $this->view->assign('rootNodeAddress', NodeAddress::fromNode($rootNode)->toJson());
         $this->view->assign('vocabularies', $vocabularies);
     }
 
@@ -176,27 +173,23 @@ class ModuleController extends ActionController
 
         $rootNode = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
         $subgraph = $this->taxonomyService->getSubgraphForNode($rootNode);
-        $liveWorkspace = $this->taxonomyService->getLiveWorkspace();
         $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
-        $nodeAddress = $this->nodeAddressFactory->createFromUriString($rootNodeAddress);
+        $nodeAddress = NodeAddress::fromJsonString($rootNodeAddress);
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
         // create node
         $nodeAggregateId = NodeAggregateId::create();
         $nodeTypeName = $this->taxonomyService->getVocabularyNodeTypeName();
-        $commandResult = $contentRepository->handle(
+        $contentRepository->handle(
             CreateNodeAggregateWithNode::create(
-                $liveWorkspace->currentContentStreamId,
-                $nodeAggregateId,
-                $nodeTypeName,
-                $originDimensionSpacePoint,
-                $rootNode->aggregateId,
-                null,
-                NodeName::transliterateFromString($name),
-                PropertyValuesToWrite::fromArray($properties)
-            )
+                workspaceName: WorkspaceName::forLive(),
+                nodeAggregateId: $nodeAggregateId,
+                nodeTypeName: $nodeTypeName,
+                originDimensionSpacePoint: $originDimensionSpacePoint,
+                parentNodeAggregateId: $rootNode->aggregateId,
+                initialPropertyValues: PropertyValuesToWrite::fromArray($properties)
+            )->withNodeName(NodeName::transliterateFromString($name))
         );
-        $commandResult->block();
 
         // create required generalizations
         foreach ($generalizations as $dimensionSpacePoint) {
@@ -207,7 +200,7 @@ class ModuleController extends ActionController
 
             $contentRepository->handle(
                 CreateNodeVariant::create(
-                    $liveWorkspace->currentContentStreamId,
+                    WorkspaceName::forLive(),
                     $nodeAggregateId,
                     $originDimensionSpacePoint,
                     $originDimensionSpacePoint2
@@ -283,7 +276,7 @@ class ModuleController extends ActionController
             );
         }
 
-        $this->redirect('index', null, null, ['rootNodeAddress' => $this->nodeAddressFactory->createFromNode($rootNode)]);
+        $this->redirect('index', null, null, ['rootNodeAddress' => NodeAddress::fromNode($rootNode)]);
     }
 
     /**
@@ -309,7 +302,7 @@ class ModuleController extends ActionController
             sprintf('Deleted vocabulary %s', $this->nodeLabelGenerator->getLabel($vocabularyNode))
         );
 
-        $this->redirect('index', null, null, ['rootNodeAddress' => $this->nodeAddressFactory->createFromNode($rootNode)]);
+        $this->redirect('index', null, null, ['rootNodeAddress' => NodeAddress::fromNode($rootNode)]);
     }
 
     /**
@@ -320,13 +313,15 @@ class ModuleController extends ActionController
         $parentNode = $this->taxonomyService->getNodeByNodeAddress($parentNodeAddress);
         $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
         $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
-        $vocabularyNode = null;
+        $parentNodeType = $this->taxonomyService->getContentRepository()->getNodeTypeManager()
+            ->getNodeType($parentNode->nodeTypeName);
 
-        if ($parentNode->nodeTypeName->equals($this->taxonomyService->getTaxonomyNodeTypeName())) {
+        if ($parentNodeType?->isOfType($this->taxonomyService->getTaxonomyNodeTypeName())) {
             $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
-        } elseif ($parentNode->nodeTypeName->equals($this->taxonomyService->getVocabularyNodeTypeName())) {
+        } elseif ($parentNodeType?->isOfType($this->taxonomyService->getVocabularyNodeTypeName())) {
             $vocabularyNode = $parentNode;
         } else {
+            throw new \Exception('Don\'t know how to handle parent nodes of type ' . $parentNode->nodeTypeName->value);
         }
 
         $this->view->assign('rootNode', $rootNode);
@@ -347,28 +342,24 @@ class ModuleController extends ActionController
             $vocabularyNode = $this->taxonomyService->findVocabularyForNode($parentNode);
         }
         $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
-        $liveWorkspace = $this->taxonomyService->getLiveWorkspace();
 
         $generalizations = $this->contentRepository->getVariationGraph()->getRootGeneralizations();
-        $nodeAddress = $this->nodeAddressFactory->createFromUriString($parentNodeAddress);
+        $nodeAddress = NodeAddress::fromJsonString($parentNodeAddress);
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
         // create node
         $nodeAggregateId = NodeAggregateId::create();
         $nodeTypeName = $this->taxonomyService->getTaxonomyNodeTypeName();
-        $commandResult = $this->contentRepository->handle(
+        $this->contentRepository->handle(
             CreateNodeAggregateWithNode::create(
-                $liveWorkspace->currentContentStreamId,
-                $nodeAggregateId,
-                $nodeTypeName,
-                $originDimensionSpacePoint,
-                $parentNode->aggregateId,
-                null,
-                NodeName::transliterateFromString($name),
-                PropertyValuesToWrite::fromArray($properties)
-            )
+                workspaceName: WorkspaceName::forLive(),
+                nodeAggregateId: $nodeAggregateId,
+                nodeTypeName: $nodeTypeName,
+                originDimensionSpacePoint: $originDimensionSpacePoint,
+                parentNodeAggregateId: $parentNode->aggregateId,
+                initialPropertyValues: PropertyValuesToWrite::fromArray($properties)
+            )->withNodeName(NodeName::transliterateFromString($name))
         );
-        $commandResult->block();
 
         // create required generalizations
         foreach ($generalizations as $dimensionSpacePoint) {
@@ -377,9 +368,9 @@ class ModuleController extends ActionController
                 continue;
             }
 
-            $commandResult = $this->contentRepository->handle(
+            $this->contentRepository->handle(
                 CreateNodeVariant::create(
-                    $liveWorkspace->currentContentStreamId,
+                    WorkspaceName::forLive(),
                     $nodeAggregateId,
                     $originDimensionSpacePoint,
                     $originDimensionSpacePoint2
@@ -401,7 +392,7 @@ class ModuleController extends ActionController
             'vocabulary',
             null,
             null,
-            ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]
+            ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]
         );
     }
 
@@ -412,7 +403,10 @@ class ModuleController extends ActionController
     {
         $taxonomyNode = $this->taxonomyService->getNodeByNodeAddress($taxonomyNodeAddress);
         $vocabularyNode = $this->taxonomyService->findVocabularyForNode($taxonomyNode);
+        $subgraph = $this->taxonomyService->getSubgraphForNode($vocabularyNode);
+        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
+        $this->view->assign('rootNode', $rootNode);
         $this->view->assign('vocabularyNode', $vocabularyNode);
         $this->view->assign('taxonomyNode', $taxonomyNode);
     }
@@ -455,7 +449,7 @@ class ModuleController extends ActionController
             );
         }
 
-        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]);
     }
 
     /**
@@ -480,7 +474,7 @@ class ModuleController extends ActionController
             sprintf('Deleted taxonomy %s', $this->nodeLabelGenerator->getLabel($taxonomyNode))
         );
 
-        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => $this->nodeAddressFactory->createFromNode($vocabularyNode)]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]);
     }
 
     protected function rebaseCurrentUserWorkspace(): void
