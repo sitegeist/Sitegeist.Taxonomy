@@ -131,13 +131,10 @@ class TaxonomyService
             return $this->taxonomyDataRootNodes[$contextHash];
         }
 
-        // return existing root-node
-        //
-        // TODO: Find a better way to determine the root node
-        $taxonomyDataRootNodeData = $this->nodeDataRepository->findOneByPath(
-            '/' . $this->getRootNodeName(),
-            $context->getWorkspace()
-        );
+        $taxonomyDataRootNode = $context->getNode('/'.$this->getRootNodeName());
+        if ($taxonomyDataRootNode instanceof NodeInterface) {
+            $taxonomyDataRootNodeData = $taxonomyDataRootNode->getNodeData();
+        }
 
         if ($taxonomyDataRootNodeData !== null) {
             $this->taxonomyDataRootNodes[$contextHash] = $this->nodeFactory->createFromNodeData(
