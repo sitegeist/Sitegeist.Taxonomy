@@ -37,9 +37,10 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Security\Context as SecurityContext;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\Domain\NodeLabel\NodeLabelGeneratorInterface;
-use Neos\Neos\Domain\Service\WorkspaceNameBuilder;
+use Neos\Neos\Domain\Service\WorkspaceService;
 use Neos\Neos\Fusion\Helper\DimensionHelper;
 use Neos\Neos\Fusion\Helper\NodeHelper;
+use Neos\Neos\Service\UserService;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 use Neos\Utility\Arrays;
 
@@ -80,6 +81,12 @@ class ModuleController extends ActionController
     #[Flow\Inject]
     protected ContentRepositoryRegistry $contentRepositoryRegistry;
 
+    #[Flow\Inject]
+    protected UserService $userService;
+
+    #[Flow\Inject]
+    protected WorkspaceService $workspaceService;
+
     protected ContentRepository $contentRepository;
 
     public function initializeObject(): void
@@ -89,11 +96,11 @@ class ModuleController extends ActionController
 
     public function initializeView(ViewInterface $view): void
     {
-        $fusionPathes = ['resource://Sitegeist.Taxonomy/Private/Fusion/Backend'];
+        $fusionPaths = ['resource://Sitegeist.Taxonomy/Private/Fusion/Backend'];
         if (is_array($this->additionalFusionIncludePathes) && !empty($this->additionalFusionIncludePathes)) {
-            $fusionPathes = Arrays::arrayMergeRecursiveOverrule($fusionPathes, $this->additionalFusionIncludePathes);
+            $fusionPaths = Arrays::arrayMergeRecursiveOverrule($fusionPaths, $this->additionalFusionIncludePathes);
         }
-        $this->view->setFusionPathPatterns($fusionPathes);
+        $this->view->setFusionPathPatterns($fusionPaths);
     }
 
     /**
@@ -479,17 +486,14 @@ class ModuleController extends ActionController
 
     protected function rebaseCurrentUserWorkspace(): void
     {
-        $account = $this->securityContext->getAccount();
-        if (is_null($account)) {
-            throw new \Exception('no account found');
+        $user = $this->userService->getBackendUser();
+        if ($user === null) {
+            $this->redirectToUri($this->uriBuilder->uriFor('index', [], 'Login', 'Neos.Neos'));
         }
-        $workspaceName = WorkspaceNameBuilder::fromAccountIdentifier(
-            $account->getAccountIdentifier()
-        );
-        $workspace = $this->contentRepository->getWorkspaceFinder()->findOneByName($workspaceName);
-        if (is_null($workspace)) {
-            throw new \Exception('no workspace found');
-        }
-        $this->contentRepository->handle(RebaseWorkspace::create($workspaceName));
+
+        $this->workspaceService->createPersonalWorkspaceForUserIfMissing($this->contentRepository->id, $user);
+        $workspace = $this->workspaceService->getPersonalWorkspaceForUser($this->contentRepository->id, $user->getId());
+
+        $this->contentRepository->handle(RebaseWorkspace::create($workspace->workspaceName));
     }
 }
