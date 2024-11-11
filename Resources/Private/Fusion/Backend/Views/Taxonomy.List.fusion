@@ -77,7 +77,7 @@ prototype(Sitegeist.Taxonomy:Views.Module.Taxonomy.List.Item) < prototype(Neos.F
                 <Neos.Fusion:Loop items={Array.range(0, props.taxonomySubtree.level - 2)} @if={props.taxonomySubtree.level > 1}>
                     &nbsp; &nbsp; &nbsp;
                 </Neos.Fusion:Loop>
-                <i class={Neos.Node.getNodeType(props.taxonomySubtree.node).fullConfiguration.ui.icon}></i>
+                <i class={Neos.Node.nodeType(props.taxonomySubtree.node).fullConfiguration.ui.icon}></i>
                 &nbsp; &nbsp;
                 {props.taxonomySubtree.node.properties.title} [{props.taxonomySubtree.node.name.value}]
             </td>
