@@ -61,7 +61,7 @@ class ReferencingTaxonomiesOperation extends AbstractOperation
          */
         foreach ($flowQuery->getContext() as $node) {
             $subgraph = $this->contentRepositoryRegistry->subgraphForNode($node);
-            $references = $subgraph->findBackReferences($node->nodeAggregateId, $findBackReferencesFilter);
+            $references = $subgraph->findBackReferences($node->aggregateId, $findBackReferencesFilter);
             foreach ($references as $reference) {
                 $nodes[] = $reference->node;
             }

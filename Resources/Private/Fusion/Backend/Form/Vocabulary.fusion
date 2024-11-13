@@ -13,7 +13,7 @@ prototype(Sitegeist.Taxonomy:Form.Vocabulary) < prototype(Neos.Fusion:Component)
     renderer = afx`
         <Neos.Fusion.Form:Form
           form.target.action={props.targetAction}
-          form.data.name={props.vocabularyNode.nodeName.value}
+          form.data.name={props.vocabularyNode.name.value}
           form.data.properties={props.vocabularyNode.properties}
         >
             <Neos.Fusion.Form:Hidden field.name="vocabularyNodeAddress" field.value={props.vocabularyNode ? Neos.Node.serializedNodeAddress(props.vocabularyNode) : null} @if.has={props.vocabularyNode}/>

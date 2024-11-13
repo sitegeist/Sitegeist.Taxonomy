@@ -17,10 +17,13 @@ namespace Sitegeist\Taxonomy\Controller;
 
 use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
+use Neos\Neos\Domain\NodeLabel\NodeLabelGeneratorInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
+use Neos\Neos\Ui\ContentRepository\Service\NeosUiNodeService;
+use Neos\Neos\FrontendRouting\SiteDetection\SiteDetectionResult;
 
 /**
  * Class SecondaryInspectorController
@@ -34,6 +37,12 @@ class SecondaryInspectorController extends ActionController
      */
     protected $taxonomyService;
 
+    #[Flow\Inject]
+    protected NodeLabelGeneratorInterface $nodeLabelGenerator;
+
+    #[Flow\Inject]
+    protected NeosUiNodeService $nodeService;
+
     /**
      * @var string[]
      */
@@ -46,7 +55,8 @@ class SecondaryInspectorController extends ActionController
 
     public function treeAction(string $contextNode, string $startingPoint): void
     {
-        $node = $this->taxonomyService->getNodeByNodeAddress($contextNode);
+        $contentRepositoryId = SiteDetectionResult::fromRequest($this->request->getHttpRequest())->contentRepositoryId;
+        $node = $this->nodeService->findNodeBySerializedNodeAddress($contextNode, $contentRepositoryId);
         $subgraph =  $this->taxonomyService->getSubgraphForNode($node);
 
         $path = AbsoluteNodePath::fromString($startingPoint);
@@ -66,10 +76,10 @@ class SecondaryInspectorController extends ActionController
      */
     protected function toJson(Subtree $subtree, string $pathSoFar = null): array
     {
-        $label = $subtree->node->getLabel();
-        $pathSegment = $subtree->node->nodeName?->value ?? $label;
+        $label = $this->nodeLabelGenerator->getLabel($subtree->node);
+        $pathSegment = $subtree->node->name?->value ?? $label;
         $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
-        $identifier = $subtree->node->nodeAggregateId->value;
+        $identifier = $subtree->node->aggregateId;
         $nodeType =  $subtree->node->nodeTypeName->value;
         $title = $subtree->node->getProperty('title');
         $description = $subtree->node->getProperty('description');

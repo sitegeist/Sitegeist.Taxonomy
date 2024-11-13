@@ -13,7 +13,7 @@ prototype(Sitegeist.Taxonomy:Form.Taxonomy) < prototype(Neos.Fusion:Component) {
     renderer = afx`
         <Neos.Fusion.Form:Form
           form.target.action={props.targetAction}
-          form.data.name={props.taxonomyNode.nodeName.value}
+          form.data.name={props.taxonomyNode.name.value}
           form.data.properties={props.taxonomyNode.properties}
         >
 

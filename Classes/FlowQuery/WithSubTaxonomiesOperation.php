@@ -70,7 +70,7 @@ class WithSubTaxonomiesOperation extends AbstractOperation
         $nodes = Nodes::createEmpty();
         foreach ($flowQuery->getContext() as $node) {
             $subgraph = $this->contentRepositoryRegistry->subgraphForNode($node);
-            $subtree = $subgraph->findSubtree($node->nodeAggregateId, $filter);
+            $subtree = $subgraph->findSubtree($node->aggregateId, $filter);
             if ($subtree) {
                 $nodes = $nodes->merge($this->flattenSubtree($subtree));
             }
