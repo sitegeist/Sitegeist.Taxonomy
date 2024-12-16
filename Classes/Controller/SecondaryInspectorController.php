@@ -85,7 +85,10 @@ class SecondaryInspectorController extends ActionController
         $nodeType =  $subtree->node->nodeTypeName->value;
         $title = $subtree->node->getProperty('title');
         $description = $subtree->node->getProperty('description');
-        $children = array_map(fn(Subtree $child)=>$this->toJson($child), $subtree->children);
+        $children = array_map(
+            fn(Subtree $child)=>$this->toJson($child),
+            iterator_to_array($subtree->children)
+        );
 
         return [
             'identifier' => $identifier,

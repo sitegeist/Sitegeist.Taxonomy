@@ -49,7 +49,7 @@ class TaxonomyCommandController extends CommandController
                     $node->getProperty('title'),
                     $node->getProperty('description')
                 ],
-                iterator_to_array($vocabularies->getIterator())
+                iterator_to_array($vocabularies)
             ),
             ['name', 'title', 'description']
         );
@@ -91,7 +91,10 @@ class TaxonomyCommandController extends CommandController
      */
     private function subtreeToTableRowsRecursively(Subtree $subtree): array
     {
-        $rows = array_map(fn(Subtree $subtree)=>$this->subtreeToTableRowsRecursively($subtree), $subtree->children);
+        $rows = array_map(
+            fn(Subtree $subtree): array => $this->subtreeToTableRowsRecursively($subtree),
+            iterator_to_array($subtree->children)
+        );
         $row = [
             str_repeat('  ', $subtree->level) . ($subtree->node->name?->value ?? $subtree->node->aggregateId->value),
             (string) $subtree->node->getProperty('title'),

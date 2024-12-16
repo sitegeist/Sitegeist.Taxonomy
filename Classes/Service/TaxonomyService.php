@@ -28,6 +28,7 @@ use Neos\ContentRepository\Core\Projection\ContentGraph\Node;
 use Neos\ContentRepository\Core\Projection\ContentGraph\NodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Nodes;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtrees;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
 use Neos\ContentRepository\Core\SharedModel\ContentRepository\ContentRepositoryId;
 use Neos\ContentRepository\Core\SharedModel\Node\NodeAddress;
@@ -182,16 +183,16 @@ class TaxonomyService
         $children = $subtree->children;
         $children = array_map(
             fn(Subtree $item) => $this->orderSubtreeByNameRecursive($item),
-            $children
+            iterator_to_array($children)
         );
         usort(
             $children,
             fn(Subtree $a, Subtree $b) => $a->node->name?->value <=> $b->node->name?->value
         );
-        return new Subtree(
+        return Subtree::create(
             $subtree->level,
             $subtree->node,
-            $children
+            Subtrees::fromArray($children)
         );
     }
 
