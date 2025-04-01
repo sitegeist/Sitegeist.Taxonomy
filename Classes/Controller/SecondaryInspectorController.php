@@ -19,6 +19,7 @@ use Neos\ContentRepository\Core\DimensionSpace\DimensionSpacePoint;
 use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
 use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
 use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\Node\NodeAddress;
 use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
@@ -53,10 +54,9 @@ class SecondaryInspectorController extends ActionController
 
     public function treeAction(string $contextNode, string $startingPoint): void
     {
-        list($workspaceNameSerialized, $dimensionSpacePointSerialized, $nodeAggregateIdSerialized)
-            = explode('__', $contextNode);
-        $workspaceName = WorkspaceName::fromString($workspaceNameSerialized);
-        $dimensionSpacePoint = DimensionSpacePoint::fromArray(json_decode(base64_decode($dimensionSpacePointSerialized), true));
+        $contextNodeAddress = NodeAddress::fromJsonString($contextNode);
+        $workspaceName = $contextNodeAddress->workspaceName;
+        $dimensionSpacePoint = $contextNodeAddress->dimensionSpacePoint;
 
         $contentRepository = $this->taxonomyService->getContentRepository();
         $subgraph = $contentRepository->getContentGraph($workspaceName)->getSubgraph($dimensionSpacePoint, VisibilityConstraints::withoutRestrictions());
