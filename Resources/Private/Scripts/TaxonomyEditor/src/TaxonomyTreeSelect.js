@@ -1,7 +1,6 @@
 import React, {PureComponent, Fragment} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {$get} from 'plow-js';
 import mergeClassNames from 'classnames';
 
 import {neos} from '@neos-project/neos-ui-decorators';
@@ -11,23 +10,26 @@ import {selectors} from '@neos-project/neos-ui-redux-store';
 
 import {Icon} from '@neos-project/react-ui-components';
 
-import styles from './TaxonomyTreeSelect.css';
+import styles from './TaxonomyTreeSelect.module.css';
 import "regenerator-runtime/runtime";
 import "core-js/stable";
 
-@connect((state, {identifier}) => {
+const withReduxState = connect((state, {identifier}) => {
 	const contextForNodeLinking = selectors.UI.NodeLinking.contextForNodeLinking(state);
-	const unsanitizedSourceValue = $get(['properties', identifier], selectors.CR.Nodes.focusedSelector(state));
+	const unsanitizedSourceValue = selectors.CR.Nodes.focusedSelector(state)?.properties?.[identifier];
 	const sourceValue = Array.isArray(unsanitizedSourceValue) ? unsanitizedSourceValue : [];
 
 	return {contextForNodeLinking, sourceValue};
-})
-@neos(globalRegistry => {
+});
+
+const withNeosGlobals = neos(globalRegistry => {
 	const nodeTypesRegistry = globalRegistry.get('@neos-project/neos-ui-contentrepository');
 
 	return {nodeTypesRegistry};
-})
-export default class TaxonomyTreeSelect extends PureComponent {
+});
+
+
+class TaxonomyTreeSelect extends PureComponent {
 	static propTypes = {
 		nodeTypesRegistry: PropTypes.object.isRequired,
 		contextForNodeLinking: PropTypes.object.isRequired,
@@ -56,11 +58,9 @@ export default class TaxonomyTreeSelect extends PureComponent {
 
 	get tree() {
 		const {contextForNodeLinking, options} = this.props;
-		const [, contextString] = contextForNodeLinking.contextNode.split('@');
-		const startingPointWithContext = `${options.startingPoint}@${contextString}`;
 
 		return fetchWithErrorHandling.withCsrfToken(csrfToken => ({
-			url: `/taxonomy/secondary-inspector/tree?contextNode=${startingPointWithContext}`,
+			url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${options.startingPoint}&contextNode=${contextForNodeLinking.contextNode}`,
 			method: 'GET',
 			credentials: 'include',
 			headers: {
@@ -102,7 +102,7 @@ export default class TaxonomyTreeSelect extends PureComponent {
 						}}
 						title={node.description}
 					>
-						<Icon className={styles.icon} icon={$get('ui.icon', nodeType)} />
+						<Icon className={styles.icon} icon={nodeType?.ui?.icon} />
 
 						<span className={styles.title}>
 							{node.title}
@@ -186,3 +186,5 @@ export default class TaxonomyTreeSelect extends PureComponent {
 		);
 	}
 }
+
+export default withReduxState(withNeosGlobals(TaxonomyTreeSelect));

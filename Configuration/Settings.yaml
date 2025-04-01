@@ -9,22 +9,7 @@ Sitegeist:
       additionalTaxonomyFieldPrototypes: []
 
     contentRepository:
-      rootNodeName: 'taxonomies'
-      rootNodeType: 'Sitegeist.Taxonomy:Root'
-      vocabularyNodeType: 'Sitegeist.Taxonomy:Vocabulary'
-      taxonomyNodeType: 'Sitegeist.Taxonomy:Taxonomy'
-
-  Silhouettes:
-    properties:
-      taxonomyReferences:
-        type: references
-        ui:
-          label: 'Taxonomy References'
-          inspector:
-            editor: 'Sitegeist.Taxonomy:TaxonomyEditor'
-            editorOptions:
-              startingPoint: '/taxonomies'
-              placeholder: 'assign Taxonomies'
+      identifier: 'default'
 
 Neos:
   Neos:
@@ -66,10 +51,6 @@ Neos:
                   startingPoint: '/taxonomies'
                   placeholder: 'assign Taxonomies'
 
-  Fusion:
-    defaultContext:
-      Taxonomy: \Sitegeist\Taxonomy\Eel\TaxonomyHelper
-
   Flow:
     mvc:
       routes:
@@ -80,7 +61,7 @@ Neos:
         providers:
           Neos.Neos:Backend:
             requestPatterns:
-              'Sitegeist.Taxonomy:secondaryInspector':
+              'Sitegeist.Taxonomy:SecondaryInspector':
                 pattern: ControllerObjectName
                 patternOptions:
                   controllerObjectNamePattern: 'Sitegeist\Taxonomy\Controller\SecondaryInspectorController'

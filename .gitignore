@@ -1,1 +1,4 @@
 Resources/Private/Scripts/TaxonomyEditor/node_modules
+composer.lock
+Packages
+vendor

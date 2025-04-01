@@ -3,11 +3,11 @@
   "license": "GPL-3.0+",
   "private": true,
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "scripts": {
-    "build": "NODE_ENV=production neos-react-scripts build",
-    "watch": "neos-react-scripts watch"
+    "build": "NODE_ENV=production node esbuild.js",
+    "watch": "node esbuild.js --watch"
   },
   "dependencies": {
     "core-js": "^3.27.1",
@@ -15,9 +15,10 @@
     "regenerator-runtime": "^0.13.11"
   },
   "devDependencies": {
-    "@neos-project/build-essentials": "^8.2.0",
-    "@neos-project/neos-ui-extensibility": "^8.2.0",
-    "@neos-project/react-ui-components": "^8.2.0"
+    "@neos-project/neos-ui-extensibility": "^8.3.0",
+    "@neos-project/react-ui-components": "^8.3.0",
+    "esbuild": "^0.23.0",
+    "esbuild-plugin-lightningcss-modules": "^0.1.2"
   },
   "neos": {
     "buildTargetDirectory": "../../../Public/JavaScript/TaxonomyEditor"

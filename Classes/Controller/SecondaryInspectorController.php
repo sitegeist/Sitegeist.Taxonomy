@@ -1,5 +1,4 @@
 <?php
-namespace Sitegeist\Taxonomy\Controller;
 
 /**
  * This file is part of the Sitegeist.Taxonomies package
@@ -12,12 +11,19 @@ namespace Sitegeist\Taxonomy\Controller;
  * source code.
  */
 
+declare(strict_types=1);
+
+namespace Sitegeist\Taxonomy\Controller;
+
+use Neos\ContentRepository\Core\DimensionSpace\DimensionSpacePoint;
+use Neos\ContentRepository\Core\Projection\ContentGraph\AbsoluteNodePath;
+use Neos\ContentRepository\Core\Projection\ContentGraph\Subtree;
+use Neos\ContentRepository\Core\Projection\ContentGraph\VisibilityConstraints;
+use Neos\ContentRepository\Core\SharedModel\Workspace\WorkspaceName;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
-
-use Neos\ContentRepository\Domain\Model\NodeInterface;
-
+use Neos\Neos\Domain\NodeLabel\NodeLabelGeneratorInterface;
 use Sitegeist\Taxonomy\Service\TaxonomyService;
 
 /**
@@ -33,7 +39,7 @@ class SecondaryInspectorController extends ActionController
     protected $taxonomyService;
 
     /**
-     * @var array
+     * @var string[]
      */
     protected $supportedMediaTypes = ['application/json'];
 
@@ -42,15 +48,56 @@ class SecondaryInspectorController extends ActionController
      */
     protected $defaultViewObjectName = JsonView::class;
 
-    /**
-     * @param NodeInterface $contextNode
-     * @return void
-     */
-    public function treeAction(NodeInterface $contextNode): void
-    {
-        $taxonomyTreeAsArray = $this->taxonomyService
-            ->getTaxonomyTreeAsArray($contextNode);
+    #[Flow\Inject]
+    protected NodeLabelGeneratorInterface $nodeLabelGenerator;
 
-        $this->view->assign('value', $taxonomyTreeAsArray);
+    public function treeAction(string $contextNode, string $startingPoint): void
+    {
+        list($workspaceNameSerialized, $dimensionSpacePointSerialized, $nodeAggregateIdSerialized)
+            = explode('__', $contextNode);
+        $workspaceName = WorkspaceName::fromString($workspaceNameSerialized);
+        $dimensionSpacePoint = DimensionSpacePoint::fromArray(json_decode(base64_decode($dimensionSpacePointSerialized), true));
+
+        $contentRepository = $this->taxonomyService->getContentRepository();
+        $subgraph = $contentRepository->getContentGraph($workspaceName)->getSubgraph($dimensionSpacePoint, VisibilityConstraints::withoutRestrictions());
+
+        $path = AbsoluteNodePath::fromString($startingPoint);
+        $startNode = $subgraph->findNodeByAbsolutePath($path);
+        if (!$startNode) {
+            return;
+        }
+        $taxonomySubtree = $this->taxonomyService->findSubtree($startNode);
+        if (!$taxonomySubtree) {
+            return;
+        }
+        $this->view->assign('value', $this->toJson($taxonomySubtree));
+    }
+
+    /**
+     * @return mixed[]
+     */
+    protected function toJson(Subtree $subtree, string $pathSoFar = null): array
+    {
+        $label = $this->nodeLabelGenerator->getLabel($subtree->node);
+        $pathSegment = $subtree->node->name?->value ?? $label;
+        $path = $pathSoFar ? $pathSoFar . ' - ' . $pathSegment : $pathSegment;
+        $identifier = $subtree->node->aggregateId->value;
+        $nodeType =  $subtree->node->nodeTypeName->value;
+        $title = $subtree->node->getProperty('title');
+        $description = $subtree->node->getProperty('description');
+        $children = array_map(
+            fn(Subtree $child)=>$this->toJson($child),
+            iterator_to_array($subtree->children)
+        );
+
+        return [
+            'identifier' => $identifier,
+            'path' => $path,
+            'nodeType' => $nodeType,
+            'label' => $label,
+            'title' => is_string($title) ? $title : $label,
+            'description' => is_string($description) ? $description : '',
+            'children' => $children
+        ];
     }
 }
