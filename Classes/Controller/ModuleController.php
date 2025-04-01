@@ -399,7 +399,7 @@ class ModuleController extends ActionController
             'vocabulary',
             null,
             null,
-            ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]
+            ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)->toJson()]
         );
     }
 
@@ -456,7 +456,7 @@ class ModuleController extends ActionController
             );
         }
 
-        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)->toJson()]);
     }
 
     /**
@@ -481,7 +481,7 @@ class ModuleController extends ActionController
             sprintf('Deleted taxonomy %s', $this->nodeLabelGenerator->getLabel($taxonomyNode))
         );
 
-        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)]);
+        $this->redirect('vocabulary', null, null, ['vocabularyNodeAddress' => NodeAddress::fromNode($vocabularyNode)->toJson()]);
     }
 
     protected function rebaseCurrentUserWorkspace(): void
