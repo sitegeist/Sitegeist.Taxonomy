@@ -13,7 +13,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-versions: ['8.2']
+                php-versions: ['8.2', '8.3']
                 neos-versions: ['9.0']
 
         runs-on: ubuntu-latest
@@ -31,9 +31,12 @@ jobs:
                   extensions: mbstring, xml, json, zlib, iconv, intl, pdo_sqlite
                   ini-values: date.timezone="Africa/Tunis", opcache.fast_shutdown=0, apc.enable_cli=on
 
-            # disabled as long as we have no official 9.0 version
-            #- name: Set Neos Version
-            #  run: composer require neos/neos ^${{ matrix.neos-versions }} --no-progress --no-interaction
+            - name: Set Neos Version
+              run: |
+                composer require neos/contentgraph-doctrinedbaladapter ^${{ matrix.neos-versions }} --no-update --no-progress --no-interaction
+                composer require neos/neos ^${{ matrix.neos-versions }} --no-update --no-progress --no-interaction
+                composer require neos/eventstore-doctrineadapter --no-update --no-progress --no-interaction
+                composer update
 
             - name: Run Tests
               run: composer test
