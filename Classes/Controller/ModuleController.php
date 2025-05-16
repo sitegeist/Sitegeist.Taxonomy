@@ -118,10 +118,10 @@ class ModuleController extends ActionController
     /**
      * Show an overview of available vocabularies
      *
-     * @param NodeInterface $root
+     * @param NodeInterface|null $root
      * @return void
      */
-    public function indexAction(NodeInterface $root = null)
+    public function indexAction(?NodeInterface $root = null)
     {
         if (!$root) {
             $root = $this->taxonomyService->getRoot();
