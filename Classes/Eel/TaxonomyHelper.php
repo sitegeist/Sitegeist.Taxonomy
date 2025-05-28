@@ -18,20 +18,20 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
     protected $taxonomyService;
 
     /**
-     * @param ContentContext $context
+     * @param ContentContext|null $context
      * @return NodeInterface
      */
-    public function root(ContentContext $context = null)
+    public function root(?ContentContext $context = null)
     {
         return $this->taxonomyService->getRoot($context);
     }
 
     /**
      * @param string $vocabulary Name of the vocabulary node
-     * @param ContentContext $context
+     * @param ContentContext|null $context
      * @return NodeInterface
      */
-    public function vocabulary($vocabulary, ContentContext $context = null)
+    public function vocabulary($vocabulary, ?ContentContext $context = null)
     {
         return $this->taxonomyService->getVocabulary($vocabulary, $context);
     }
@@ -39,10 +39,10 @@ class TaxonomyHelper implements ProtectedContextAwareInterface
     /**
      * @param string $vocabulary Name of the vocabulary node
      * @param string $path Path of the taxonomy node
-     * @param ContentContext $context
+     * @param ContentContext|null $context
      * @return NodeInterface
      */
-    public function taxonomy($vocabulary, $path, ContentContext $context = null)
+    public function taxonomy($vocabulary, $path, ?ContentContext $context = null)
     {
         return $this->taxonomyService->getTaxonomy($vocabulary, $path, $context);
     }

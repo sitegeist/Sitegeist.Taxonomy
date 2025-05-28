@@ -113,10 +113,10 @@ class TaxonomyService
     }
 
     /**
-     * @param Context $context
+     * @param Context|null $context
      * @return NodeInterface
      */
-    public function getRoot(Context $context = null)
+    public function getRoot(?Context $context = null)
     {
         if ($context === null) {
             $context = $this->contextFactory->create();
@@ -169,7 +169,7 @@ class TaxonomyService
      * @param Context|null $context
      * @param $vocabulary
      */
-    public function getVocabulary($vocabularyName, Context $context = null)
+    public function getVocabulary($vocabularyName, ?Context $context = null)
     {
         if ($context === null) {
             $context = $this->contextFactory->create();
@@ -183,9 +183,8 @@ class TaxonomyService
      * @param string $vocabularyName
      * @param string $taxonomyPath
      * @param Context|null $context
-     * @param $vocabulary
      */
-    public function getTaxonomy($vocabularyName, $taxonomyPath, Context $context = null)
+    public function getTaxonomy($vocabularyName, $taxonomyPath, ?Context $context = null)
     {
         $vocabulary = $this->getVocabulary($vocabularyName, $context);
         if ($vocabulary) {
