@@ -106,7 +106,7 @@ class ModuleController extends ActionController
     /**
      * Show an overview of available vocabularies
      */
-    public function indexAction(string $rootNodeAddress = null): void
+    public function indexAction(?string $rootNodeAddress = null): void
     {
         if (is_null($rootNodeAddress)) {
             $subgraph = $this->taxonomyService->getDefaultSubgraph();
