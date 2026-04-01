@@ -10,7 +10,7 @@
         "neos/fusion-form": ">=2.1.0"
     },
     "require-dev": {
-        "phpstan/phpstan": "~1.10.16",
+        "phpstan/phpstan": "~1.12.33",
         "squizlabs/php_codesniffer": "~3.7.2"
     },
     "autoload": {
@@ -27,7 +27,9 @@
         "test:lint-fix": ["phpcbf --standard=PSR12 -n Classes"],
         "test:lint": ["phpcs --standard=PSR12 -n Classes"],
         "test:stan": ["vendor/bin/phpstan analyse Classes"],
-        "test": ["composer install", "composer  test:lint", "composer  test:stan"]
+        "fix": ["composer test:lint-fix"],
+        "lint": ["composer test:lint", "composer test:stan"],
+        "test": ["echo 'not implemented yet'"]
     },
     "config": {
         "allow-plugins": {
