@@ -15,6 +15,9 @@ jobs:
             matrix:
                 php-versions: ['8.2', '8.3']
                 neos-versions: ['9.0']
+                include:
+                  - php-versions: '8.4'
+                    neos-versions: '9.1'
 
         runs-on: ubuntu-latest
 
