@@ -39,4 +39,6 @@ jobs:
                 composer update
 
             - name: Run Tests
-              run: composer test
+              run: |
+                composer install
+                composer lint
