@@ -3,8 +3,12 @@ name: build
 on:
   push:
       branches:
-        - 'main'
-  pull_request: ~
+        - '2.0'
+        - '1.0'
+  pull_request:
+      branches:
+        - '2.0'
+        - '1.0'
 
 jobs:
     test:
