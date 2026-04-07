@@ -14,8 +14,25 @@ import styles from './TaxonomyTreeSelect.module.css';
 import "regenerator-runtime/runtime";
 import "core-js/stable";
 
-const withReduxState = connect((state, {identifier}) => {
-	const contextForNodeLinking = selectors.UI.NodeLinking.contextForNodeLinking(state);
+const resolveContextForNodeLinking = (state, options) => {
+	const selector = selectors?.UI?.NodeLinking?.contextForNodeLinking;
+	if (typeof selector === 'function') {
+		const resolvedContext = selector(state);
+		if (resolvedContext) {
+			return resolvedContext;
+		}
+	}
+
+	const focusedNode = selectors?.CR?.Nodes?.focusedSelector?.(state);
+	const fallbackContextNode = focusedNode?.contextPath || focusedNode?.identifier || options?.startingPoint;
+
+	return {
+		contextNode: fallbackContextNode
+	};
+};
+
+const withReduxState = connect((state, {identifier, options}) => {
+	const contextForNodeLinking = resolveContextForNodeLinking(state, options);
 	const unsanitizedSourceValue = selectors.CR.Nodes.focusedSelector(state)?.properties?.[identifier];
 	const sourceValue = Array.isArray(unsanitizedSourceValue) ? unsanitizedSourceValue : [];
 
@@ -32,7 +49,7 @@ const withNeosGlobals = neos(globalRegistry => {
 class TaxonomyTreeSelect extends PureComponent {
 	static propTypes = {
 		nodeTypesRegistry: PropTypes.object.isRequired,
-		contextForNodeLinking: PropTypes.object.isRequired,
+		contextForNodeLinking: PropTypes.object,
 		options: PropTypes.object.isRequired,
 		onToggleTaxonomy: PropTypes.func.isRequired,
 		onToggleTaxonomyBranch: PropTypes.func.isRequired,
@@ -58,9 +75,10 @@ class TaxonomyTreeSelect extends PureComponent {
 
 	get tree() {
 		const {contextForNodeLinking, options} = this.props;
+		const contextNode = contextForNodeLinking?.contextNode || options.startingPoint;
 
 		return fetchWithErrorHandling.withCsrfToken(csrfToken => ({
-			url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${options.startingPoint}&contextNode=${contextForNodeLinking.contextNode}`,
+			url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${encodeURIComponent(options.startingPoint)}&contextNode=${encodeURIComponent(contextNode)}`,
 			method: 'GET',
 			credentials: 'include',
 			headers: {
@@ -73,8 +91,9 @@ class TaxonomyTreeSelect extends PureComponent {
 	async componentDidMount() {
 		this.setState({tree: await this.tree}, () => {
 			const {onInitializeTaxonomyBranches} = this.props;
+			const initialBranches = Array.isArray(this.state.tree?.children) ? this.state.tree.children : [];
 
-			onInitializeTaxonomyBranches(this.state.tree.children.map(node => node.identifier));
+			onInitializeTaxonomyBranches(initialBranches.map(node => node.identifier));
 		});
 	}
 

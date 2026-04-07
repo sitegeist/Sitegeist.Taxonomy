@@ -1,4 +1,3 @@
-"use strict";
 (() => {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -145,9 +144,9 @@
     }
   });
 
-  // css-modules:css-modules://9jepfGOOxxm6kO3NLT1b2CJ_589XM4yZgOSvkB80id8.css
-  var init_jepfGOOxxm6kO3NLT1b2CJ_589XM4yZgOSvkB80id8 = __esm({
-    "css-modules:css-modules://9jepfGOOxxm6kO3NLT1b2CJ_589XM4yZgOSvkB80id8.css"() {
+  // css-modules:css-modules://nSvHlEsf03_q0EA4QzuPPn-nmzD-7NSXJ3OthnL-NmM.css
+  var init_nSvHlEsf03_q0EA4QzuPPn_nmzD_7NSXJ3OthnL_NmM = __esm({
+    "css-modules:css-modules://nSvHlEsf03_q0EA4QzuPPn-nmzD-7NSXJ3OthnL-NmM.css"() {
     }
   });
 
@@ -155,8 +154,7 @@
   var TaxonomyEditor_default;
   var init_TaxonomyEditor = __esm({
     "src/TaxonomyEditor.module.css"() {
-      "use strict";
-      init_jepfGOOxxm6kO3NLT1b2CJ_589XM4yZgOSvkB80id8();
+      init_nSvHlEsf03_q0EA4QzuPPn_nmzD_7NSXJ3OthnL_NmM();
       TaxonomyEditor_default = { "button": "EkaHVG_button", "icon": "EkaHVG_icon" };
     }
   });
@@ -165,7 +163,6 @@
   var import_react, import_react_dom, import_prop_types, import_neos_ui_decorators, import_react_ui_components, withNeosGlobals, TaxonomyEditor, TaxonomyEditor_default2;
   var init_TaxonomyEditor2 = __esm({
     "src/TaxonomyEditor.js"() {
-      "use strict";
       import_react = __toESM(require_react());
       import_react_dom = __toESM(require_react_dom());
       import_prop_types = __toESM(require_prop_types());
@@ -322,9 +319,9 @@
     }
   });
 
-  // css-modules:css-modules://2JddOJyHHk7J_wOKBUuiqaiHbp5VipzL5jYPYtUfDFI.css
-  var init_JddOJyHHk7J_wOKBUuiqaiHbp5VipzL5jYPYtUfDFI = __esm({
-    "css-modules:css-modules://2JddOJyHHk7J_wOKBUuiqaiHbp5VipzL5jYPYtUfDFI.css"() {
+  // css-modules:css-modules://SJseZPc1Hh2X5qFXTglW6u73mlqAf1IyY-lnmvYX9fM.css
+  var init_SJseZPc1Hh2X5qFXTglW6u73mlqAf1IyY_lnmvYX9fM = __esm({
+    "css-modules:css-modules://SJseZPc1Hh2X5qFXTglW6u73mlqAf1IyY-lnmvYX9fM.css"() {
     }
   });
 
@@ -332,9 +329,8 @@
   var TaxonomyTreeSelect_default;
   var init_TaxonomyTreeSelect = __esm({
     "src/TaxonomyTreeSelect.module.css"() {
-      "use strict";
-      init_JddOJyHHk7J_wOKBUuiqaiHbp5VipzL5jYPYtUfDFI();
-      TaxonomyTreeSelect_default = { "list": "wzgIPG_list", "title": "wzgIPG_title", "icon": "wzgIPG_icon", "isDirty": "wzgIPG_isDirty", "label": "wzgIPG_label", "taxonomyTreeSelect": "wzgIPG_taxonomyTreeSelect", "checkbox": "wzgIPG_checkbox", "item": "wzgIPG_item", "details": "wzgIPG_details", "nodePath": "wzgIPG_nodePath" };
+      init_SJseZPc1Hh2X5qFXTglW6u73mlqAf1IyY_lnmvYX9fM();
+      TaxonomyTreeSelect_default = { "label": "wzgIPG_label", "list": "wzgIPG_list", "title": "wzgIPG_title", "details": "wzgIPG_details", "item": "wzgIPG_item", "taxonomyTreeSelect": "wzgIPG_taxonomyTreeSelect", "checkbox": "wzgIPG_checkbox", "isDirty": "wzgIPG_isDirty", "nodePath": "wzgIPG_nodePath", "icon": "wzgIPG_icon" };
     }
   });
 
@@ -15568,10 +15564,9 @@
   });
 
   // src/TaxonomyTreeSelect.js
-  var import_react2, import_prop_types2, import_react_redux, import_classnames, import_neos_ui_decorators2, import_neos_ui_redux_store, import_react_ui_components2, import_runtime2, import_stable, withReduxState, withNeosGlobals2, TaxonomyTreeSelect, TaxonomyTreeSelect_default2;
+  var import_react2, import_prop_types2, import_react_redux, import_classnames, import_neos_ui_decorators2, import_neos_ui_redux_store, import_react_ui_components2, import_runtime2, import_stable, resolveContextForNodeLinking, withReduxState, withNeosGlobals2, TaxonomyTreeSelect, TaxonomyTreeSelect_default2;
   var init_TaxonomyTreeSelect2 = __esm({
     "src/TaxonomyTreeSelect.js"() {
-      "use strict";
       import_react2 = __toESM(require_react());
       import_prop_types2 = __toESM(require_prop_types());
       import_react_redux = __toESM(require_react_redux());
@@ -15583,8 +15578,22 @@
       init_TaxonomyTreeSelect();
       import_runtime2 = __toESM(require_runtime());
       import_stable = __toESM(require_stable());
-      withReduxState = (0, import_react_redux.connect)((state, { identifier }) => {
-        const contextForNodeLinking = import_neos_ui_redux_store.selectors.UI.NodeLinking.contextForNodeLinking(state);
+      resolveContextForNodeLinking = (state, options) => {
+        const selector = import_neos_ui_redux_store.selectors?.UI?.NodeLinking?.contextForNodeLinking;
+        if (typeof selector === "function") {
+          const resolvedContext = selector(state);
+          if (resolvedContext) {
+            return resolvedContext;
+          }
+        }
+        const focusedNode = import_neos_ui_redux_store.selectors?.CR?.Nodes?.focusedSelector?.(state);
+        const fallbackContextNode = focusedNode?.contextPath || focusedNode?.identifier || options?.startingPoint;
+        return {
+          contextNode: fallbackContextNode
+        };
+      };
+      withReduxState = (0, import_react_redux.connect)((state, { identifier, options }) => {
+        const contextForNodeLinking = resolveContextForNodeLinking(state, options);
         const unsanitizedSourceValue = import_neos_ui_redux_store.selectors.CR.Nodes.focusedSelector(state)?.properties?.[identifier];
         const sourceValue = Array.isArray(unsanitizedSourceValue) ? unsanitizedSourceValue : [];
         return { contextForNodeLinking, sourceValue };
@@ -15681,8 +15690,9 @@
         }
         get tree() {
           const { contextForNodeLinking, options } = this.props;
+          const contextNode = contextForNodeLinking?.contextNode || options.startingPoint;
           return fetchWithErrorHandling.withCsrfToken((csrfToken) => ({
-            url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${options.startingPoint}&contextNode=${contextForNodeLinking.contextNode}`,
+            url: `/neos/taxonomy/secondary-inspector/tree?startingPoint=${encodeURIComponent(options.startingPoint)}&contextNode=${encodeURIComponent(contextNode)}`,
             method: "GET",
             credentials: "include",
             headers: {
@@ -15694,7 +15704,8 @@
         async componentDidMount() {
           this.setState({ tree: await this.tree }, () => {
             const { onInitializeTaxonomyBranches } = this.props;
-            onInitializeTaxonomyBranches(this.state.tree.children.map((node) => node.identifier));
+            const initialBranches = Array.isArray(this.state.tree?.children) ? this.state.tree.children : [];
+            onInitializeTaxonomyBranches(initialBranches.map((node) => node.identifier));
           });
         }
         render() {
@@ -15704,7 +15715,7 @@
       };
       __publicField(TaxonomyTreeSelect, "propTypes", {
         nodeTypesRegistry: import_prop_types2.default.object.isRequired,
-        contextForNodeLinking: import_prop_types2.default.object.isRequired,
+        contextForNodeLinking: import_prop_types2.default.object,
         options: import_prop_types2.default.object.isRequired,
         onToggleTaxonomy: import_prop_types2.default.func.isRequired,
         onToggleTaxonomyBranch: import_prop_types2.default.func.isRequired,
@@ -15721,7 +15732,6 @@
   var manifest_exports = {};
   var init_manifest2 = __esm({
     "src/manifest.js"() {
-      "use strict";
       init_dist();
       init_TaxonomyEditor2();
       init_TaxonomyTreeSelect2();
