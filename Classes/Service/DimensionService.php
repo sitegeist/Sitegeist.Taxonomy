@@ -120,6 +120,9 @@ class DimensionService
                 $baseDimensionValues = $this->getDimensionValuesForSubgraph($baseDimensionSubgraph);
                 $baseDimensionContext = array_merge($nodeContext->getProperties(), $baseDimensionValues);
                 $targetContext = $this->contextFactory->create($baseDimensionContext);
+                if ($targetContext->getNodeByIdentifier($node->getIdentifier())) {
+                    continue;
+                }
                 $adoptedNode = $targetContext->adoptNode($node, true);
                 $results[] = $adoptedNode;
             }

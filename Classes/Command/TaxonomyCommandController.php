@@ -258,6 +258,11 @@ class TaxonomyCommandController extends CommandController
         $taxonomyRootInTargetContest = $flowQuery->context($targetContextValues)->get(0);
 
         if (!$taxonomyRootInTargetContest) {
+            $this->dimensionService->ensureBaseVariantsExist($taxonomyRoot);
+            $taxonomyRootInTargetContest = $flowQuery->context($targetContextValues)->get(0);
+        }
+
+        if (!$taxonomyRootInTargetContest) {
             $this->outputLine('Not root in target context found');
             $this->quit(1);
         }
