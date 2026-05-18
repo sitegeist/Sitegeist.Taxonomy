@@ -21,13 +21,41 @@ prototype(Sitegeist.Taxonomy:Views.Fragments.DimensionSelector) < prototype(Neos
                     field.value={Neos.Dimension.currentValue(props.contextNode, dimensionKey).value}
                     attributes.onchange="this.form.submit()"
                 >
-                  <Neos.Fusion.Form:Select.Option >{String.firstLetterToUpperCase(dimensionKey)}: {Neos.Dimension.currentValue(props.contextNode, dimensionKey).value}</Neos.Fusion.Form:Select.Option>
-                  <Neos.Fusion:Loop items={dimension.values.rootValues} itemName="dimensionValue" itemKey="presetIdentifier">
-                        <Neos.Fusion.Form:Select.Option option.value={dimensionValue.value}>{String.firstLetterToUpperCase(dimensionKey)}: {dimensionValue.value}</Neos.Fusion.Form:Select.Option>
-                    </Neos.Fusion:Loop>
+                  <Sitegeist.Taxonomy:Views.Fragments.DimensionSelector.Options dimension={dimension} dimensionKey={dimensionKey} contextNode={props.contextNode} />
                 </Neos.Fusion.Form:Select>
             </Neos.Fusion:Loop>
-
         </Neos.Fusion.Form:Form>
     `
+}
+
+prototype(Sitegeist.Taxonomy:Views.Fragments.DimensionSelector.Options) < prototype(Neos.Fusion:Component) {
+  dimension = null
+  dimensionKey = null
+  contextNode = null
+
+  @context {
+    dimension = ${this.dimension}
+    dimensionKey = ${this.dimensionKey}
+    contextNode = ${this.contextNode}
+  }
+
+  renderer = Neos.Fusion:Case {
+    dimensionConfigured {
+      condition = ${dimension.values}
+      renderer = afx`
+        <Neos.Fusion:Loop items={dimension.values} itemName="dimensionValue" itemKey="presetIdentifier">
+          <Neos.Fusion.Form:Select.Option attributes.selected={Neos.Dimension.currentValue(contextNode, dimensionKey).value == dimensionValue.value} option.value={dimensionValue.value}>{String.firstLetterToUpperCase(dimensionKey)}: {dimensionValue.value}</Neos.Fusion.Form:Select.Option>
+        </Neos.Fusion:Loop>
+      `
+    }
+    default {
+      condition = ${dimension.rootValues}
+      renderer = afx`
+        <Neos.Fusion.Form:Select.Option >{String.firstLetterToUpperCase(dimensionKey)}: {Neos.Dimension.currentValue(props.contextNode, dimensionKey).value}</Neos.Fusion.Form:Select.Option>
+        <Neos.Fusion:Loop items={dimension.values.rootValues} itemName="dimensionValue" itemKey="presetIdentifier">
+          <Neos.Fusion.Form:Select.Option option.value={dimensionValue.value}>{String.firstLetterToUpperCase(dimensionKey)}: {dimensionValue.value}</Neos.Fusion.Form:Select.Option>
+        </Neos.Fusion:Loop>
+      `
+    }
+  }
 }

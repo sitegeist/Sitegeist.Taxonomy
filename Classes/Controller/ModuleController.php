@@ -180,7 +180,8 @@ class ModuleController extends ActionController
 
         $rootNode = $this->taxonomyService->getNodeByNodeAddress($rootNodeAddress);
         $subgraph = $this->taxonomyService->getSubgraphForNode($rootNode);
-        $generalizations = $contentRepository->getVariationGraph()->getRootGeneralizations();
+        $generalizations = $contentRepository->getVariationGraph()->getDimensionSpacePoints() ? $contentRepository->getVariationGraph()->getDimensionSpacePoints() : $contentRepository->getVariationGraph()->getRootGeneralizations();
+
         $nodeAddress = NodeAddress::fromJsonString($rootNodeAddress);
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
@@ -252,7 +253,6 @@ class ModuleController extends ActionController
     {
         $vocabularyNode = $this->taxonomyService->getNodeByNodeAddress($vocabularyNodeAddress);
         $subgraph = $this->contentRepositoryRegistry->subgraphForNode($vocabularyNode);
-        $rootNode = $this->taxonomyService->findOrCreateRoot($subgraph);
 
         $this->contentRepository->handle(
             SetNodeProperties::create(
@@ -283,7 +283,7 @@ class ModuleController extends ActionController
             );
         }
 
-        $this->redirect('index', null, null, ['rootNodeAddress' => NodeAddress::fromNode($rootNode)]);
+    	$this->redirect('index');
     }
 
     /**
@@ -350,7 +350,7 @@ class ModuleController extends ActionController
         }
         $subgraph = $this->taxonomyService->getSubgraphForNode($parentNode);
 
-        $generalizations = $this->contentRepository->getVariationGraph()->getRootGeneralizations();
+        $generalizations = $this->contentRepository->getVariationGraph()->getDimensionSpacePoints() ? $this->contentRepository->getVariationGraph()->getDimensionSpacePoints() : $this->contentRepository->getVariationGraph()->getRootGeneralizations();
         $nodeAddress = NodeAddress::fromJsonString($parentNodeAddress);
         $originDimensionSpacePoint = OriginDimensionSpacePoint::fromDimensionSpacePoint($nodeAddress->dimensionSpacePoint);
 
