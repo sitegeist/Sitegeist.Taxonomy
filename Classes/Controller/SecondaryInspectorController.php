@@ -76,7 +76,7 @@ class SecondaryInspectorController extends ActionController
     /**
      * @return mixed[]
      */
-    protected function toJson(Subtree $subtree, string $pathSoFar = null): array
+    protected function toJson(Subtree $subtree, ?string $pathSoFar = null): array
     {
         $label = $this->nodeLabelGenerator->getLabel($subtree->node);
         $pathSegment = $subtree->node->name?->value ?? $label;
